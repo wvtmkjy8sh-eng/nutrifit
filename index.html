@@ -118,7 +118,7 @@
 
       <section class="page" id="calculadora">
         <div class="section-head"><div><h2>Calculadora metabólica</h2><p>Dados preenchidos automaticamente com o paciente selecionado.</p></div><div class="selected-calc-patient" id="calculatorPatientSummary"><span class="avatar small-avatar">—</span><span><b id="calculatorPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span></div></div>
-        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" inputmode="numeric" value="41"></label><label>Peso (kg)<input id="weight" type="number" inputmode="decimal" value="85"></label><label>Altura (cm)<input id="height" type="number" inputmode="numeric" value="175"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">2.548 kcal</strong><p>Gasto energético diário</p><div class="result-list"><div><span>TMB</span><b id="bmr">1.644 kcal</b></div><div><span>Manutenção</span><b id="maintenance">2.548 kcal</b></div><div><span>Déficit sugerido*</span><b id="deficit">2.048 kcal</b></div></div><small>*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.</small></div></div>
+        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" inputmode="numeric" min="10" placeholder="—"></label><label>Peso (kg)<input id="weight" type="number" inputmode="decimal" step="0.1" min="1" placeholder="—"></label><label>Altura (cm)<input id="height" type="number" inputmode="numeric" min="50" placeholder="—"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card is-empty" id="calculatorResultCard"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">—</strong><p id="calculatorResultHint">Carregue um paciente para ver o gasto energético real.</p><div class="result-list" id="calculatorResultList" hidden><div><span>TMB</span><b id="bmr">—</b></div><div><span>Manutenção</span><b id="maintenance">—</b></div><div><span>Déficit sugerido*</span><b id="deficit">—</b></div></div><small id="calculatorResultNote">Nenhuma estimativa fictícia é exibida sem um perfil carregado.</small></div></div>
       </section>
 
       <section class="page" id="agua">
@@ -133,8 +133,8 @@
       </section>
 
       <section class="page" id="receitas">
-        <div class="section-head"><div><h2>Receitas</h2><p>Opções práticas alinhadas ao seu plano.</p></div><button class="primary">+ Nova receita</button></div>
-        <div class="recipe-grid"><article class="recipe-card card"><div class="recipe-photo">🥗</div><div><span>Almoço · 420 kcal</span><h3>Frango com legumes</h3><p>48 g proteína · 18 g carboidratos · 18 g gordura</p><button class="text-btn">Ver receita →</button></div></article><article class="recipe-card card"><div class="recipe-photo">🥣</div><div><span>Café da manhã · 380 kcal</span><h3>Overnight oats</h3><p>20 g proteína · 48 g carboidratos · 11 g gordura</p><button class="text-btn">Ver receita →</button></div></article><article class="recipe-card card"><div class="recipe-photo">🍳</div><div><span>Jantar · 360 kcal</span><h3>Omelete proteico</h3><p>34 g proteína · 12 g carboidratos · 19 g gordura</p><button class="text-btn">Ver receita →</button></div></article></div>
+        <div class="section-head"><div><h2>Receitas</h2><p id="recipesPageSubtitle">Cadastre receitas do consultório, edite e exclua quando quiser.</p></div><button class="primary" id="addRecipeBtn" type="button">+ Nova receita</button></div>
+        <div class="recipe-grid" id="recipeGrid"></div>
       </section>
     </main>
   </div>
@@ -239,6 +239,37 @@
     </div>
   </div>
 
+  <div class="modal" id="recipeModal" aria-hidden="true">
+    <div class="modal-content wide-modal recipe-modal">
+      <button class="close" id="closeRecipeModal" type="button" aria-label="Fechar">×</button>
+      <form id="recipeForm">
+        <div class="edit-patient-header">
+          <div class="recipe-emoji-preview" id="recipeEmojiPreview">🥗</div>
+          <div>
+            <span class="eyebrow">RECEITAS</span>
+            <h2 id="recipeModalTitle">Nova receita</h2>
+            <p class="muted" id="recipeModalSubtitle">Monte uma receita simples: nome, refeição, ingredientes e modo de preparo.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>Nome da receita<input id="recipeName" required placeholder="Ex.: Frango grelhado com legumes"></label>
+          <label>Refeição<select id="recipeMeal"><option>Café da manhã</option><option>Lanche da manhã</option><option>Almoço</option><option>Lanche da tarde</option><option>Jantar</option><option>Ceia</option></select></label>
+          <label class="wide">Ícone<div class="recipe-emoji-picks" id="recipeEmojiPicks"></div></label>
+          <label>Kcal<input id="recipeKcal" type="number" min="0" placeholder="Opcional"></label>
+          <label>Proteína (g)<input id="recipeProtein" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label>Carboidratos (g)<input id="recipeCarbs" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label>Gorduras (g)<input id="recipeFat" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label class="wide">Ingredientes (um por linha)<textarea id="recipeIngredients" rows="4" placeholder="Ex.:&#10;150 g de peito de frango&#10;1 colher de azeite&#10;Salada variada"></textarea></label>
+          <label class="wide">Modo de preparo<textarea id="recipeSteps" rows="4" placeholder="Ex.: Grelhe o frango, tempere e sirva com a salada."></textarea></label>
+        </div>
+        <div class="modal-actions edit-actions">
+          <button class="danger-btn" type="button" id="deleteRecipeBtn" hidden>Excluir</button>
+          <button class="outline-btn" type="button" id="cancelRecipeBtn">Cancelar</button>
+          <button class="primary" type="submit" id="saveRecipeBtn">Salvar receita</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div class="modal" id="toastModal" aria-hidden="true"></div>
   <script src="js/app.js"></script>
   <script>
