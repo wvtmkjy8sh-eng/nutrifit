@@ -3,9 +3,21 @@ const pages=document.querySelectorAll('.page');
 const title=document.getElementById('pageTitle');
 const titles={dashboard:'Olá, Nutri',clientes:'Pacientes',alimentacao:'Alimentação',plano:'Plano alimentar',calculadora:'Calculadora metabólica',agua:'Hidratação',evolucao:'Evolução',receitas:'Receitas'};
 
+function playRouteProgress(){
+  const bar=document.getElementById('routeProgress');
+  if(!bar)return;
+  bar.classList.remove('active');
+  // Força reflow para permitir reiniciar a animação em navegações seguidas.
+  void bar.offsetWidth;
+  bar.classList.add('active');
+  clearTimeout(playRouteProgress._t);
+  playRouteProgress._t=setTimeout(()=>bar.classList.remove('active'),500);
+}
+
 function showPage(id){
   const target=document.getElementById(id);
   if(!target)return;
+  playRouteProgress();
   pages.forEach(p=>p.classList.toggle('active-page',p.id===id));
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
   if(title)title.textContent=titles[id]||'NutriFit';
@@ -473,7 +485,27 @@ function fillEditForm(p,mode='edit'){
 }
 function persistPatients(){localStorage.setItem('nutrifit-patients',JSON.stringify(patients))}
 function refreshCurrentPatientViews(){ renderPatients(); renderPatientsCrud(byId('patientSearch')?.value||''); renderPatientPlan(); renderAlimentacao(); if(typeof loadCalculatorPatient==='function') loadCalculatorPatient(selectedPatient||null); const current=localStorage.getItem('nutrifit-page'); if(current) showPage(current); window.scrollTo({top:0,behavior:'smooth'}); }
-function loadPatients(){try{const saved=JSON.parse(localStorage.getItem('nutrifit-patients'));if(Array.isArray(saved)&&saved.length){patients.splice(0,patients.length,...saved)}}catch(e){}}
+// IDs dos pacientes de demonstração que existiam antes (Mardem, Ana, Carlos).
+// Navegadores que já tinham esses dados salvos no localStorage antes desta
+// atualização continuariam carregando-os; esta limpeza remove definitivamente
+// esses registros (e qualquer plano/meta vinculados a eles) na primeira vez
+// que o app roda com esta versão, sem afetar pacientes reais cadastrados.
+const LEGACY_SEED_PATIENT_IDS=['mardem','ana','carlos'];
+function purgeLegacySeedPatients(saved){
+  const cleaned=saved.filter(p=>!LEGACY_SEED_PATIENT_IDS.includes(p?.id));
+  if(cleaned.length===saved.length)return cleaned;
+  localStorage.setItem('nutrifit-patients',JSON.stringify(cleaned));
+  ['nutrifit-patient-plans','nutrifit-calculator-meta','nutrifit-plan-builder-drafts'].forEach(key=>{
+    try{
+      const store=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      let changed=false;
+      LEGACY_SEED_PATIENT_IDS.forEach(id=>{ if(store[id]!==undefined){ delete store[id]; changed=true; } });
+      if(changed) localStorage.setItem(key,JSON.stringify(store));
+    }catch(e){}
+  });
+  return cleaned;
+}
+function loadPatients(){try{const saved=JSON.parse(localStorage.getItem('nutrifit-patients'));if(Array.isArray(saved)&&saved.length){const cleaned=purgeLegacySeedPatients(saved);patients.splice(0,patients.length,...cleaned)}}catch(e){}}
 loadPatients();
 renderPatientsCrud();
 if(selectedPatient){const fresh=patients.find(p=>p.id===selectedPatient.id);if(fresh)selectedPatient=fresh}
@@ -519,6 +551,13 @@ byId('editPatientForm')?.addEventListener('submit',e=>{
 byId('settingsBtn')?.addEventListener('click',()=>{byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
 byId('closeSettingsModal')?.addEventListener('click',()=>closeModal(settingsModal));
 byId('saveSettingsBtn')?.addEventListener('click',()=>{applyTheme(byId('settingDark').checked?'dark':'light');localStorage.setItem('nutrifit-autosave',byId('settingAutoSave').checked?'1':'0');localStorage.setItem('nutrifit-suggestions',byId('settingSuggestions').checked?'1':'0');closeModal(settingsModal);showToast('Configurações salvas.')});
+byId('clearAppDataBtn')?.addEventListener('click',()=>{
+  const confirmed=confirm('Tem certeza que deseja limpar todos os dados salvos (pacientes, planos, metas e preferências) neste navegador? Esta ação não pode ser desfeita.');
+  if(!confirmed)return;
+  Object.keys(localStorage).filter(key=>key.startsWith('nutrifit-')).forEach(key=>localStorage.removeItem(key));
+  showToast('Dados do aplicativo foram limpos. Recarregando...');
+  setTimeout(()=>window.location.reload(),700);
+});
 byId('settingsEditPatient')?.addEventListener('click',()=>{closeModal(settingsModal);pendingPatient=selectedPatient;if(pendingPatient){openEditPatient(pendingPatient,'edit')}});
 
 const mealPlanModal=byId('mealPlanModal');

@@ -1150,3 +1150,68 @@ body{min-width:0;overflow-x:hidden}
 @media(prefers-reduced-motion:reduce){
   .page.active-page,.card,.metric-card,.client-card,.recipe-card{animation:none}
 }
+
+/* =====================================================
+   NUTRIFIT v24 — EFEITOS DE CARREGAMENTO SUAVES
+   Apenas apresentação: transições visuais de entrada/saída.
+   Nenhum dado, tempo de resposta real ou funcionalidade é alterado.
+   ===================================================== */
+
+/* Barra de progresso no topo ao trocar de página (feedback visual imediato) */
+.nf-route-progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--green-strong));z-index:2000;opacity:0;pointer-events:none;transition:opacity .15s ease}
+.nf-route-progress.active{opacity:1;animation:nfRouteProgress .45s ease forwards}
+@keyframes nfRouteProgress{0%{width:0}30%{width:45%}70%{width:78%}100%{width:100%}}
+
+/* Fade-in ampliado para listas e itens que são re-renderizados dinamicamente */
+.patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+.generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+.nf-meal-suggestion,.plan-meal,.client-card{
+  animation:nfFadeIn .32s ease;
+}
+
+/* Efeito de abertura suave dos modais (fade + leve escala), mantendo o mesmo
+   fluxo de abrir/fechar já existente via a classe "open". */
+@keyframes nfModalBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes nfModalContentIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal.open{animation:nfModalBackdropIn .18s ease}
+.modal.open .modal-content{animation:nfModalContentIn .22s cubic-bezier(.2,.7,.3,1)}
+
+/* Placeholder de carregamento (shimmer) reutilizável para estados vazios/transitórios */
+@keyframes nfShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.nf-skeleton{
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--surface-alt) 25%,var(--line) 37%,var(--surface-alt) 63%);
+  background-size:200% 100%;
+  animation:nfShimmer 1.4s ease infinite;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nf-route-progress.active{animation:none;opacity:1;width:100%}
+  .patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+  .generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+  .nf-meal-suggestion,.plan-meal,.client-card,
+  .modal.open,.modal.open .modal-content{animation:none}
+  .nf-skeleton{animation:none}
+}
+
+/* =====================================================
+   NUTRIFIT v24 — ZONA DE PERIGO NAS CONFIGURAÇÕES
+   Botão para limpar dados salvos no localStorage deste navegador.
+   ===================================================== */
+#settingsModal .settings-danger-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(190,55,55,.28);
+  border-radius:14px;
+  background:rgba(190,55,55,.05)!important;
+}
+#settingsModal .settings-danger-card b{display:block;font-size:12px;color:#b13b3b}
+#settingsModal .settings-danger-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-danger-card .danger-btn{flex:0 0 auto;white-space:nowrap}
+@media(max-width:700px){
+  #settingsModal .settings-danger-card{flex-direction:column;align-items:flex-start;padding:12px}
+  #settingsModal .settings-danger-card .danger-btn{width:100%;min-height:44px}
+}

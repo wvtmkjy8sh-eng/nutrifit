@@ -6,12 +6,17 @@
   <title>NutriFit — Nutrição inteligente</title>
   <meta name="description" content="Dashboard profissional de nutrição e acompanhamento.">
   <meta name="theme-color" content="#67a83d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NutriFit">
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="assets/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
 </head>
 <body>
+  <div class="nf-route-progress" id="routeProgress" aria-hidden="true"></div>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -191,6 +196,7 @@
         <label class="setting-row"><span><b>Salvar automaticamente</b><small>Guardar paciente, metas e preferências neste navegador.</small></span><input id="settingAutoSave" type="checkbox" checked></label>
         <label class="setting-row"><span><b>Mostrar sugestões de alimentação</b><small>Disponibilizar recomendações no plano alimentar.</small></span><input id="settingSuggestions" type="checkbox" checked></label>
         <div class="setting-block settings-patient-card"><div class="settings-patient-title"><span class="settings-patient-avatar" id="settingsPatientAvatar">—</span><div><b>Paciente ativo</b><span id="settingsPatientName">Nenhum paciente selecionado</span></div></div><button class="outline-btn" id="settingsEditPatient" type="button">Editar paciente</button></div>
+        <div class="setting-block settings-danger-card"><div><b>Limpar dados do aplicativo</b><small>Remove todos os pacientes, planos e preferências salvos neste navegador. Esta ação não pode ser desfeita.</small></div><button class="danger-btn" id="clearAppDataBtn" type="button">Limpar dados</button></div>
       </div>
       <div class="modal-actions"><button class="primary" id="saveSettingsBtn" type="button">Salvar configurações</button></div>
     </div>
