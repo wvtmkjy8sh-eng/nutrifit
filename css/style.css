@@ -169,8 +169,9 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .nf-food-row{grid-template-columns:minmax(180px,1fr) auto minmax(150px,190px) auto;align-items:center;gap:12px}
 .nf-meal-picker,.builder-move{display:flex;flex-direction:column;gap:4px;min-width:145px}
 .nf-meal-picker span,.builder-move span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.65}
-.nf-meal-picker select,.builder-move select{width:100%;border:1px solid var(--border,#ddd);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;font-size:12px}
-.builder-food-meal:invalid{color:color-mix(in srgb, currentColor 55%, transparent)}
+.nf-meal-picker select,.builder-move select{width:100%;border:1px solid #c3cbc6;background:#e6eae7;color:#2c342f;border-radius:10px;padding:9px 10px;font:inherit;font-size:12px;color-scheme:light}
+.nf-meal-picker select option,.builder-move select option{background:#e6eae7;color:#2c342f}
+.builder-food-meal:invalid{color:#6d7671}
 .nf-builder-item{grid-template-columns:minmax(0,1fr) auto minmax(145px,170px) auto!important;align-items:center}
 .builder-move{margin-left:4px}
 @media(max-width:1050px){.nf-food-row{grid-template-columns:1fr 1fr}.nf-food-row .nf-add-food{justify-self:start}.nf-meal-picker{grid-column:2}.nf-builder-item{grid-template-columns:1fr auto!important}.nf-builder-item .builder-move{grid-column:1/-1;margin-left:0}.nf-builder-item .builder-remove-item{grid-column:2;grid-row:2}}
