@@ -1215,3 +1215,27 @@ body{min-width:0;overflow-x:hidden}
   #settingsModal .settings-danger-card{flex-direction:column;align-items:flex-start;padding:12px}
   #settingsModal .settings-danger-card .danger-btn{width:100%;min-height:44px}
 }
+
+/* =====================================================
+   NUTRIFIT — CABEÇALHO DAS ABAS INTERNAS
+   Evita o título duplicado (topo + seção). Fora do dashboard,
+   cada página usa apenas o próprio cabeçalho de seção.
+   ===================================================== */
+body[data-page]:not([data-page="dashboard"]) .topbar #pageTitle{display:none}
+
+/* =====================================================
+   NUTRIFIT — FOLGA DO BOTÃO FECHAR NOS MODAIS
+   Garante que eyebrows/títulos nunca fiquem sob o "×".
+   ===================================================== */
+.modal-content>.eyebrow:first-child,
+.modal-content>h2:first-of-type{padding-right:48px}
+.modal-content .edit-patient-header,
+.modal-content .suggest-patient-header,
+.modal-content .modal-identity{padding-right:48px}
+@media(max-width:430px){
+  .modal-content>.eyebrow:first-child,
+  .modal-content>h2:first-of-type,
+  .modal-content .edit-patient-header,
+  .modal-content .suggest-patient-header,
+  .modal-content .modal-identity{padding-right:44px}
+}

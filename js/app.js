@@ -1,7 +1,22 @@
 const navItems=document.querySelectorAll('[data-page]');
 const pages=document.querySelectorAll('.page');
 const title=document.getElementById('pageTitle');
-const titles={dashboard:'Olá, Nutri',clientes:'Pacientes',alimentacao:'Alimentação',plano:'Plano alimentar',calculadora:'Calculadora metabólica',agua:'Hidratação',evolucao:'Evolução',receitas:'Receitas'};
+const titles={dashboard:'Olá,',clientes:'Pacientes',alimentacao:'Alimentação',plano:'Plano alimentar',calculadora:'Calculadora metabólica',agua:'Hidratação',evolucao:'Evolução',receitas:'Receitas'};
+
+// Saudação do dashboard: sem nome enquanto nenhum paciente estiver carregado.
+function patientFirstName(){
+  try{ if(typeof selectedPatient!=='undefined' && selectedPatient && selectedPatient.name){ return String(selectedPatient.name).trim().split(/\s+/)[0]||''; } }catch(e){}
+  return '';
+}
+function dashboardGreeting(){
+  const first=patientFirstName();
+  return first ? `Olá, ${first}` : 'Olá,';
+}
+function refreshDashboardGreeting(){
+  if(!title)return;
+  const current=localStorage.getItem('nutrifit-page')||'dashboard';
+  if(current==='dashboard') title.textContent=dashboardGreeting();
+}
 
 function playRouteProgress(){
   const bar=document.getElementById('routeProgress');
@@ -20,7 +35,8 @@ function showPage(id){
   playRouteProgress();
   pages.forEach(p=>p.classList.toggle('active-page',p.id===id));
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
-  if(title)title.textContent=titles[id]||'NutriFit';
+  document.body.dataset.page=id;
+  if(title)title.textContent = id==='dashboard' ? dashboardGreeting() : (titles[id]||'NutriFit');
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
@@ -416,10 +432,9 @@ function applyPatientData(patient){
   localStorage.setItem('nutrifit-selected-patient',patient.id);
   const name=document.getElementById('selectedPatientName');
   const profile=document.getElementById('profilePatientName');
-  const pageTitle=document.getElementById('pageTitle');
   if(name)name.textContent=patient.name;
   if(profile)profile.textContent=patient.name;
-  if(pageTitle && (localStorage.getItem('nutrifit-page')||'dashboard')==='dashboard')pageTitle.textContent='Olá, Nutri';
+  refreshDashboardGreeting();
   // Atualiza os principais indicadores com os dados do paciente carregado.
   const kcalStrong=document.querySelector('.metric-card strong');
   if(kcalStrong)kcalStrong.innerHTML=`1.850 <small>/ ${patient.calories.toLocaleString('pt-BR')} kcal</small>`;
@@ -457,6 +472,7 @@ if(initialName) initialName.textContent='Nenhum paciente';
 if(initialProfile) initialProfile.textContent='Nenhum paciente';
 if(initialSelectorAvatar) initialSelectorAvatar.textContent='—';
 loadCalculatorPatient(null);
+refreshDashboardGreeting();
 
 
 
@@ -525,7 +541,7 @@ function deletePatientById(id){
   if(!confirm(`Excluir o cliente ${p.name}? Esta ação também removerá o plano alimentar e os dados da calculadora salvos para ele.`))return false;
   const idx=patients.findIndex(x=>x.id===id); if(idx>=0)patients.splice(idx,1);
   try{const plans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}')||{};delete plans[id];localStorage.setItem('nutrifit-patient-plans',JSON.stringify(plans));const metas=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')||{};delete metas[id];localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(metas));const drafts=JSON.parse(localStorage.getItem('nutrifit-plan-builder-drafts')||'{}')||{};delete drafts[id];localStorage.setItem('nutrifit-plan-builder-drafts',JSON.stringify(drafts));}catch(e){}
-  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();}
+  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();refreshDashboardGreeting();}
   persistPatients();renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');renderPatientPlan();renderAlimentacao();closeModal(editPatientModal);showToast(`${p.name} foi excluído.`);window.scrollTo({top:0,behavior:'smooth'});return true;
 }
 byId('editPatientBtn')?.addEventListener('click',()=>{if(pendingPatient)openEditPatient(pendingPatient,'edit')});
