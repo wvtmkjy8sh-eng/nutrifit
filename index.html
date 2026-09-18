@@ -26,7 +26,6 @@
 
       <nav class="nav">
         <button class="nav-item active" data-page="dashboard"><img src="assets/icons/home.svg">Dashboard</button>
-        <button class="nav-item" data-page="clientes"><img src="assets/icons/users.svg">Pacientes</button>
         <button class="nav-item" data-page="alimentacao"><img src="assets/icons/nutrition.svg">Alimentação</button>
         <button class="nav-item" data-page="plano"><img src="assets/icons/clipboard.svg">Plano alimentar</button>
         <button class="nav-item" data-page="calculadora"><img src="assets/icons/calculator.svg">Calculadora</button>
@@ -58,7 +57,6 @@
 
       <nav class="mobile-tabs" aria-label="Seções do NutriFit">
         <button class="mobile-tab nav-item active" data-page="dashboard" type="button"><img src="assets/icons/home.svg" alt="">Dashboard</button>
-        <button class="mobile-tab nav-item" data-page="clientes" type="button"><img src="assets/icons/users.svg" alt="">Pacientes</button>
         <button class="mobile-tab nav-item" data-page="alimentacao" type="button"><img src="assets/icons/nutrition.svg" alt="">Alimentação</button>
         <button class="mobile-tab nav-item" data-page="plano" type="button"><img src="assets/icons/clipboard.svg" alt="">Plano alimentar</button>
         <button class="mobile-tab nav-item" data-page="calculadora" type="button"><img src="assets/icons/calculator.svg" alt="">Calculadora</button>
@@ -143,12 +141,12 @@
 
       <section class="page" id="calculadora">
         <div class="section-head"><div><h2>Calculadora metabólica</h2><p>Dados preenchidos automaticamente com o paciente selecionado.</p></div><div class="selected-calc-patient" id="calculatorPatientSummary"><span class="avatar small-avatar">—</span><span><b id="calculatorPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span></div></div>
-        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" inputmode="numeric" value="41"></label><label>Peso (kg)<input id="weight" type="number" inputmode="decimal" value="85"></label><label>Altura (cm)<input id="height" type="number" inputmode="numeric" value="175"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">2.548 kcal</strong><p>Gasto energético diário</p><div class="result-list"><div><span>TMB</span><b id="bmr">1.644 kcal</b></div><div><span>Manutenção</span><b id="maintenance">2.548 kcal</b></div><div><span>Déficit sugerido*</span><b id="deficit">2.048 kcal</b></div></div><small>*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.</small></div></div>
+        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" inputmode="numeric" placeholder="Ex.: 35"></label><label>Peso (kg)<input id="weight" type="number" inputmode="decimal" placeholder="Ex.: 70"></label><label>Altura (cm)<input id="height" type="number" inputmode="numeric" placeholder="Ex.: 170"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">—</strong><p id="calcResultHint">Preencha os dados e clique em Calcular</p><div class="result-list"><div><span>TMB</span><b id="bmr">—</b></div><div><span>Manutenção</span><b id="maintenance">—</b></div><div><span>Déficit sugerido*</span><b id="deficit">—</b></div></div><small>*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.</small></div></div>
       </section>
 
       <section class="page" id="agua">
         <div class="section-head"><div><h2>Hidratação</h2><p>Acompanhe seu consumo de água.</p></div></div>
-        <div class="hydration-large card"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">1,8 L</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong>2,5 L</strong><div class="progress large"><i id="waterBar" style="width:72%"></i></div><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
+        <div class="hydration-large card"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">0,0 L</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong id="waterGoalLabel">2,5 L</strong><small id="waterGoalSource" class="muted"></small><div class="progress large"><i id="waterBar" style="width:0%"></i></div><p class="hint" id="waterHint"></p><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
       </section>
 
       <section class="page" id="evolucao">
@@ -166,7 +164,6 @@
 
   <nav class="bottom-nav" aria-label="Navegação principal">
     <button class="nav-item" data-page="dashboard" type="button"><img src="assets/icons/home.svg" alt="">Início</button>
-    <button class="nav-item" data-page="clientes" type="button"><img src="assets/icons/users.svg" alt="">Pacientes</button>
     <button class="nav-item" data-page="alimentacao" type="button"><img src="assets/icons/nutrition.svg" alt="">Alimentação</button>
     <button class="nav-item" data-page="plano" type="button"><img src="assets/icons/clipboard.svg" alt="">Plano</button>
     <button class="nav-item" id="bottomNavMore" type="button"><img src="assets/icons/more.svg" alt="">Mais</button>
@@ -181,6 +178,7 @@
       <div class="patient-list" id="patientList"></div>
       <div class="selected-patient-box" id="selectedPatientBox">Nenhum paciente selecionado.</div>
       <div class="modal-actions"><button class="outline-btn" id="editPatientBtn" type="button">Editar dados/metas</button><button class="primary" id="loadPatientBtn" type="button" disabled>Carregar informações do paciente</button></div>
+      <button class="text-btn manage-patients-link" id="managePatientsBtn" type="button">Gerenciar todos os pacientes (adicionar, buscar, excluir) →</button>
     </div>
   </div>
 
@@ -270,8 +268,11 @@
   <div class="modal" id="toastModal" aria-hidden="true"></div>
   <script src="js/app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+    // A instalação do PWA (e o service worker) só funciona quando o app é
+    // aberto via http/https (ex.: servidor local ou Live Server). Abrir o
+    // arquivo diretamente (file://) desativa essas duas tecnologias no navegador.
+    if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
   </script>
 </body>

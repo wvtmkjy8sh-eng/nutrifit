@@ -1,3 +1,10 @@
+// Declarados no topo para evitar erro de "temporal dead zone": funções
+// executadas ainda durante a inicialização (ex.: updateWater) já referenciam
+// selectedPatient antes da seção de seleção de paciente ser processada.
+const patients = [];
+let selectedPatient = null;
+let pendingPatient = null;
+
 const navItems=document.querySelectorAll('[data-page]');
 const pages=document.querySelectorAll('.page');
 const title=document.getElementById('pageTitle');
@@ -74,13 +81,21 @@ function updateWater(){
   const visualFill=document.querySelector('.water-fill');
   const dashTotal=document.getElementById('dashboardWaterTotal');
   const dashHint=document.getElementById('dashboardWaterHint');
+  const goalLabel=document.getElementById('waterGoalLabel');
+  const goalSource=document.getElementById('waterGoalSource');
+  const waterHint=document.getElementById('waterHint');
   const pct=Math.min(100,(water/goal)*100);
   const remaining=Math.max(0,goal-water);
-  if(liters)liters.textContent=(water/1000).toFixed(1).replace('.',',')+' L';
+  const fmtL=n=>(n/1000).toFixed(1).replace('.',',')+' L';
+  if(liters)liters.textContent=fmtL(water);
   if(bar)bar.style.width=pct+'%';
   if(visualFill)visualFill.style.height=pct+'%';
-  if(dashTotal)dashTotal.innerHTML=`${(water/1000).toFixed(1).replace('.',',')} <small>/ ${(goal/1000).toFixed(1).replace('.',',')} L</small>`;
+  if(dashTotal)dashTotal.innerHTML=`${(water/1000).toFixed(1).replace('.',',')} <small>/ ${fmtL(goal)}</small>`;
   if(dashHint)dashHint.innerHTML=remaining?`Faltam <b>${remaining.toLocaleString('pt-BR')} ml</b> para atingir sua meta.`:'<b>Meta de hidratação atingida.</b>';
+  if(goalLabel)goalLabel.textContent=fmtL(goal);
+  const hasPatientGoal=typeof selectedPatient!=='undefined' && !!selectedPatient?.waterGoal;
+  if(goalSource)goalSource.textContent=hasPatientGoal?`Calculada para ${selectedPatient.name}`:'Meta padrão — selecione um paciente para uma meta personalizada';
+  if(waterHint)waterHint.innerHTML=remaining?`Faltam <b>${remaining.toLocaleString('pt-BR')} ml</b> para atingir sua meta diária.`:'<b>Meta de hidratação atingida hoje.</b> 🎉';
 }
 document.querySelectorAll('[data-water]').forEach(b=>b.addEventListener('click',()=>{water+=Number(b.dataset.water);updateWater();if(typeof renderDashboard==='function')renderDashboard()}));
 updateWater();
@@ -110,6 +125,8 @@ calc?.addEventListener('submit',e=>{
   document.getElementById('tdee').textContent=fmt(tdee);
   document.getElementById('maintenance').textContent=fmt(tdee);
   document.getElementById('deficit').textContent=fmt(Math.max(0,tdee-500));
+  const resultHint=document.getElementById('calcResultHint');
+  if(resultHint)resultHint.textContent='Gasto energético diário';
   const pid=calc.dataset.patientId||selectedPatient?.id;
   if(pid){const all=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}');all[pid]={calories:target,protein,carbs,fat,bmr:Math.round(bmr),tdee:Math.round(tdee),activity,objective,sex,age,weight,height,updatedAt:new Date().toISOString()};localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(all));}
 });
@@ -117,9 +134,6 @@ calc?.addEventListener('submit',e=>{
 // ===============================
 // SELEÇÃO E CARREGAMENTO DE PACIENTE
 // ===============================
-const patients = [];
-let selectedPatient = null;
-let pendingPatient = null;
 let patientPlans = {};
 try{ patientPlans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}')||{}; }catch(e){ patientPlans={}; }
 function persistPlans(){localStorage.setItem('nutrifit-patient-plans',JSON.stringify(patientPlans))}
@@ -169,7 +183,7 @@ function renderAlimentacao(){
   const target=Number(plan.calories||getPlanMeta(p).calories||0);
   const remaining=Math.round(target-totals.kcal);
   if(sub)sub.textContent=`Plano de ${p.name} · ${formatKcal(target)} kcal/dia`;
-  box.innerHTML=`<div class="food-summary"><div><span>Meta diária</span><strong>${formatKcal(target)} kcal</strong></div><div><span>Plano montado</span><strong>${formatKcal(totals.kcal)} kcal</strong></div><div><span>Saldo</span><strong class="${remaining<0?'food-over':''}">${remaining>=0?formatKcal(remaining)+' kcal restantes':formatKcal(Math.abs(remaining))+' kcal acima'}</strong></div><div><span>Proteína</span><strong>${Math.round(totals.protein)} g</strong></div></div><article class="card table-card"><div class="card-head"><div><span class="eyebrow">PLANO ATIVO</span><h3>${escapeHtml(plan.name||'Plano alimentar')}</h3><p>Refeições, quantidades e valores nutricionais cadastrados para ${escapeHtml(p.name)}.</p></div><button class="outline-btn" id="foodEditPlanBtn" type="button">Editar plano</button></div>${meals.length?meals.map(m=>{const mac=mealMacros(m),suggested=Math.round(target*(BUILDER_MEALS.find(x=>x.id===m.id)?.share||0));return `<div class="food-meal"><div class="food-meal-title"><div><b>${escapeHtml(m.name)}</b><small>${m.time}</small></div><span>${formatKcal(mac.kcal)} kcal</span></div>${(m.items||[]).map(item=>{const f=foodCatalog[item.key],n=foodNutrientsForAmount(f,item.amount);return `<div class="food-item"><b>${escapeHtml(f.name)}</b><span>${builderAmountLabel(f,item.amount)} · ${n.kcal} kcal</span></div>`}).join('')}${mac.protein||mac.carbs||mac.fat?`<div class="food-nutrients"><span>Proteína ${mac.protein.toFixed(1)} g</span><span>Carboidratos ${mac.carbs.toFixed(1)} g</span><span>Gorduras ${mac.fat.toFixed(1)} g</span>${suggested?`<span>Meta ${formatKcal(suggested)} kcal</span>`:''}</div>`:''}</div>`}).join(''):'<div class="food-empty-inline">O plano está salvo, mas ainda não possui refeições cadastradas.</div>'}</article>`;
+  box.innerHTML=`<div class="food-summary food-summary-macros"><div><span>Meta diária</span><strong>${formatKcal(target)} kcal</strong></div><div><span>Plano montado</span><strong>${formatKcal(totals.kcal)} kcal</strong></div><div><span>Saldo</span><strong class="${remaining<0?'food-over':''}">${remaining>=0?formatKcal(remaining)+' kcal restantes':formatKcal(Math.abs(remaining))+' kcal acima'}</strong></div><div><span>Proteína</span><strong>${Math.round(totals.protein)} g</strong></div><div><span>Carboidratos</span><strong>${Math.round(totals.carbs)} g</strong></div><div><span>Gorduras</span><strong>${Math.round(totals.fat)} g</strong></div></div><article class="card table-card"><div class="card-head"><div><span class="eyebrow">PLANO ATIVO</span><h3>${escapeHtml(plan.name||'Plano alimentar')}</h3><p>Refeições, quantidades e valores nutricionais cadastrados para ${escapeHtml(p.name)}.</p></div><button class="outline-btn" id="foodEditPlanBtn" type="button">Editar plano</button></div>${meals.length?meals.map(m=>{const mac=mealMacros(m),suggested=Math.round(target*(BUILDER_MEALS.find(x=>x.id===m.id)?.share||0));return `<div class="food-meal"><div class="food-meal-title"><div><b>${escapeHtml(m.name)}</b><small>${m.time}</small></div><span>${formatKcal(mac.kcal)} kcal</span></div>${(m.items||[]).map(item=>{const f=foodCatalog[item.key],n=foodNutrientsForAmount(f,item.amount);return `<div class="food-item"><b>${escapeHtml(f.name)}</b><span>${builderAmountLabel(f,item.amount)} · ${n.kcal} kcal</span></div>`}).join('')}${mac.protein||mac.carbs||mac.fat?`<div class="food-nutrients"><span>Proteína ${mac.protein.toFixed(1)} g</span><span>Carboidratos ${mac.carbs.toFixed(1)} g</span><span>Gorduras ${mac.fat.toFixed(1)} g</span>${suggested?`<span>Meta ${formatKcal(suggested)} kcal</span>`:''}</div>`:''}</div>`}).join(''):'<div class="food-empty-inline">O plano está salvo, mas ainda não possui refeições cadastradas.</div>'}</article>`;
   byId('foodEditPlanBtn')?.addEventListener('click',()=>openMealPlanModal(true));
 }
 function defaultPlanMeals(p){return planForPatient(p,'')}
@@ -322,6 +336,13 @@ function selectPatient(id){
   pendingPatient=patients.find(p=>p.id===id) || null;
   renderPatients();
 }
+function resetCalculatorResult(hint){
+  const dash='—';
+  const b=document.getElementById('bmr'),t=document.getElementById('tdee'),m=document.getElementById('maintenance'),d=document.getElementById('deficit');
+  if(b)b.textContent=dash; if(t)t.textContent=dash; if(m)m.textContent=dash; if(d)d.textContent=dash;
+  const resultHint=document.getElementById('calcResultHint');
+  if(resultHint)resultHint.textContent=hint||'Preencha os dados e clique em Calcular';
+}
 function loadCalculatorPatient(patient){
   if(!patient){
     const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=value??''};
@@ -332,6 +353,7 @@ function loadCalculatorPatient(patient){
     if(summaryAvatar)summaryAvatar.textContent='—';
     const form=document.getElementById('calcForm');
     if(form)delete form.dataset.patientId;
+    resetCalculatorResult('Selecione um paciente ou preencha seus dados e clique em Calcular');
     return;
   }
   const weight=Number(String(patient.weight||'0').replace(' kg','').replace(',','.'))||0;
@@ -355,6 +377,10 @@ function loadCalculatorPatient(patient){
     const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
     const b=document.getElementById('bmr'),t=document.getElementById('tdee'),m=document.getElementById('maintenance'),d=document.getElementById('deficit');
     if(b)b.textContent=fmt(bmr); if(t)t.textContent=fmt(tdee); if(m)m.textContent=fmt(tdee); if(d)d.textContent=fmt(Math.max(0,tdee-500));
+    const resultHint=document.getElementById('calcResultHint');
+    if(resultHint)resultHint.textContent='Gasto energético diário';
+  }else{
+    resetCalculatorResult('Complete peso, idade e altura do paciente ou calcule manualmente');
   }
 }
 window.loadSelectedPatientCalculator=()=>loadCalculatorPatient(selectedPatient);
@@ -548,6 +574,7 @@ function deletePatientById(id){
   persistPatients();renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');renderPatientPlan();renderAlimentacao();closeModal(editPatientModal);showToast(`${p.name} foi excluído.`);window.scrollTo({top:0,behavior:'smooth'});return true;
 }
 byId('editPatientBtn')?.addEventListener('click',()=>{if(pendingPatient)openEditPatient(pendingPatient,'edit')});
+byId('managePatientsBtn')?.addEventListener('click',()=>{closePatientModal();showPage('clientes');});
 byId('addPatientBtn')?.addEventListener('click',()=>openEditPatient(null,'create'));
 byId('patientSearch')?.addEventListener('input',e=>renderPatientsCrud(e.target.value));
 byId('patientsCrudList')?.addEventListener('click',e=>{
@@ -919,3 +946,8 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('#addMealPlanBtn');
   if(b){e.preventDefault();showPage('plano');renderPatientPlan();}
 });
+
+// Garante que a Calculadora não exiba dados fictícios de sessões anteriores
+// caso a última página visitada (salva no navegador) tenha sido a própria
+// Calculadora e nenhum paciente esteja selecionado no boot.
+if(typeof loadCalculatorPatient==='function') loadCalculatorPatient(selectedPatient||null);
