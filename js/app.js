@@ -48,6 +48,8 @@ function showPage(id){
   if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
   if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
   if(id==='receitas' && typeof window.renderRecipes==='function') window.renderRecipes();
+  if(id==='agua' && typeof renderAgua==='function') renderAgua();
+  if(id==='evolucao' && typeof renderEvolucao==='function') renderEvolucao();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 navItems.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
@@ -80,7 +82,7 @@ document.getElementById('mobileMenu')?.addEventListener('click',()=>toggleSideba
 document.getElementById('bottomNavMore')?.addEventListener('click',()=>toggleSidebar());
 document.getElementById('sidebarOverlay')?.addEventListener('click',()=>toggleSidebar(false));
 
-let water=Number(localStorage.getItem('nutrifit-water')||1800);
+let water=Number(localStorage.getItem('nutrifit-water')||0);
 function currentWaterGoal(){
   try{if(typeof selectedPatient!=='undefined' && selectedPatient?.waterGoal)return Number(selectedPatient.waterGoal)||2500}catch(e){}
   return 2500;
@@ -89,18 +91,15 @@ function updateWater(){
   const goal=Math.max(500,currentWaterGoal());
   water=Math.max(0,Math.min(goal,water));
   localStorage.setItem('nutrifit-water',water);
-  const liters=document.getElementById('waterLiters');
-  const bar=document.getElementById('waterBar');
   const visualFill=document.querySelector('.water-fill');
   const dashTotal=document.getElementById('dashboardWaterTotal');
   const dashHint=document.getElementById('dashboardWaterHint');
   const pct=Math.min(100,(water/goal)*100);
   const remaining=Math.max(0,goal-water);
-  if(liters)liters.textContent=(water/1000).toFixed(1).replace('.',',')+' L';
-  if(bar)bar.style.width=pct+'%';
   if(visualFill)visualFill.style.height=pct+'%';
   if(dashTotal)dashTotal.innerHTML=`${(water/1000).toFixed(1).replace('.',',')} <small>/ ${(goal/1000).toFixed(1).replace('.',',')} L</small>`;
   if(dashHint)dashHint.innerHTML=remaining?`Faltam <b>${remaining.toLocaleString('pt-BR')} ml</b> para atingir sua meta.`:'<b>Meta de hidratação atingida.</b>';
+  if(typeof renderAgua==='function') try{renderAgua()}catch(e){}
 }
 document.querySelectorAll('[data-water]').forEach(b=>b.addEventListener('click',()=>{water+=Number(b.dataset.water);updateWater();if(typeof renderDashboard==='function')renderDashboard()}));
 updateWater();
@@ -206,6 +205,66 @@ function getDisplayPlanMeals(plan,p){
     }
   });
   return base.filter(m=>m.items.length||source.length===0);
+}
+function renderAgua(){
+  const liters=document.getElementById('waterLiters');
+  const goalEl=document.getElementById('waterGoalValue');
+  const bar=document.getElementById('waterBar');
+  const sub=document.getElementById('waterPageSubtitle');
+  const hint=document.getElementById('waterPageHint');
+  const p=(typeof selectedPatient!=='undefined')?selectedPatient:null;
+  if(!p){
+    if(sub)sub.textContent='Selecione um paciente para acompanhar a hidratação.';
+    if(liters)liters.textContent='—';
+    if(goalEl)goalEl.textContent='—';
+    if(bar)bar.style.width='0%';
+    if(hint)hint.textContent='Nenhum volume fictício é exibido sem um perfil carregado.';
+    return;
+  }
+  const goal=Math.max(0,Number(p.waterGoal)||0);
+  const consumed=Math.max(0,Number(water)||0);
+  const pct=goal?Math.min(100,(consumed/goal)*100):0;
+  if(sub)sub.textContent=`Hidratação de ${p.name}.`;
+  if(liters)liters.textContent=(consumed/1000).toFixed(1).replace('.',',')+' L';
+  if(goalEl)goalEl.textContent=goal?(goal/1000).toFixed(1).replace('.',',')+' L':'—';
+  if(bar)bar.style.width=pct+'%';
+  if(hint){
+    if(!goal)hint.textContent='Cadastre a meta de água do paciente para acompanhar o progresso.';
+    else if(consumed>=goal)hint.textContent='Meta de hidratação atingida.';
+    else hint.textContent=`Faltam ${Math.max(0,goal-consumed).toLocaleString('pt-BR')} ml para a meta de ${p.name}.`;
+  }
+}
+function renderEvolucao(){
+  const sub=document.getElementById('evoPageSubtitle');
+  const weight=document.getElementById('evoWeight');
+  const weightNote=document.getElementById('evoWeightNote');
+  const waist=document.getElementById('evoWaist');
+  const waistNote=document.getElementById('evoWaistNote');
+  const adh=document.getElementById('evoAdherence');
+  const adhNote=document.getElementById('evoAdherenceNote');
+  const caption=document.getElementById('evoChartCaption');
+  const empty=document.getElementById('evoChartEmpty');
+  const p=(typeof selectedPatient!=='undefined')?selectedPatient:null;
+  if(waist)waist.textContent='—';
+  if(adh)adh.textContent='—';
+  if(!p){
+    if(sub)sub.textContent='Selecione um paciente para ver os dados reais.';
+    if(weight)weight.textContent='—';
+    if(weightNote)weightNote.textContent='Selecione um paciente';
+    if(waistNote)waistNote.textContent='Não informado';
+    if(adhNote)adhNote.textContent='Não informado';
+    if(caption)caption.textContent='Nenhum histórico cadastrado';
+    if(empty)empty.textContent='Nenhum gráfico fictício é exibido. O histórico aparece quando houver registros do paciente.';
+    return;
+  }
+  const w=String(p.weight||'').trim();
+  if(sub)sub.textContent=`Evolução de ${p.name}.`;
+  if(weight)weight.textContent=w||'—';
+  if(weightNote)weightNote.textContent=w?'Peso cadastrado no perfil':'Peso não informado no perfil';
+  if(waistNote)waistNote.textContent='Não há medida de cintura cadastrada';
+  if(adhNote)adhNote.textContent='Não há registro de adesão';
+  if(caption)caption.textContent='Sem histórico de pesagens';
+  if(empty)empty.textContent=`Não há histórico de peso registrado para ${p.name}.`;
 }
 function renderAlimentacao(){
   const box=byId('foodPlanContent'), sub=byId('foodPageSubtitle'), add=byId('foodAddPlanBtn');
@@ -496,6 +555,8 @@ function applyPatientData(patient){
   renderPatientsCrud(byId('patientSearch')?.value||'');
   if(typeof renderPatientPlan==='function') renderPatientPlan();
   if(typeof renderAlimentacao==='function') renderAlimentacao();
+  if(typeof renderAgua==='function') renderAgua();
+  if(typeof renderEvolucao==='function') renderEvolucao();
   closePatientModal();
   showToast(`Informações de ${patient.name} carregadas.`);
 }
@@ -528,6 +589,8 @@ if(initialProfile) initialProfile.textContent='Nenhum paciente';
 if(initialSelectorAvatar) initialSelectorAvatar.textContent='—';
 loadCalculatorPatient(null);
 refreshDashboardGreeting();
+renderAgua();
+renderEvolucao();
 
 
 
@@ -596,7 +659,7 @@ function deletePatientById(id){
   if(!confirm(`Excluir o cliente ${p.name}? Esta ação também removerá o plano alimentar e os dados da calculadora salvos para ele.`))return false;
   const idx=patients.findIndex(x=>x.id===id); if(idx>=0)patients.splice(idx,1);
   try{const plans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}')||{};delete plans[id];localStorage.setItem('nutrifit-patient-plans',JSON.stringify(plans));const metas=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')||{};delete metas[id];localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(metas));const drafts=JSON.parse(localStorage.getItem('nutrifit-plan-builder-drafts')||'{}')||{};delete drafts[id];localStorage.setItem('nutrifit-plan-builder-drafts',JSON.stringify(drafts));}catch(e){}
-  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();refreshDashboardGreeting();}
+  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();renderAgua();renderEvolucao();refreshDashboardGreeting();}
   else if(pendingPatient?.id===id){pendingPatient=null;}
   persistPatients();renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');renderPatientPlan();renderAlimentacao();closeModal(editPatientModal);showToast(`${p.name} foi excluído.`);window.scrollTo({top:0,behavior:'smooth'});return true;
 }
