@@ -46,7 +46,7 @@
         <div>
           <button class="mobile-menu" id="mobileMenu">☰</button>
           <span class="eyebrow">SEGUNDA-FEIRA, 14 SET</span>
-          <h1 id="pageTitle">Olá, Nutri</h1>
+          <h1 id="pageTitle">Olá,</h1>
         </div>
         <div class="top-actions">
           <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron">⌄</span></button>
@@ -95,18 +95,6 @@
           </article>
           <article class="card goal-card"><div class="goal-icon"><img src="assets/icons/target.svg"></div><div><span>Meta de peso</span><strong id="dashboardWeight">—</strong><p id="dashboardWeightNote">Selecione um paciente.</p></div><div class="goal-progress"><i id="dashboardGoalBar" style="width:0%"></i></div></article>
         </div>
-      </section>
-
-      <section class="page" id="clientes">
-        <div class="section-head clients-page-head">
-          <div><span class="eyebrow">CADASTRO</span><h2>Pacientes</h2><p>Gerencie pacientes, dados, metas e acesso em um único lugar.</p></div>
-          <button class="primary fab-action" id="addPatientBtn" type="button"><span class="fab-icon">+</span><span class="fab-label">Novo paciente</span></button>
-        </div>
-        <div class="clients-toolbar card">
-          <div class="clients-search"><img src="assets/icons/search.svg" alt=""><input id="patientSearch" type="search" placeholder="Buscar por nome ou e-mail" autocomplete="off"></div>
-          <div class="clients-stats" id="patientStats"></div>
-        </div>
-        <div class="clients-grid" id="patientsCrudList"></div>
       </section>
 
       <section class="page" id="alimentacao">
@@ -162,12 +150,10 @@
   <div class="modal" id="patientModal" aria-hidden="true">
     <div class="modal-content patient-modal">
       <button class="close" id="closePatientModal" type="button" aria-label="Fechar">×</button>
-      <span class="eyebrow">SELECIONAR PACIENTE</span>
-      <h2>Escolha o paciente</h2>
-      <p class="muted">Clique em um paciente para selecioná-lo e depois carregue as informações.</p>
+      <div class="patient-modal-head"><div><span class="eyebrow">SELECIONAR PACIENTE</span><h2>Escolha o paciente</h2><p class="muted">Clique em um paciente para selecioná-lo e depois carregue as informações.</p></div><button class="outline-btn" id="addPatientBtn" type="button">+ Novo paciente</button></div>
       <div class="patient-list" id="patientList"></div>
       <div class="selected-patient-box" id="selectedPatientBox">Nenhum paciente selecionado.</div>
-      <div class="modal-actions"><button class="outline-btn" id="manageClientsBtn" type="button">Gerenciar pacientes</button><button class="outline-btn" id="editPatientBtn" type="button">Editar dados/metas</button><button class="primary" id="loadPatientBtn" type="button" disabled>Carregar informações do paciente</button></div>
+      <div class="modal-actions"><button class="outline-btn" id="editPatientBtn" type="button">Editar dados/metas</button><button class="primary" id="loadPatientBtn" type="button" disabled>Carregar informações do paciente</button></div>
     </div>
   </div>
 

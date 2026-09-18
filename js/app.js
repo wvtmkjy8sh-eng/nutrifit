@@ -41,6 +41,8 @@ function showPage(id){
   document.querySelector('.sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
+  if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
+  if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 navItems.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
@@ -138,6 +140,16 @@ try{ patientPlans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}
 function persistPlans(){localStorage.setItem('nutrifit-patient-plans',JSON.stringify(patientPlans))}
 function getPlan(){return selectedPatient ? patientPlans[selectedPatient.id] || null : null}
 function formatKcal(n){return Math.round(Number(n)||0).toLocaleString('pt-BR')}
+function resolveFoodKeyFromFood(f){
+  if(!f)return null;
+  if(f.key && foodCatalog[f.key])return f.key;
+  const name=String(f.name||'').trim().toLowerCase();
+  if(name){
+    const byName=Object.keys(foodCatalog).find(k=>foodCatalog[k].name.toLowerCase()===name);
+    if(byName)return byName;
+  }
+  return (typeof foodKey==='function'?foodKey(f.name||f):null)||null;
+}
 function getDisplayPlanMeals(plan,p){
   const base=BUILDER_MEALS.map(m=>({...m,items:[]}));
   if(!plan)return base;
@@ -147,7 +159,7 @@ function getDisplayPlanMeals(plan,p){
     const foods=Array.isArray(m.foods)?m.foods:[];
     if(foods.length){
       foods.forEach(f=>{
-        const key=f.key||foodKey(f);
+        const key=resolveFoodKeyFromFood(f);
         if(key && foodCatalog[key]) target.items.push({key,amount:Number(f.amount)||builderDefaultAmount(foodCatalog[key])});
       });
     }else if(Array.isArray(m.items)){
@@ -327,7 +339,7 @@ function closePatientModal(){
 }
 function renderPatients(){
   if(!patientList)return;
-  patientList.innerHTML=patients.map(p=>`<button type="button" class="patient-option ${pendingPatient?.id===p.id?'selected':''}" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'✓':''}</span></button>`).join('');
+  patientList.innerHTML=patients.length?patients.map(p=>`<div class="patient-option-row ${pendingPatient?.id===p.id?'selected':''}"><button type="button" class="patient-option" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'✓':''}</span></button><button type="button" class="patient-option-delete" data-delete-id="${p.id}" title="Excluir paciente" aria-label="Excluir paciente">×</button></div>`).join(''):'<p class="muted">Nenhum paciente cadastrado. Use "+ Novo paciente" para começar.</p>';
   if(selectedPatientBox) selectedPatientBox.innerHTML=pendingPatient ? `<b>Paciente selecionado:</b> ${pendingPatient.name} · ${pendingPatient.objective}` : 'Nenhum paciente selecionado.';
   if(loadPatientBtn){loadPatientBtn.disabled=!pendingPatient;loadPatientBtn.textContent=pendingPatient?'Carregar informações do paciente':'Selecione um paciente';}
 }
@@ -446,6 +458,8 @@ function applyPatientData(patient){
   loadCalculatorPatient(patient);
   renderDashboard();
   renderPatientsCrud(byId('patientSearch')?.value||'');
+  if(typeof renderPatientPlan==='function') renderPatientPlan();
+  if(typeof renderAlimentacao==='function') renderAlimentacao();
   closePatientModal();
   showToast(`Informações de ${patient.name} carregadas.`);
 }
@@ -459,10 +473,13 @@ document.getElementById('patientSelector')?.addEventListener('click',openPatient
 document.getElementById('profilePatientBtn')?.addEventListener('click',openPatientModal);
 document.getElementById('closePatientModal')?.addEventListener('click',closePatientModal);
 patientModal?.addEventListener('click',e=>{if(e.target===patientModal)closePatientModal()});
-patientList?.addEventListener('click',e=>{const btn=e.target.closest('[data-patient-id]');if(btn)selectPatient(btn.dataset.patientId)});
+patientList?.addEventListener('click',e=>{
+  const del=e.target.closest('[data-delete-id]');
+  if(del){deletePatientById(del.dataset.deleteId);return;}
+  const btn=e.target.closest('[data-patient-id]');
+  if(btn)selectPatient(btn.dataset.patientId);
+});
 loadPatientBtn?.addEventListener('click',()=>{if(pendingPatient){applyPatientData(pendingPatient);renderPatientPlan()}});
-document.getElementById('manageClientsBtn')?.addEventListener('click',()=>{closePatientModal();showPage('clientes');});
-
 // Nenhum paciente é carregado por padrão. A seleção deve ser feita explicitamente a cada sessão.
 localStorage.removeItem('nutrifit-selected-patient');
 selectedPatient=null;
@@ -544,10 +561,11 @@ function deletePatientById(id){
   const idx=patients.findIndex(x=>x.id===id); if(idx>=0)patients.splice(idx,1);
   try{const plans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}')||{};delete plans[id];localStorage.setItem('nutrifit-patient-plans',JSON.stringify(plans));const metas=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')||{};delete metas[id];localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(metas));const drafts=JSON.parse(localStorage.getItem('nutrifit-plan-builder-drafts')||'{}')||{};delete drafts[id];localStorage.setItem('nutrifit-plan-builder-drafts',JSON.stringify(drafts));}catch(e){}
   if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();refreshDashboardGreeting();}
+  else if(pendingPatient?.id===id){pendingPatient=null;}
   persistPatients();renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');renderPatientPlan();renderAlimentacao();closeModal(editPatientModal);showToast(`${p.name} foi excluído.`);window.scrollTo({top:0,behavior:'smooth'});return true;
 }
 byId('editPatientBtn')?.addEventListener('click',()=>{if(pendingPatient)openEditPatient(pendingPatient,'edit')});
-byId('addPatientBtn')?.addEventListener('click',()=>openEditPatient(null,'create'));
+byId('addPatientBtn')?.addEventListener('click',()=>{closePatientModal();openEditPatient(null,'create');});
 byId('patientSearch')?.addEventListener('input',e=>renderPatientsCrud(e.target.value));
 byId('patientsCrudList')?.addEventListener('click',e=>{
   const sel=e.target.closest('[data-client-select]'); if(sel){const p=patients.find(x=>x.id===sel.dataset.clientSelect);if(p){pendingPatient=p;applyPatientData(p);renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');}}
@@ -564,7 +582,7 @@ byId('editPatientForm')?.addEventListener('submit',e=>{
  if(isCreate){p={id:`patient_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,name,initials:name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(),email,age,sex:byId('editSex').value,height,objective:byId('editObjective').value,calories:Number(byId('editCalories').value||0),protein:Number(byId('editProtein').value||0),waterGoal:Number(byId('editWaterGoal').value||2500),weight:weight.toFixed(1).replace('.',',')+' kg',restrictions:byId('editRestrictions').value.trim(),preferences:byId('editPreferences').value.trim()};patients.push(p);}
  else{p.name=name;p.email=email;p.age=age;p.sex=byId('editSex').value;p.height=height;p.objective=byId('editObjective').value;p.calories=Number(byId('editCalories').value||0);p.protein=Number(byId('editProtein').value||0);p.waterGoal=Number(byId('editWaterGoal').value||2500);p.weight=weight.toFixed(1).replace('.',',')+' kg';p.restrictions=byId('editRestrictions').value.trim();p.preferences=byId('editPreferences').value.trim();p.initials=name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
  pendingPatient=p;persistPatients();if(selectedPatient?.id===p.id){selectedPatient=p;applyPatientData(p);renderPatientPlan();renderAlimentacao();}
- renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');closeModal(editPatientModal);showToast(isCreate?`${p.name} foi cadastrado.`:`Dados de ${p.name} salvos.`);
+ renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');closeModal(editPatientModal);if(isCreate)openPatientModal();showToast(isCreate?`${p.name} foi cadastrado.`:`Dados de ${p.name} salvos.`);
 });
 byId('settingsBtn')?.addEventListener('click',()=>{byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
 byId('closeSettingsModal')?.addEventListener('click',()=>closeModal(settingsModal));
