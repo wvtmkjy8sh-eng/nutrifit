@@ -1165,7 +1165,7 @@ body.menu-open .fab-action{visibility:hidden;pointer-events:none}
    Mesmo botão/ID/clique já existente; apenas reposicionado visualmente.
    Especificidade reforçada para não ser sobrescrito por ".section-head .primary".
    ===================================================== */
-.fab-action .fab-icon{display:inline;margin-right:6px;font-weight:800}
+.fab-action .fab-icon{display:inline-block;width:16px;height:16px;margin-right:6px;vertical-align:-3px;filter:brightness(0) invert(1)}
 .fab-action .fab-label{display:inline}
 @media(max-width:600px){
   .section-head .fab-action.fab-action{
@@ -1182,7 +1182,7 @@ body.menu-open .fab-action{visibility:hidden;pointer-events:none}
     place-items:center;
     box-shadow:0 10px 28px rgba(30,55,35,.28);
   }
-  .fab-action .fab-icon{display:block;font-size:26px;line-height:1;font-weight:700}
+  .fab-action .fab-icon{display:block;width:24px;height:24px;margin:0;font-size:inherit;filter:brightness(0) invert(1)}
   .fab-action .fab-label{display:none}
 }
 
@@ -1394,3 +1394,20 @@ body:not(.is-dashboard) .topbar #pageTitle,
     #recipeModal .recipe-modal{height:100vh;max-height:100vh}
   }
 }
+
+.inline-icon{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
+.primary .inline-icon{filter:brightness(0) invert(1)}
+.text-btn .inline-icon{margin-left:2px}
+.theme-btn img,.mobile-menu img,.chevron img,.icon-btn img{width:18px;height:18px;display:block}
+.mobile-menu{border:0;padding:0}
+.mobile-menu img{width:22px;height:22px}
+.modal-content>.close img,.patient-modal .close img{width:16px;height:16px;display:block}
+.patient-option .check img{width:16px;height:16px;display:block}
+.patient-option-delete img{width:14px;height:14px;display:block}
+.food-empty-icon img{width:24px;height:24px}
+.food-choice i img{width:12px;height:12px;opacity:0;filter:brightness(0) invert(1)}
+.food-choice:has(input:checked) i img{opacity:1}
+.recipe-photo img,.recipe-emoji-preview img{width:52px;height:52px;display:block;margin:auto}
+.recipe-emoji-picks button img{width:22px;height:22px;display:block}
+.builder-remove-item img{width:12px;height:12px;display:block}
+.nf-builder-empty-icon img{width:28px;height:28px}

@@ -61,7 +61,10 @@ const themeToggle=document.getElementById('themeToggle');
 function applyTheme(theme){
   const dark=theme==='dark';
   document.body.classList.toggle('dark',dark);
-  if(themeToggle){themeToggle.textContent=dark?'☀':'◐';themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro')}
+  if(themeToggle){
+    themeToggle.innerHTML=dark?'<img src="assets/icons/sun.svg" alt="">':'<img src="assets/icons/moon.svg" alt="">';
+    themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');
+  }
   localStorage.setItem('nutrifit-theme',theme);
 }
 const storedTheme=localStorage.getItem('nutrifit-theme');
@@ -273,12 +276,12 @@ function renderAlimentacao(){
   if(add)add.disabled=!p;
   if(!p){
     if(sub)sub.textContent='Selecione um paciente para visualizar a alimentação.';
-    box.innerHTML='<div class="food-empty card"><div class="food-empty-icon">—</div><h3>Nenhum paciente selecionado</h3><p>A alimentação só será exibida depois que um paciente for selecionado.</p></div>';
+    box.innerHTML='<div class="food-empty card"><div class="food-empty-icon"><img src="assets/icons/users.svg" alt=""></div><h3>Nenhum paciente selecionado</h3><p>A alimentação só será exibida depois que um paciente for selecionado.</p></div>';
     return;
   }
   if(!plan){
     if(sub)sub.textContent=`Nenhum plano alimentar atribuído a ${p.name}.`;
-    box.innerHTML=`<div class="food-empty card"><div class="food-empty-icon">+</div><span class="eyebrow">SEM PLANO ALIMENTAR</span><h3>${escapeHtml(p.name)} ainda não possui um plano.</h3><p>Nenhuma refeição, caloria ou nutriente fictício será exibido. Adicione um plano ou gere uma sugestão baseada na calculadora metabólica.</p><button class="primary" type="button" id="foodEmptyAddPlan">Adicionar plano</button></div>`;
+    box.innerHTML=`<div class="food-empty card"><div class="food-empty-icon"><img src="assets/icons/plus.svg" alt=""></div><span class="eyebrow">SEM PLANO ALIMENTAR</span><h3>${escapeHtml(p.name)} ainda não possui um plano.</h3><p>Nenhuma refeição, caloria ou nutriente fictício será exibido. Adicione um plano ou gere uma sugestão baseada na calculadora metabólica.</p><button class="primary" type="button" id="foodEmptyAddPlan">Adicionar plano</button></div>`;
     return;
   }
   const meals=getDisplayPlanMeals(plan,p);
@@ -387,7 +390,7 @@ function renderBuilderMeals(p){
   const draft=getBuilderDraft(p.id), meta=getPlanMeta(p), suggestions=byId('builderMealSuggestions'), list=byId('builderMenuList');
   if(!suggestions||!list)return;
   suggestions.innerHTML=BUILDER_MEALS.map(m=>{const actual=draft.meals.find(x=>x.id===m.id)||m;const kcal=Math.round(mealKcal(actual));const suggested=Math.round(meta.calories*m.share);const diff=kcal-suggested;return `<div class="nf-meal-suggestion"><span>${m.time}</span><div><b>${m.name}</b><small>Sugerido ${suggested.toLocaleString('pt-BR')} kcal</small></div><strong class="${diff>50?'warn':''}">${kcal.toLocaleString('pt-BR')} kcal</strong></div>`}).join('');
-  list.innerHTML=draft.meals.map(m=>{const suggested=Math.round(meta.calories*m.share),mac=mealMacros(m);return `<article class="nf-builder-meal" data-meal-id="${m.id}"><div class="nf-builder-meal-head"><div><span>${m.time}</span><h4>${m.name}</h4></div><div class="nf-meal-kcal"><b>${Math.round(mac.kcal).toLocaleString('pt-BR')} kcal</b><small>meta ${suggested.toLocaleString('pt-BR')} kcal</small></div></div><div class="nf-builder-items">${m.items.length?m.items.map((it,idx)=>{const f=foodCatalog[it.key],n=foodNutrientsForAmount(f,it.amount);const moveOptions=BUILDER_MEALS.map(x=>`<option value="${x.id}" ${x.id===m.id?'selected':''}>${x.name}</option>`).join('');return `<div class="nf-builder-item"><div><b>${escapeHtml(f.name)}</b><small>${n.kcal} kcal · ${n.protein} P · ${n.carbs} C · ${n.fat} G</small></div><label><input class="builder-amount" data-item-index="${idx}" data-food-key="${it.key}" type="number" min="0" step="${f.unit==='un'?'1':'5'}" value="${it.amount}">${f.unit==='un'?'un':'g'}</label><label class="builder-move"><span>Refeição</span><select class="builder-move-meal" data-item-index="${idx}">${moveOptions}</select></label><button type="button" class="builder-remove-item" data-item-index="${idx}" aria-label="Remover alimento">×</button></div>`}).join(''):'<div class="nf-meal-empty">Adicione alimentos da lista e escolha a refeição.</div>'}</div></article>`}).join('');
+  list.innerHTML=draft.meals.map(m=>{const suggested=Math.round(meta.calories*m.share),mac=mealMacros(m);return `<article class="nf-builder-meal" data-meal-id="${m.id}"><div class="nf-builder-meal-head"><div><span>${m.time}</span><h4>${m.name}</h4></div><div class="nf-meal-kcal"><b>${Math.round(mac.kcal).toLocaleString('pt-BR')} kcal</b><small>meta ${suggested.toLocaleString('pt-BR')} kcal</small></div></div><div class="nf-builder-items">${m.items.length?m.items.map((it,idx)=>{const f=foodCatalog[it.key],n=foodNutrientsForAmount(f,it.amount);const moveOptions=BUILDER_MEALS.map(x=>`<option value="${x.id}" ${x.id===m.id?'selected':''}>${x.name}</option>`).join('');return `<div class="nf-builder-item"><div><b>${escapeHtml(f.name)}</b><small>${n.kcal} kcal · ${n.protein} P · ${n.carbs} C · ${n.fat} G</small></div><label><input class="builder-amount" data-item-index="${idx}" data-food-key="${it.key}" type="number" min="0" step="${f.unit==='un'?'1':'5'}" value="${it.amount}">${f.unit==='un'?'un':'g'}</label><label class="builder-move"><span>Refeição</span><select class="builder-move-meal" data-item-index="${idx}">${moveOptions}</select></label><button type="button" class="builder-remove-item" data-item-index="${idx}" aria-label="Remover alimento"><img src="assets/icons/x.svg" alt=""></button></div>`}).join(''):'<div class="nf-meal-empty">Adicione alimentos da lista e escolha a refeição.</div>'}</div></article>`}).join('');
   const consumed=draft.meals.reduce((a,m)=>a+mealKcal(m),0);const remaining=Math.round(meta.calories-consumed);const budget=byId('plano')?.querySelector('.nf-calorie-budget');
   if(budget){budget.classList.toggle('over',remaining<0);const bar=budget.querySelector('.nf-budget-bar i');if(bar)bar.style.width=`${meta.calories ? Math.min(100,Math.max(0,consumed/meta.calories*100)) : 0}%`;const foot=budget.querySelector('.nf-budget-foot strong');if(foot)foot.textContent=remaining>=0?`${remaining.toLocaleString('pt-BR')} kcal restantes`:`${Math.abs(remaining).toLocaleString('pt-BR')} kcal acima da meta`;const c=budget.querySelector('.nf-budget-foot b');if(c)c.textContent=`${Math.max(0,Math.round(consumed)).toLocaleString('pt-BR')} kcal`}
 }
@@ -432,7 +435,7 @@ function closePatientModal(){
 }
 function renderPatients(){
   if(!patientList)return;
-  patientList.innerHTML=patients.length?patients.map(p=>`<div class="patient-option-row ${pendingPatient?.id===p.id?'selected':''}"><button type="button" class="patient-option" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'✓':''}</span></button><button type="button" class="patient-option-delete" data-delete-id="${p.id}" title="Excluir paciente" aria-label="Excluir paciente">×</button></div>`).join(''):'<p class="muted">Nenhum paciente cadastrado. Use "+ Novo paciente" para começar.</p>';
+  patientList.innerHTML=patients.length?patients.map(p=>`<div class="patient-option-row ${pendingPatient?.id===p.id?'selected':''}"><button type="button" class="patient-option" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'<img src="assets/icons/check.svg" alt="">':''}</span></button><button type="button" class="patient-option-delete" data-delete-id="${p.id}" title="Excluir paciente" aria-label="Excluir paciente"><img src="assets/icons/x.svg" alt=""></button></div>`).join(''):'<p class="muted">Nenhum paciente cadastrado. Use "+ Novo paciente" para começar.</p>';
   if(selectedPatientBox) selectedPatientBox.innerHTML=pendingPatient ? `<b>Paciente selecionado:</b> ${pendingPatient.name} · ${pendingPatient.objective}` : 'Nenhum paciente selecionado.';
   if(loadPatientBtn){loadPatientBtn.disabled=!pendingPatient;loadPatientBtn.textContent=pendingPatient?'Carregar informações do paciente':'Selecione um paciente';}
 }
@@ -708,7 +711,7 @@ function renderPlanTargets(p){
   const t=getPlanMeta(p), box=byId('planTargetPanel'); if(!box)return;
   box.innerHTML=`<div class="plan-target-title"><div><span class="eyebrow">METAS DA CALCULADORA</span><h3>Meta diária do paciente</h3></div><span class="target-source">${localStorage.getItem('nutrifit-calculator-meta')&&p&&JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')[p.id]?'Calculada':'Estimativa atual'}</span></div><div class="plan-target-grid"><div><b>${Math.round(t.calories).toLocaleString('pt-BR')}</b><span>kcal</span></div><div><b>${Math.round(t.protein)}</b><span>g proteína</span></div><div><b>${Math.round(t.carbs)}</b><span>g carboidratos</span></div><div><b>${Math.round(t.fat)}</b><span>g gorduras</span></div></div>`;
 }
-function foodChoiceLabel(k){const f=foodCatalog[k];return `<label class="food-choice"><input type="checkbox" value="${k}" class="plan-food-check"><span><b>${f.name}</b><small>${f.kcal} kcal / ${f.ref}${f.unit==='un'?' un':' g'}</small></span><i>✓</i></label>`}
+function foodChoiceLabel(k){const f=foodCatalog[k];return `<label class="food-choice"><input type="checkbox" value="${k}" class="plan-food-check"><span><b>${f.name}</b><small>${f.kcal} kcal / ${f.ref}${f.unit==='un'?' un':' g'}</small></span><i><img src="assets/icons/check.svg" alt=""></i></label>`}
 function renderFoodChoices(selected=[]){
  const box=byId('foodChoiceGrid'); if(!box)return; const groups=[['Arroz, cereais e massas',['arroz','arroz_integral','macarrao','cuscuz','tapioca','aveia','granola']],['Feijões e tubérculos',['feijao','lentilha','grao_bico','batata','batata_inglesa','mandioca']],['Pães e frutas',['pao','pao_integral','banana','maca','laranja','mamao','morango']],['Proteínas',['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos']],['Lácteos',['iogurte','leite','leite_integral','queijo','cottage','ricota']],['Gorduras, sementes e vegetais',['azeite','castanhas','amendoim','pasta_amendoim','chia','abacate','salada','brocolis','cenoura','abobora','tomate']]];
  box.innerHTML=groups.map(([g,ks])=>`<div class="food-choice-group"><h4>${g}</h4>${ks.map(k=>foodChoiceLabel(k)).join('')}</div>`).join(''); box.querySelectorAll('.plan-food-check').forEach(c=>c.checked=selected.includes(c.value));
@@ -1084,10 +1087,27 @@ document.addEventListener('click',e=>{
   if(b){e.preventDefault();showPage('plano');renderPatientPlan();}
 });
 
-const RECIPE_EMOJIS=['🥗','🥣','🍳','🍲','🥘','🥑','🍓','🍞','🍗','🐟','🧀','☕'];
+const RECIPE_ICONS=[
+  {id:'salad',emoji:'🥗'},{id:'bowl',emoji:'🥣'},{id:'egg',emoji:'🍳'},{id:'soup',emoji:'🍲'},
+  {id:'pan',emoji:'🥘'},{id:'avocado',emoji:'🥑'},{id:'strawberry',emoji:'🍓'},{id:'bread',emoji:'🍞'},
+  {id:'chicken',emoji:'🍗'},{id:'fish',emoji:'🐟'},{id:'cheese',emoji:'🧀'},{id:'coffee',emoji:'☕'}
+];
 const recipeModal=byId('recipeModal');
 let editingRecipeId=null;
-let recipeEmoji='🥗';
+let recipeEmoji='salad';
+function recipeIconId(value){
+  if(!value)return 'salad';
+  if(typeof value==='string'){
+    if(RECIPE_ICONS.some(x=>x.id===value))return value;
+    const byE=RECIPE_ICONS.find(x=>x.emoji===value);
+    return byE?byE.id:'salad';
+  }
+  if(value.icon && RECIPE_ICONS.some(x=>x.id===value.icon))return value.icon;
+  const byE=RECIPE_ICONS.find(x=>x.emoji===value.emoji);
+  return byE?byE.id:'salad';
+}
+function recipeIconImg(value){return `<img src="assets/icons/${recipeIconId(value)}.svg" alt="">`}
+function recipeEmojiFor(id){return (RECIPE_ICONS.find(x=>x.id===id)||RECIPE_ICONS[0]).emoji}
 function loadRecipes(){
   try{const saved=JSON.parse(localStorage.getItem('nutrifit-recipes')||'[]');if(Array.isArray(saved))return saved;}catch(e){}
   return [];
@@ -1103,12 +1123,13 @@ function recipeMacros(r){
 }
 function renderRecipeEmojiPicks(){
   const box=byId('recipeEmojiPicks'); if(!box)return;
-  box.innerHTML=RECIPE_EMOJIS.map(e=>`<button type="button" data-emoji="${e}" class="${e===recipeEmoji?'is-on':''}">${e}</button>`).join('');
-  const preview=byId('recipeEmojiPreview'); if(preview)preview.textContent=recipeEmoji;
+  const current=recipeIconId(recipeEmoji);
+  box.innerHTML=RECIPE_ICONS.map(x=>`<button type="button" data-emoji="${x.id}" class="${x.id===current?'is-on':''}">${recipeIconImg(x.id)}</button>`).join('');
+  const preview=byId('recipeEmojiPreview'); if(preview)preview.innerHTML=recipeIconImg(current);
 }
 function openRecipeModal(recipe){
   editingRecipeId=recipe?.id||null;
-  recipeEmoji=recipe?.emoji||'🥗';
+  recipeEmoji=recipeIconId(recipe);
   byId('recipeModalTitle').textContent=recipe?'Editar receita':'Nova receita';
   byId('recipeModalSubtitle').textContent=recipe?'Ajuste os dados e salve. Você também pode excluir esta receita.':'Monte uma receita simples: nome, refeição, ingredientes e modo de preparo.';
   byId('recipeName').value=recipe?.name||'';
@@ -1129,14 +1150,14 @@ function renderRecipes(){
   const recipes=loadRecipes();
   if(sub)sub.textContent=recipes.length?`${recipes.length} receita${recipes.length===1?'':'s'} cadastrada${recipes.length===1?'':'s'}.`:'Cadastre receitas do consultório, edite e exclua quando quiser.';
   if(!recipes.length){
-    grid.innerHTML='<div class="recipe-empty card"><div class="recipe-photo">🍽️</div><h3>Nenhuma receita ainda</h3><p>Crie a primeira receita com nome, refeição, ingredientes e preparo. Depois você edita ou exclui com um toque.</p><button class="primary" type="button" id="emptyAddRecipeBtn">+ Nova receita</button></div>';
+    grid.innerHTML='<div class="recipe-empty card"><div class="recipe-photo">'+recipeIconImg('utensils')+'</div><h3>Nenhuma receita ainda</h3><p>Crie a primeira receita com nome, refeição, ingredientes e preparo. Depois você edita ou exclui com um toque.</p><button class="primary" type="button" id="emptyAddRecipeBtn">+ Nova receita</button></div>';
     byId('emptyAddRecipeBtn')?.addEventListener('click',()=>openRecipeModal(null));
     return;
   }
   grid.innerHTML=recipes.map(r=>{
     const macros=recipeMacros(r);
     const preview=(r.ingredients||[]).slice(0,2).join(' · ');
-    return `<article class="recipe-card card" data-recipe-id="${escapeHtml(r.id)}"><div class="recipe-photo">${r.emoji||'🥗'}</div><div><span>${escapeHtml(r.meal||'Receita')}${Number(r.kcal)?` · ${Number(r.kcal).toLocaleString('pt-BR')} kcal`:''}</span><h3>${escapeHtml(r.name)}</h3><p>${macros||preview||'Sem informações nutricionais'}</p><div class="recipe-card-actions"><button class="text-btn" type="button" data-recipe-view="${escapeHtml(r.id)}">Ver</button><button class="outline-btn" type="button" data-recipe-edit="${escapeHtml(r.id)}">Editar</button><button class="danger-btn" type="button" data-recipe-delete="${escapeHtml(r.id)}">Excluir</button></div></div></article>`;
+    return `<article class="recipe-card card" data-recipe-id="${escapeHtml(r.id)}"><div class="recipe-photo">${recipeIconImg(r)}</div><div><span>${escapeHtml(r.meal||'Receita')}${Number(r.kcal)?` · ${Number(r.kcal).toLocaleString('pt-BR')} kcal`:''}</span><h3>${escapeHtml(r.name)}</h3><p>${macros||preview||'Sem informações nutricionais'}</p><div class="recipe-card-actions"><button class="text-btn" type="button" data-recipe-view="${escapeHtml(r.id)}">Ver</button><button class="outline-btn" type="button" data-recipe-edit="${escapeHtml(r.id)}">Editar</button><button class="danger-btn" type="button" data-recipe-delete="${escapeHtml(r.id)}">Excluir</button></div></div></article>`;
   }).join('');
 }
 window.renderRecipes=renderRecipes;
@@ -1164,7 +1185,7 @@ byId('recipeForm')?.addEventListener('submit',e=>{
   if(!name){showToast('Informe o nome da receita.');return;}
   const recipe={
     id:editingRecipeId||`recipe_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
-    name, meal:byId('recipeMeal').value, emoji:recipeEmoji,
+    name, meal:byId('recipeMeal').value, icon:recipeIconId(recipeEmoji), emoji:recipeEmojiFor(recipeIconId(recipeEmoji)),
     kcal:byId('recipeKcal').value?Number(byId('recipeKcal').value):'',
     protein:byId('recipeProtein').value?Number(byId('recipeProtein').value):'',
     carbs:byId('recipeCarbs').value?Number(byId('recipeCarbs').value):'',

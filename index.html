@@ -43,14 +43,14 @@
     <main class="main">
       <header class="topbar">
         <div>
-          <button class="mobile-menu" id="mobileMenu">☰</button>
+          <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Abrir menu"><img src="assets/icons/menu.svg" alt=""></button>
           <span class="eyebrow">SEGUNDA-FEIRA, 14 SET</span>
           <h1 id="pageTitle">Olá,</h1>
         </div>
         <div class="top-actions">
-          <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron">⌄</span></button>
+          <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron"><img src="assets/icons/chevron-down.svg" alt=""></span></button>
           <button class="icon-btn" title="Notificações"><img src="assets/icons/bell.svg"></button>
-          <button class="theme-btn" id="themeToggle">◐</button>
+          <button class="theme-btn" id="themeToggle" type="button" aria-label="Alternar tema"><img src="assets/icons/moon.svg" alt=""></button>
         </div>
       </header>
 
@@ -60,7 +60,7 @@
             <span class="pill">● Plano em andamento</span>
             <h2>Seu progresso começa<br>com pequenas escolhas.</h2>
             <p>Você está seguindo bem. Mantenha o foco nas metas de hoje.</p>
-            <button class="primary" data-page="alimentacao">Ver alimentação <span>→</span></button>
+            <button class="primary" data-page="alimentacao">Ver alimentação <img class="inline-icon" src="assets/icons/arrow-right.svg" alt=""></button>
           </div>
           <div class="hero-ring"><div><strong id="dashboardProgress">0%</strong><span>meta diária</span></div></div>
         </div>
@@ -75,7 +75,7 @@
 
         <div class="content-grid">
           <article class="card meals-card">
-            <div class="card-head"><div><h3>Refeições de hoje</h3><p id="dashboardMealsSubtitle">Selecione um paciente para carregar o plano.</p></div><button class="text-btn" data-page="alimentacao">Ver tudo →</button></div>
+            <div class="card-head"><div><h3>Refeições de hoje</h3><p id="dashboardMealsSubtitle">Selecione um paciente para carregar o plano.</p></div><button class="text-btn" data-page="alimentacao">Ver tudo <img class="inline-icon" src="assets/icons/arrow-right.svg" alt=""></button></div>
             <div class="meal-row"><div class="meal-icon"><img src="assets/icons/clipboard.svg"></div><div><b>Nenhum paciente selecionado</b><span>Use o seletor no topo para carregar as informações.</span></div><span class="pending">Pendente</span></div>
           </article>
 
@@ -97,7 +97,7 @@
       </section>
 
       <section class="page" id="alimentacao">
-        <div class="section-head"><div><h2>Alimentação</h2><p id="foodPageSubtitle">Selecione um paciente para visualizar a alimentação.</p></div><button class="primary fab-action" id="foodAddPlanBtn" type="button"><span class="fab-icon">+</span><span class="fab-label">Adicionar plano</span></button></div>
+        <div class="section-head"><div><h2>Alimentação</h2><p id="foodPageSubtitle">Selecione um paciente para visualizar a alimentação.</p></div><button class="primary fab-action" id="foodAddPlanBtn" type="button"><img class="fab-icon" src="assets/icons/plus.svg" alt=""><span class="fab-label">Adicionar plano</span></button></div>
         <div id="foodPlanContent"></div>
       </section>
 
@@ -148,7 +148,7 @@
 
   <div class="modal" id="patientModal" aria-hidden="true">
     <div class="modal-content patient-modal">
-      <button class="close" id="closePatientModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closePatientModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="patient-modal-head"><div><span class="eyebrow">SELECIONAR PACIENTE</span><h2>Escolha o paciente</h2><p class="muted">Clique em um paciente para selecioná-lo e depois carregue as informações.</p></div><button class="outline-btn" id="addPatientBtn" type="button">+ Novo paciente</button></div>
       <div class="patient-list" id="patientList"></div>
       <div class="selected-patient-box" id="selectedPatientBox">Nenhum paciente selecionado.</div>
@@ -158,7 +158,7 @@
 
   <div class="modal" id="editPatientModal" aria-hidden="true">
     <div class="modal-content wide-modal edit-patient-modal">
-      <button class="close" id="closeEditPatientModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeEditPatientModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="edit-patient-header"><div class="edit-patient-avatar" id="editPatientAvatar">MA</div><div><span class="eyebrow">FICHA DO PACIENTE</span><h2 id="editPatientTitle">Informações do paciente</h2><p class="muted" id="editPatientSubtitle">Atualize os dados usados pelo NutriFit.</p></div></div>
       <form id="editPatientForm">
         <div class="edit-section"><div class="edit-section-title"><span class="section-icon">1</span><div><b>Dados pessoais</b><small>Informações básicas do paciente</small></div></div><div class="form-grid"><label>Nome completo<input id="editName" required></label><label>E-mail<input id="editEmail" type="email"></label><label>Idade<input id="editAge" type="number" inputmode="numeric" min="10" max="120"></label><label>Sexo<select id="editSex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label></div></div>
@@ -172,7 +172,7 @@
 
   <div class="modal" id="settingsModal" aria-hidden="true">
     <div class="modal-content settings-patient-modal">
-      <button class="close" id="closeSettingsModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeSettingsModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <span class="eyebrow">CONFIGURAÇÕES</span><h2>Preferências do NutriFit</h2><p class="muted">Configurações do atendimento e da experiência do aplicativo.</p>
       <div class="settings-grid">
         <label class="setting-row"><span><b>Modo escuro</b><small>Alternar aparência do sistema.</small></span><input id="settingDark" type="checkbox"></label>
@@ -187,7 +187,7 @@
 
   <div class="modal" id="mealPlanModal" aria-hidden="true">
     <div class="modal-content wide-modal meal-plan-modal nf-plan-modal-premium">
-      <button class="close" id="closeMealPlanModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeMealPlanModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="modal-identity"><span class="avatar small-avatar" id="planHeaderAvatar">—</span><div><span class="eyebrow">PLANO DO PACIENTE</span><h2>Adicionar plano alimentar</h2></div></div>
       <p class="muted">A calculadora define as metas. Você escolhe os alimentos e o NutriFit calcula as quantidades necessárias.</p>
       <form id="mealPlanForm">
@@ -209,7 +209,7 @@
 
   <div class="modal" id="suggestPlanModal" aria-hidden="true">
     <div class="modal-content wide-modal nf-plan-modal-premium suggest-patient-modal">
-      <button class="close" id="closeSuggestPlanModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeSuggestPlanModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="edit-patient-header suggest-patient-header">
         <div class="edit-patient-avatar" id="suggestPatientAvatar">—</div>
         <div>
@@ -241,10 +241,10 @@
 
   <div class="modal" id="recipeModal" aria-hidden="true">
     <div class="modal-content wide-modal nf-plan-modal-premium recipe-modal">
-      <button class="close" id="closeRecipeModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeRecipeModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <form id="recipeForm" class="recipe-modal-form">
         <div class="edit-patient-header suggest-patient-header recipe-modal-header">
-          <div class="recipe-emoji-preview" id="recipeEmojiPreview">🥗</div>
+          <div class="recipe-emoji-preview" id="recipeEmojiPreview"><img src="assets/icons/salad.svg" alt=""></div>
           <div>
             <span class="eyebrow">RECEITAS</span>
             <h2 id="recipeModalTitle">Nova receita</h2>
