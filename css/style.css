@@ -53,17 +53,13 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 @media(max-width:850px){.patient-selector{min-width:0;width:40px;height:40px;padding:0;justify-content:center}.patient-selector>span:nth-child(2){display:none}.chevron{display:none}}
 
 /* Cabeçalho do modal "Selecionar paciente" com ação de novo cadastro */
-.patient-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-right:40px}
+.patient-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .patient-modal-head .outline-btn{flex:0 0 auto;white-space:nowrap}
 .patient-option-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .patient-option-row .patient-option{margin-bottom:0;flex:1;min-width:0}
 .patient-option-row.selected .patient-option{border-color:var(--green);background:var(--green-soft);box-shadow:0 0 0 2px var(--green-soft)}
 .patient-option-delete{flex:0 0 auto;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted-strong);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.18s}
 .patient-option-delete:hover{background:rgba(190,55,55,.08);border-color:rgba(190,55,55,.35);color:#b13b3b}
-@media(max-width:480px){
-  .patient-modal-head{flex-direction:column;align-items:stretch;padding-right:44px}
-  .patient-modal-head .outline-btn{width:100%}
-}
 
 .toast{position:fixed;right:24px;bottom:24px;z-index:1200;background:var(--text);color:var(--surface);padding:13px 18px;border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
 
@@ -1414,3 +1410,50 @@ body:not(.is-dashboard) .topbar #pageTitle,
 .recipe-emoji-picks button img{width:22px;height:22px;display:block}
 .builder-remove-item img{width:12px;height:12px;display:block}
 .nf-builder-empty-icon img{width:28px;height:28px}
+
+/* Alinha + Novo paciente com o botão fechar no seletor de paciente */
+#patientModal .patient-modal{padding-top:22px}
+#patientModal .patient-modal>.close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  float:none;
+  margin:0;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  min-height:40px;
+}
+#patientModal .patient-modal-head{
+  display:block;
+  padding-right:0;
+}
+#patientModal .patient-modal-head>div{padding-right:min(230px,48%);box-sizing:border-box}
+#patientModal .patient-modal-head .outline-btn{
+  position:absolute;
+  top:20px;
+  right:68px;
+  width:auto;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+@media(max-width:700px){
+  #patientModal .patient-modal{padding-top:68px}
+  #patientModal .patient-modal>.close{
+    top:14px;
+    right:14px;
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    margin:0;
+  }
+  #patientModal .patient-modal-head .outline-btn{top:14px;right:62px}
+  #patientModal .patient-modal-head>div{padding-right:0}
+}
