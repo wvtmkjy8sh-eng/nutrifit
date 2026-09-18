@@ -1,0 +1,9 @@
+{
+  "name": "nutrifit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard profissional de nutrição e acompanhamento de pacientes (PWA).",
+  "scripts": {
+    "start": "node serve.js"
+  }
+}

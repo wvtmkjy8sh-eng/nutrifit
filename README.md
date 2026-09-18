@@ -3,7 +3,15 @@
 Protótipo front-end funcional, responsivo e pronto para abrir no VS Code.
 
 ## Executar
-Abra `index.html` diretamente no navegador ou use Live Server.
+Para uso geral, abra `index.html` diretamente no navegador ou use a extensão Live Server do VS Code.
+
+**Importante:** a instalação como PWA e o funcionamento offline (service worker) só funcionam quando o app é servido via `http://`/`https://` — o navegador desativa essas duas tecnologias quando o arquivo é aberto direto (`file://`). Para testar isso, sirva a pasta com um servidor local:
+
+```bash
+npm start
+```
+
+Isso abre o app em `http://localhost:5173`. Qualquer outro servidor estático (Live Server, `npx serve`, `python -m http.server`, etc.) também funciona.
 
 ## Incluído
 - Dashboard
