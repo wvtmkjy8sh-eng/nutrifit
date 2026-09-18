@@ -12,6 +12,8 @@ function showPage(id){
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
+  if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
+  if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 navItems.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
@@ -100,6 +102,16 @@ try{ patientPlans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}
 function persistPlans(){localStorage.setItem('nutrifit-patient-plans',JSON.stringify(patientPlans))}
 function getPlan(){return selectedPatient ? patientPlans[selectedPatient.id] || null : null}
 function formatKcal(n){return Math.round(Number(n)||0).toLocaleString('pt-BR')}
+function resolveFoodKeyFromFood(f){
+  if(!f)return null;
+  if(f.key && foodCatalog[f.key])return f.key;
+  const name=String(f.name||'').trim().toLowerCase();
+  if(name){
+    const byName=Object.keys(foodCatalog).find(k=>foodCatalog[k].name.toLowerCase()===name);
+    if(byName)return byName;
+  }
+  return (typeof foodKey==='function'?foodKey(f.name||f):null)||null;
+}
 function getDisplayPlanMeals(plan,p){
   const base=BUILDER_MEALS.map(m=>({...m,items:[]}));
   if(!plan)return base;
@@ -109,7 +121,7 @@ function getDisplayPlanMeals(plan,p){
     const foods=Array.isArray(m.foods)?m.foods:[];
     if(foods.length){
       foods.forEach(f=>{
-        const key=f.key||foodKey(f);
+        const key=resolveFoodKeyFromFood(f);
         if(key && foodCatalog[key]) target.items.push({key,amount:Number(f.amount)||builderDefaultAmount(foodCatalog[key])});
       });
     }else if(Array.isArray(m.items)){
@@ -409,6 +421,8 @@ function applyPatientData(patient){
   loadCalculatorPatient(patient);
   renderDashboard();
   renderPatientsCrud(byId('patientSearch')?.value||'');
+  if(typeof renderPatientPlan==='function') renderPatientPlan();
+  if(typeof renderAlimentacao==='function') renderAlimentacao();
   closePatientModal();
   showToast(`Informações de ${patient.name} carregadas.`);
 }
