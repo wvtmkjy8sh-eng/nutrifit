@@ -22,7 +22,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .brand{display:flex;align-items:center;gap:11px;padding:0 10px 30px}.brand-mark{width:39px;height:39px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700}.brand strong{display:block;font-size:18px}.brand span{font-size:10px;color:var(--muted)}
 .nav{display:grid;gap:5px}.nav-item{width:100%;display:flex;align-items:center;gap:13px;padding:12px 13px;border-radius:12px;background:transparent;color:var(--muted-strong);text-align:left;font-weight:600;font-size:13px;transition:.2s}.nav-item:hover{background:var(--surface-alt);color:var(--text)}.nav-item img{width:20px;height:20px;filter:var(--icon-filter,none)}.nav-item.active{background:var(--green-soft);color:var(--green-strong)}
 .sidebar-bottom{margin-top:auto;display:grid;gap:8px}.profile-mini{display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid var(--line);background:var(--surface);text-align:left;color:var(--text)}.profile-mini .avatar{width:34px;height:34px;border-radius:50%;background:var(--green-soft);color:var(--green-strong);display:grid;place-items:center;font-size:11px;font-weight:700}.profile-mini b,.profile-mini span{display:block}.profile-mini b{font-size:11px}.profile-mini span{font-size:9px;color:var(--muted)}.profile-mini>img{margin-left:auto;width:16px}
-.main{margin-left:248px;width:calc(100% - 248px);padding:0 38px 45px}.topbar{height:105px;display:flex;align-items:center;justify-content:space-between}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:1.3px;font-weight:700}.topbar h1{font-size:25px;margin:7px 0 0}.top-actions{display:flex;gap:9px}.icon-btn,.theme-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--text);transition:.2s}.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}.icon-btn img{width:19px}.theme-btn{font-size:18px}.mobile-menu{display:none}
+.main{margin-left:248px;width:calc(100% - 248px);padding:0 38px 45px}.topbar{height:105px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:1.3px;font-weight:700}.topbar h1{font-size:25px;margin:7px 0 0}.top-actions{display:flex;gap:9px}.icon-btn,.theme-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--text);transition:.2s}.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}.icon-btn img{width:19px}.theme-btn{font-size:18px}.mobile-menu{display:none}
 .page{display:none;max-width:1260px;margin:auto}.active-page{display:block}
 .hero{background:linear-gradient(105deg,var(--green-tint),var(--surface));border:1px solid var(--line);border-radius:25px;padding:30px 36px;display:flex;align-items:center;justify-content:space-between;overflow:hidden}.hero h2{font-size:28px;line-height:1.2;margin:14px 0 8px}.hero p{color:var(--muted);font-size:13px;margin:0 0 22px}.pill{font-size:10px;color:var(--green-strong);background:var(--green-soft);padding:7px 10px;border-radius:20px;font-weight:700}.hero-ring{width:125px;height:125px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0 82%,var(--line) 82% 100%);position:relative}.hero-ring:after{content:'';position:absolute;width:93px;height:93px;border-radius:50%;background:var(--surface)}.hero-ring div{position:relative;z-index:1;text-align:center}.hero-ring strong{display:block;font-size:22px}.hero-ring span{font-size:9px;color:var(--muted)}
 .primary{background:var(--green);color:#fff;padding:12px 17px;border-radius:11px;font-weight:700;font-size:12px;transition:.2s}.primary:hover{filter:brightness(.95);transform:translateY(-1px)}.primary span{margin-left:12px}
@@ -39,7 +39,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .evolution-cards{grid-template-columns:repeat(3,1fr)}.evolution-cards .card{padding:18px}.evolution-cards strong{display:block;font-size:25px;margin:7px 0}.evolution-cards em{font-size:10px;color:var(--green-strong);font-style:normal;font-weight:700}.big-chart{margin-top:14px}.tall{height:280px}
 .recipe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.recipe-photo{height:130px;border-radius:14px;background:var(--green-tint);display:grid;place-items:center;font-size:45px;margin-bottom:15px}.recipe-card h3{font-size:16px;margin:5px 0}.recipe-card p{font-size:10px;color:var(--muted);line-height:1.5}.recipe-card .text-btn{padding:0}
 @media(max-width:900px){.sidebar{transform:translateX(-100%);z-index:10;transition:.2s}.sidebar.open{transform:translateX(0)}.main{margin-left:0;width:100%;padding:0 18px 35px}.mobile-menu{display:inline-block;background:none;font-size:20px;margin-right:8px;color:var(--text)}.metric-grid,.food-summary{grid-template-columns:1fr 1fr}.content-grid,.calculator-grid{grid-template-columns:1fr}.plan-grid,.recipe-grid{grid-template-columns:1fr 1fr}.hero{padding:25px}.hero-ring{width:100px;height:100px}.hero-ring:after{width:76px;height:76px}}
-@media(max-width:600px){.topbar{height:90px}.topbar h1{font-size:20px}.hero{padding:20px;align-items:flex-start}.hero h2{font-size:22px}.hero-ring{display:none}.metric-grid,.food-summary,.plan-grid,.recipe-grid,.evolution-cards{grid-template-columns:1fr}.section-head{align-items:flex-start;gap:10px}.section-head .primary{padding:10px}.meal-row{gap:8px}.food-item{display:block}.hydration-large{padding:25px;display:block}.big-water{margin:auto;width:180px;height:180px}.hydration-info{margin-top:25px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.chart.tall{height:180px}}
+@media(max-width:600px){.topbar{height:90px;margin-bottom:14px}.topbar h1{font-size:20px}.hero{padding:20px;align-items:flex-start}.hero h2{font-size:22px}.hero-ring{display:none}.metric-grid,.food-summary,.plan-grid,.recipe-grid,.evolution-cards{grid-template-columns:1fr}.section-head{align-items:flex-start;gap:10px}.section-head .primary{padding:10px}.meal-row{gap:8px}.food-item{display:block}.hydration-large{padding:25px;display:block}.big-water{margin:auto;width:180px;height:180px}.hydration-info{margin-top:25px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.chart.tall{height:180px}}
 
 /* SVG 2D theme visibility */
 .nav-item img,.metric-icon img,.goal-icon img,.plan-icon img,.meal-icon img,.water-visual img,.big-water img{color:var(--green)}
@@ -50,7 +50,16 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .patient-selector small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.patient-selector b{font-size:13px}.chevron{margin-left:auto;color:var(--muted);font-size:18px}.small-avatar{width:34px!important;height:34px!important;font-size:11px!important}
 .modal{position:fixed;inset:0;background:rgba(10,15,11,.58);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;backdrop-filter:blur(5px)}
 .modal.open{display:flex}.patient-modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 25px 80px rgba(0,0,0,.25);position:relative}.patient-modal h2{margin:7px 0 5px}.patient-modal .close{position:absolute;right:18px;top:15px;border:0;background:transparent;color:var(--muted);font-size:28px;cursor:pointer}.patient-list{display:grid;gap:10px;margin:20px 0}.patient-option{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--line);background:var(--surface-alt);color:var(--text);border-radius:16px;padding:12px;text-align:left;cursor:pointer}.patient-option:hover,.patient-option.selected{border-color:var(--green);background:var(--green-soft)}.patient-option .avatar{flex:0 0 42px}.patient-option b{display:block}.patient-option span{display:block;color:var(--muted);font-size:12px;margin-top:2px}.patient-option .check{margin-left:auto;color:var(--green-strong);font-weight:800}.selected-patient-box{background:var(--green-tint);border:1px solid var(--line);border-radius:14px;padding:13px;margin:10px 0 14px;font-size:13px}.load-patient-loading{opacity:.65;pointer-events:none}
-@media(max-width:850px){.patient-selector{min-width:0;padding:6px 8px}.patient-selector>span:nth-child(2){display:none}.chevron{display:none}}
+@media(max-width:850px){.patient-selector{min-width:0;width:40px;height:40px;padding:0;justify-content:center}.patient-selector>span:nth-child(2){display:none}.chevron{display:none}}
+
+/* Cabeçalho do modal "Selecionar paciente" com ação de novo cadastro */
+.patient-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.patient-modal-head .outline-btn{flex:0 0 auto;white-space:nowrap}
+.patient-option-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.patient-option-row .patient-option{margin-bottom:0;flex:1;min-width:0}
+.patient-option-row.selected .patient-option{border-color:var(--green);background:var(--green-soft);box-shadow:0 0 0 2px var(--green-soft)}
+.patient-option-delete{flex:0 0 auto;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted-strong);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.18s}
+.patient-option-delete:hover{background:rgba(190,55,55,.08);border-color:rgba(190,55,55,.35);color:#b13b3b}
 
 .toast{position:fixed;right:24px;bottom:24px;z-index:1200;background:var(--text);color:var(--surface);padding:13px 18px;border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
 
@@ -156,7 +165,10 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .nf-food-row{grid-template-columns:minmax(180px,1fr) auto minmax(150px,190px) auto;align-items:center;gap:12px}
 .nf-meal-picker,.builder-move{display:flex;flex-direction:column;gap:4px;min-width:145px}
 .nf-meal-picker span,.builder-move span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.65}
-.nf-meal-picker select,.builder-move select{width:100%;border:1px solid var(--border,#ddd);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;font-size:12px}
+.nf-meal-picker select,.builder-move select{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;font-size:12px;outline:none}
+.nf-meal-picker select:focus,.builder-move select:focus{border-color:var(--green)}
+.nf-meal-picker select option,.builder-move select option{background:var(--surface);color:var(--text)}
+.builder-food-meal:invalid{color:var(--muted)}
 .nf-builder-item{grid-template-columns:minmax(0,1fr) auto minmax(145px,170px) auto!important;align-items:center}
 .builder-move{margin-left:4px}
 @media(max-width:1050px){.nf-food-row{grid-template-columns:1fr 1fr}.nf-food-row .nf-add-food{justify-self:start}.nf-meal-picker{grid-column:2}.nf-builder-item{grid-template-columns:1fr auto!important}.nf-builder-item .builder-move{grid-column:1/-1;margin-left:0}.nf-builder-item .builder-remove-item{grid-column:2;grid-row:2}}
@@ -731,6 +743,30 @@ body{min-width:0;overflow-x:hidden}
   #suggestPlanModal .suggest-patient-meta{grid-template-columns:1fr 1fr}
   #suggestPlanModal .suggest-actions{grid-template-columns:1fr}
 }
+
+/* =====================================================
+   NUTRIFIT — "SUGERIR PLANO ALIMENTAR" 100% FLUTUANTE E RESPONSIVA
+   No mobile, a aba ocupa toda a tela (sem margens/backdrop visível),
+   permanecendo com rolagem interna própria.
+   ===================================================== */
+@media(max-width:700px){
+  #suggestPlanModal{padding:0;align-items:stretch}
+  #suggestPlanModal .suggest-patient-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    height:100svh;
+    max-height:100dvh;
+    max-height:100svh;
+    border-radius:0;
+    margin:0;
+  }
+}
+@supports not (height: 100dvh){
+  @media(max-width:700px){
+    #suggestPlanModal .suggest-patient-modal{height:100vh;max-height:100vh}
+  }
+}
 /* =====================================================
    BOTAO FECHAR — PADRAO GLOBAL DOS MODAIS/ABAS FLUTUANTES
    ===================================================== */
@@ -1050,3 +1086,374 @@ body{min-width:0;overflow-x:hidden}
 #dashboard .goal-card strong small{font-size:10px;color:var(--muted);font-weight:500}
 #dashboard .metric-card .progress i,#dashboard .goal-progress i{transition:width .25s ease}
 #dashboard .meal-row .small-btn{cursor:pointer}
+
+/* =====================================================
+   NUTRIFIT v23 — MENU MOBILE COM OVERLAY
+   Apenas apresentação: reaproveita a mesma abertura/fechamento já existente.
+   Hierarquia de camadas: menu lateral > overlay > barra inferior > FAB > conteúdo.
+   ===================================================== */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,11,.5);backdrop-filter:blur(2px);z-index:35;opacity:0;transition:opacity .2s}
+@media(max-width:900px){
+  .sidebar-overlay.open{display:block;opacity:1}
+  .sidebar{z-index:40}
+}
+/* Enquanto o menu lateral estiver aberto, a barra inferior fica oculta para
+   não sobrepor/"vazar" por cima do menu (lei da hierarquia de camadas). */
+body.menu-open .bottom-nav,
+body.menu-open .fab-action{visibility:hidden;pointer-events:none}
+
+/* =====================================================
+   NUTRIFIT v23 — BARRA DE NAVEGAÇÃO INFERIOR (MOBILE)
+   Barra flutuante, arredondada e com rolagem horizontal quando os itens
+   não couberem na largura da tela. Reaproveita os mesmos botões [data-page].
+   ===================================================== */
+.bottom-nav{display:none}
+@media(max-width:900px){
+  .bottom-nav{
+    display:flex;
+    align-items:stretch;
+    gap:4px;
+    position:fixed;
+    left:10px;right:10px;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    margin:0 auto;
+    max-width:520px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:0 14px 34px rgba(20,35,25,.16);
+    z-index:20;
+    padding:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .bottom-nav::-webkit-scrollbar{display:none}
+  .bottom-nav .nav-item{
+    flex:1 0 0;
+    width:auto;
+    scroll-snap-align:start;
+    flex-direction:column;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:8px 10px;
+    min-width:64px;
+    border-radius:16px;
+    background:transparent;
+    color:var(--muted);
+    font-size:9px;
+    font-weight:700;
+    text-align:center;
+    white-space:nowrap;
+    min-height:52px;
+  }
+  .bottom-nav .nav-item img{width:19px;height:19px;flex:0 0 auto}
+  .bottom-nav .nav-item.active{background:var(--green-soft);color:var(--green-strong)}
+  .main{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:380px){
+  .bottom-nav .nav-item{font-size:8px;min-width:58px;padding:8px 6px}
+  .bottom-nav .nav-item img{width:18px;height:18px}
+}
+
+/* =====================================================
+   NUTRIFIT v23 — BOTÃO DE AÇÃO FLUTUANTE (FAB) NO MOBILE
+   Mesmo botão/ID/clique já existente; apenas reposicionado visualmente.
+   Especificidade reforçada para não ser sobrescrito por ".section-head .primary".
+   ===================================================== */
+.fab-action .fab-icon{display:inline-block;width:16px;height:16px;margin-right:6px;vertical-align:-3px;filter:brightness(0) invert(1)}
+.fab-action .fab-label{display:inline}
+@media(max-width:600px){
+  .section-head .fab-action.fab-action{
+    position:fixed;
+    right:18px;
+    bottom:calc(104px + env(safe-area-inset-bottom,0px));
+    left:auto;
+    z-index:22;
+    width:56px;
+    height:56px;
+    padding:0;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    box-shadow:0 10px 28px rgba(30,55,35,.28);
+  }
+  .fab-action .fab-icon{display:block;width:24px;height:24px;margin:0;font-size:inherit;filter:brightness(0) invert(1)}
+  .fab-action .fab-label{display:none}
+}
+
+/* =====================================================
+   NUTRIFIT v23 — FEEDBACK TÁTIL EM BOTÕES (TOQUE)
+   Apenas CSS: nenhuma função é alterada, só o retorno visual ao toque.
+   ===================================================== */
+.primary:active,.outline-btn:active,.danger-btn:active,.icon-btn:active,.theme-btn:active,
+.small-btn:active,.text-btn:active,.nav-item:active,.client-main:active,.food-choice:active{
+  transform:scale(.96);
+}
+@media(prefers-reduced-motion:reduce){
+  .primary:active,.outline-btn:active,.danger-btn:active,.icon-btn:active,.theme-btn:active,
+  .small-btn:active,.text-btn:active,.nav-item:active,.client-main:active,.food-choice:active{
+    transform:none;
+  }
+}
+
+/* =====================================================
+   NUTRIFIT v23 — ENTRADA SUAVE DE CONTEÚDO
+   Apenas uma animação de aparição; nenhum dado ou estado é alterado.
+   ===================================================== */
+@keyframes nfFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page.active-page{animation:nfFadeIn .28s ease}
+.card,.metric-card,.client-card,.recipe-card{animation:nfFadeIn .3s ease}
+@media(prefers-reduced-motion:reduce){
+  .page.active-page,.card,.metric-card,.client-card,.recipe-card{animation:none}
+}
+
+/* =====================================================
+   NUTRIFIT v24 — EFEITOS DE CARREGAMENTO SUAVES
+   Apenas apresentação: transições visuais de entrada/saída.
+   Nenhum dado, tempo de resposta real ou funcionalidade é alterado.
+   ===================================================== */
+
+/* Barra de progresso no topo ao trocar de página (feedback visual imediato) */
+.nf-route-progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--green-strong));z-index:2000;opacity:0;pointer-events:none;transition:opacity .15s ease}
+.nf-route-progress.active{opacity:1;animation:nfRouteProgress .45s ease forwards}
+@keyframes nfRouteProgress{0%{width:0}30%{width:45%}70%{width:78%}100%{width:100%}}
+
+/* Fade-in ampliado para listas e itens que são re-renderizados dinamicamente */
+.patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+.generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+.nf-meal-suggestion,.plan-meal,.client-card{
+  animation:nfFadeIn .32s ease;
+}
+
+/* Efeito de abertura suave dos modais (fade + leve escala), mantendo o mesmo
+   fluxo de abrir/fechar já existente via a classe "open". */
+@keyframes nfModalBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes nfModalContentIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal.open{animation:nfModalBackdropIn .18s ease}
+.modal.open .modal-content{animation:nfModalContentIn .22s cubic-bezier(.2,.7,.3,1)}
+
+/* Placeholder de carregamento (shimmer) reutilizável para estados vazios/transitórios */
+@keyframes nfShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.nf-skeleton{
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--surface-alt) 25%,var(--line) 37%,var(--surface-alt) 63%);
+  background-size:200% 100%;
+  animation:nfShimmer 1.4s ease infinite;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nf-route-progress.active{animation:none;opacity:1;width:100%}
+  .patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+  .generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+  .nf-meal-suggestion,.plan-meal,.client-card,
+  .modal.open,.modal.open .modal-content{animation:none}
+  .nf-skeleton{animation:none}
+}
+
+/* =====================================================
+   NUTRIFIT v24 — ZONA DE PERIGO NAS CONFIGURAÇÕES
+   Botão para limpar dados salvos no localStorage deste navegador.
+   ===================================================== */
+#settingsModal .settings-danger-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(190,55,55,.28);
+  border-radius:14px;
+  background:rgba(190,55,55,.05)!important;
+}
+#settingsModal .settings-danger-card b{display:block;font-size:12px;color:#b13b3b}
+#settingsModal .settings-danger-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-danger-card .danger-btn{flex:0 0 auto;white-space:nowrap}
+@media(max-width:700px){
+  #settingsModal .settings-danger-card{flex-direction:column;align-items:flex-start;padding:12px}
+  #settingsModal .settings-danger-card .danger-btn{width:100%;min-height:44px}
+}
+
+/* =====================================================
+   NUTRIFIT — CABEÇALHO DAS ABAS INTERNAS
+   Evita o título duplicado (topo + seção). Fora do dashboard,
+   cada página usa apenas o próprio cabeçalho de seção.
+   ===================================================== */
+body:not(.is-dashboard) .topbar #pageTitle,
+.topbar #pageTitle[hidden]{display:none!important}
+
+/* =====================================================
+   NUTRIFIT — FOLGA DO BOTÃO FECHAR NOS MODAIS
+   Garante que eyebrows/títulos nunca fiquem sob o "×".
+   ===================================================== */
+.modal-content>.eyebrow:first-child,
+.modal-content>h2:first-of-type{padding-right:48px}
+.modal-content .edit-patient-header,
+.modal-content .suggest-patient-header,
+.modal-content .modal-identity{padding-right:48px}
+@media(max-width:430px){
+  .modal-content>.eyebrow:first-child,
+  .modal-content>h2:first-of-type,
+  .modal-content .edit-patient-header,
+  .modal-content .suggest-patient-header,
+  .modal-content .modal-identity{padding-right:44px}
+}
+
+#calculatorResultCard.is-empty #tdee{color:var(--muted);font-size:26px}
+.recipe-card{display:flex;flex-direction:column;padding:16px}
+.recipe-card .recipe-photo{margin-bottom:12px}
+.recipe-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.recipe-card-actions .text-btn,.recipe-card-actions .outline-btn,.recipe-card-actions .danger-btn{margin:0;padding:8px 10px;min-height:36px}
+.recipe-empty{grid-column:1/-1;text-align:center;padding:36px 22px}
+.recipe-empty h3{margin:8px 0 6px}
+.recipe-empty p{margin:0 0 16px;color:var(--muted);font-size:13px}
+.recipe-emoji-preview{width:56px;height:56px;border-radius:16px;background:var(--green-tint);display:grid;place-items:center;font-size:28px;flex:0 0 auto}
+.recipe-emoji-picks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-emoji-picks button{width:42px;height:42px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--line);font-size:20px}
+.recipe-emoji-picks button.is-on{border-color:var(--green);background:var(--green-soft)}
+.recipe-ingredients,.recipe-steps{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.6}
+.recipe-view-macros{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-view-macros span{background:var(--green-soft);color:var(--green-strong);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700}
+
+.evo-empty-chart{margin:0;padding:28px 18px;color:var(--muted);font-size:13px;line-height:1.5;text-align:center;align-self:center}
+.evo-chart-empty{display:grid;place-items:center;background:var(--surface-alt);border-radius:16px}
+#aguaCard.is-empty .big-water strong{color:var(--muted)}
+
+/* Receitas — mesmo padrão das abas flutuantes (Sugerir plano / Adicionar plano) */
+#recipeModal{padding:clamp(12px,2vw,28px)}
+#recipeModal .recipe-modal{
+  width:min(820px,calc(100vw - 32px));
+  max-width:820px;
+  max-height:min(92vh,920px);
+  overflow:auto;
+  box-sizing:border-box;
+  padding:clamp(22px,3vw,34px);
+  border-radius:24px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+}
+#recipeModal .recipe-modal-header{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--surface-alt);
+  margin-bottom:18px;
+  align-items:center;
+  padding-right:48px;
+}
+#recipeModal .recipe-modal-header h2{font-size:20px;line-height:1.2;margin:3px 0 4px;overflow-wrap:anywhere}
+#recipeModal .recipe-modal-header .muted{font-size:11px;line-height:1.45;margin:0;overflow-wrap:anywhere}
+#recipeModal .recipe-modal-form .form-grid{margin-top:0}
+#recipeModal .recipe-modal-form textarea{
+  width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--surface);color:var(--text);
+  border-radius:12px;padding:12px;font:inherit;min-width:0;resize:vertical;min-height:92px;margin-top:6px;
+}
+#recipeModal .recipe-modal-form input,
+#recipeModal .recipe-modal-form select{
+  width:100%;box-sizing:border-box;min-height:46px;
+}
+#recipeModal .recipe-modal-form input:focus,
+#recipeModal .recipe-modal-form select:focus,
+#recipeModal .recipe-modal-form textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+#recipeModal .edit-actions{padding-top:18px;gap:8px}
+@media(max-width:900px){
+  #recipeModal .recipe-modal{width:min(94vw,760px);max-height:92vh;padding:24px}
+}
+@media(max-width:700px){
+  #recipeModal{align-items:stretch;overflow-y:auto;padding:0}
+  #recipeModal .recipe-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    height:100svh;
+    max-height:100dvh;
+    max-height:100svh;
+    border-radius:0;
+    margin:0;
+    padding:48px 16px 16px;
+  }
+  #recipeModal .recipe-modal-header{align-items:flex-start;margin-bottom:12px}
+  #recipeModal .recipe-modal-header h2{font-size:19px}
+  #recipeModal .recipe-modal-form .form-grid{grid-template-columns:1fr}
+  #recipeModal .recipe-modal-form .form-grid .wide{grid-column:auto}
+  #recipeModal .edit-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  #recipeModal .edit-actions button{width:100%;min-height:44px}
+  #recipeModal .recipe-emoji-picks button{width:44px;height:44px}
+}
+@media(max-width:430px){
+  #recipeModal .recipe-modal{padding:48px 13px 14px}
+  #recipeModal .recipe-modal-header{gap:9px}
+  #recipeModal .edit-actions{grid-template-columns:1fr}
+}
+@supports not (height: 100dvh){
+  @media(max-width:700px){
+    #recipeModal .recipe-modal{height:100vh;max-height:100vh}
+  }
+}
+
+.inline-icon{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
+.primary .inline-icon{filter:brightness(0) invert(1)}
+.text-btn .inline-icon{margin-left:2px}
+.theme-btn img,.mobile-menu img,.chevron img,.icon-btn img{width:18px;height:18px;display:block}
+.mobile-menu{border:0;padding:0}
+.mobile-menu img{width:22px;height:22px}
+.modal-content>.close img,.patient-modal .close img{width:16px;height:16px;display:block}
+.patient-option .check img{width:16px;height:16px;display:block}
+.patient-option-delete img{width:14px;height:14px;display:block}
+.food-empty-icon img{width:24px;height:24px}
+.food-choice i img{width:12px;height:12px;opacity:0;filter:brightness(0) invert(1)}
+.food-choice:has(input:checked) i img{opacity:1}
+.recipe-photo img,.recipe-emoji-preview img{width:52px;height:52px;display:block;margin:auto}
+.recipe-emoji-picks button img{width:22px;height:22px;display:block}
+.builder-remove-item img{width:12px;height:12px;display:block}
+.nf-builder-empty-icon img{width:28px;height:28px}
+
+/* Alinha + Novo paciente com o botão fechar no seletor de paciente */
+#patientModal .patient-modal{padding-top:22px}
+#patientModal .patient-modal>.close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  float:none;
+  margin:0;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  min-height:40px;
+}
+#patientModal .patient-modal-head{
+  display:block;
+  padding-right:0;
+}
+#patientModal .patient-modal-head>div{padding-right:min(230px,48%);box-sizing:border-box}
+#patientModal .patient-modal-head .outline-btn{
+  position:absolute;
+  top:20px;
+  right:68px;
+  width:auto;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+@media(max-width:700px){
+  #patientModal .patient-modal{padding-top:68px}
+  #patientModal .patient-modal>.close{
+    top:14px;
+    right:14px;
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    margin:0;
+  }
+  #patientModal .patient-modal-head .outline-btn{top:14px;right:62px}
+  #patientModal .patient-modal-head>div{padding-right:0}
+}
