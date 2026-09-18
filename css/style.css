@@ -1282,7 +1282,8 @@ body.menu-open .fab-action{visibility:hidden;pointer-events:none}
    Evita o título duplicado (topo + seção). Fora do dashboard,
    cada página usa apenas o próprio cabeçalho de seção.
    ===================================================== */
-body[data-page]:not([data-page="dashboard"]) .topbar #pageTitle{display:none}
+body:not(.is-dashboard) .topbar #pageTitle,
+.topbar #pageTitle[hidden]{display:none!important}
 
 /* =====================================================
    NUTRIFIT — FOLGA DO BOTÃO FECHAR NOS MODAIS

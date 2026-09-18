@@ -15,7 +15,7 @@ function dashboardGreeting(){
 function refreshDashboardGreeting(){
   if(!title)return;
   const current=localStorage.getItem('nutrifit-page')||'dashboard';
-  if(current==='dashboard') title.textContent=dashboardGreeting();
+  if(current==='dashboard'){title.hidden=false;title.textContent=dashboardGreeting();}
 }
 
 function playRouteProgress(){
@@ -36,7 +36,11 @@ function showPage(id){
   pages.forEach(p=>p.classList.toggle('active-page',p.id===id));
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
   document.body.dataset.page=id;
-  if(title)title.textContent = id==='dashboard' ? dashboardGreeting() : (titles[id]||'NutriFit');
+  document.body.classList.toggle('is-dashboard',id==='dashboard');
+  if(title){
+    if(id==='dashboard'){title.hidden=false;title.textContent=dashboardGreeting();}
+    else{title.hidden=true;title.textContent='';}
+  }
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
