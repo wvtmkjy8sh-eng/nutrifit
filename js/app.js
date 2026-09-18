@@ -67,6 +67,7 @@ function toggleSidebar(forceOpen){
   const open=typeof forceOpen==='boolean' ? forceOpen : !sidebar.classList.contains('open');
   sidebar.classList.toggle('open',open);
   overlay?.classList.toggle('open',open);
+  document.body.classList.toggle('menu-open',open);
 }
 document.getElementById('mobileMenu')?.addEventListener('click',()=>toggleSidebar());
 document.getElementById('bottomNavMore')?.addEventListener('click',()=>toggleSidebar());
@@ -460,6 +461,7 @@ document.getElementById('closePatientModal')?.addEventListener('click',closePati
 patientModal?.addEventListener('click',e=>{if(e.target===patientModal)closePatientModal()});
 patientList?.addEventListener('click',e=>{const btn=e.target.closest('[data-patient-id]');if(btn)selectPatient(btn.dataset.patientId)});
 loadPatientBtn?.addEventListener('click',()=>{if(pendingPatient){applyPatientData(pendingPatient);renderPatientPlan()}});
+document.getElementById('manageClientsBtn')?.addEventListener('click',()=>{closePatientModal();showPage('clientes');});
 
 // Nenhum paciente é carregado por padrão. A seleção deve ser feita explicitamente a cada sessão.
 localStorage.removeItem('nutrifit-selected-patient');
