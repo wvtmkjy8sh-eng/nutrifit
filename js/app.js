@@ -645,62 +645,68 @@ function optimizeFoods(keys,target){
  const total=foods.reduce((a,f)=>({kcal:a.kcal+f.kcal,protein:a.protein+f.protein,carbs:a.carbs+f.carbs,fat:a.fat+f.fat}),{kcal:0,protein:0,carbs:0,fat:0});
  return {foods,total};
 }
-function distributeCalculatedPlan(foods,target){
-  /* Distribuição determinística: cada alimento escolhido entra em apenas uma refeição.
-     Proteínas não são duplicadas entre almoço/jantar; ovos têm prioridade no café. */
+function foodCategory(k){
+  if(['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k))return 'protein';
+  if(['iogurte','leite','leite_integral','queijo','cottage','ricota'].includes(k))return 'dairy';
+  if(['banana','maca','laranja','mamao','morango','abacate'].includes(k))return 'fruit';
+  if(['arroz','arroz_integral','macarrao','cuscuz','tapioca','batata','batata_inglesa','mandioca','pao','pao_integral','aveia','granola'].includes(k))return 'carb';
+  if(['feijao','lentilha','grao_bico'].includes(k))return 'legume';
+  if(['azeite','castanhas','amendoim','pasta_amendoim','chia'].includes(k))return 'fat';
+  if(['salada','brocolis','cenoura','abobora','tomate'].includes(k))return 'vegetable';
+  return 'other';
+}
+function distributeCalculatedPlan(foods){
+  /* Uma proteína animal por refeição. Café: ovo ou lácteo + cereal + fruta.
+     Almoço e jantar: 1 proteína + carboidrato + (leguminosa/vegetal/gordura).
+     Lanches: fruta, lácteo ou oleaginosa — sem proteína principal. */
   const defs=[['07:00','Café da manhã'],['10:00','Lanche da manhã'],['12:30','Almoço'],['16:30','Lanche da tarde'],['20:00','Jantar']];
   const groups=defs.map(([time,name])=>({time,name,foods:[]}));
   const used=new Set();
-  const keyOf=f=>Object.keys(foodCatalog).find(k=>foodCatalog[k].name===f.name);
-  const category=k=>{
-    if(['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k))return 'protein';
-    if(['iogurte','leite','leite_integral','queijo','cottage','ricota'].includes(k))return 'dairy';
-    if(['banana','maca','laranja','mamao','morango','abacate'].includes(k))return 'fruit';
-    if(['arroz','arroz_integral','macarrao','cuscuz','tapioca','batata','batata_inglesa','mandioca','pao','pao_integral','aveia','granola'].includes(k))return 'carb';
-    if(['feijao','lentilha','grao_bico'].includes(k))return 'legume';
-    if(['azeite','castanhas','amendoim','pasta_amendoim','chia'].includes(k))return 'fat';
-    if(['salada','brocolis','cenoura','abobora','tomate'].includes(k))return 'vegetable';
-    return 'other';
+  const tagged=(foods||[]).map(f=>{
+    const key=f.key||resolveFoodKeyFromFood(f)||Object.keys(foodCatalog).find(k=>foodCatalog[k].name===f.name);
+    return key?{...f,key}:null;
+  }).filter(Boolean);
+  const cat=f=>foodCategory(f.key);
+  const hasProtein=i=>groups[i].foods.some(x=>cat(x)==='protein');
+  const add=(f,i)=>{
+    if(!f||used.has(f.key)||i==null)return false;
+    if(cat(f)==='protein' && hasProtein(i))return false;
+    groups[i].foods.push(f); used.add(f.key); return true;
   };
-  const add=(f,i)=>{if(!f||used.has(f.name))return false;groups[i].foods.push(f);used.add(f.name);return true};
-  const byCat=c=>foods.filter(f=>category(keyOf(f))===c&&!used.has(f.name));
+  const unused=c=>tagged.filter(f=>!used.has(f.key)&&(c?cat(f)===c:true));
+  const take=(c,pred)=>{
+    const list=unused(c);
+    return pred?list.find(pred):list[0];
+  };
 
-  // Café da manhã: ovos/dairy + cereal/pão + fruta.
-  const eggs=byCat('protein').find(f=>keyOf(f)==='ovos');
-  if(eggs)add(eggs,0);
-  const breakfastDairy=byCat('dairy')[0]; if(breakfastDairy)add(breakfastDairy,0);
-  const breakfastCarb=byCat('carb').find(f=>['aveia','pao','pao_integral','cuscuz','tapioca'].includes(keyOf(f)))||byCat('carb')[0];
-  if(breakfastCarb)add(breakfastCarb,0);
-  const breakfastFruit=byCat('fruit')[0]; if(breakfastFruit)add(breakfastFruit,0);
+  add(take('protein',f=>f.key==='ovos')||take('dairy'),0);
+  add(take('carb',f=>['aveia','pao','pao_integral','cuscuz','tapioca','granola'].includes(f.key))||take('carb'),0);
+  add(take('fruit'),0);
 
-  // Lanches: fruta + dairy ou oleaginosas, sem criar uma nova proteína principal.
-  const snack1Fruit=byCat('fruit')[0]; if(snack1Fruit)add(snack1Fruit,1);
-  const snack1Dairy=byCat('dairy')[0]; if(snack1Dairy)add(snack1Dairy,1);
-  const snack2Fruit=byCat('fruit')[0]; if(snack2Fruit)add(snack2Fruit,3);
-  const snackFat=byCat('fat')[0]; if(snackFat)add(snackFat,3);
+  add(take('fruit'),1);
+  add(take('dairy')||take('fat'),1);
 
-  // Proteínas principais: uma escolha diferente no almoço e outra no jantar.
-  const proteins=byCat('protein');
-  const mainProteins=proteins.filter(f=>f!==eggs);
-  if(mainProteins[0])add(mainProteins[0],2);
-  if(mainProteins[1])add(mainProteins[1],4);
+  add(take('protein',f=>f.key!=='ovos')||take('protein'),2);
+  add(take('carb'),2);
+  add(take('legume'),2);
+  add(take('vegetable'),2);
+  add(take('fat'),2);
 
-  // Carboidratos, leguminosas, vegetais e gordura acompanham as refeições principais.
-  const lunchCarb=byCat('carb')[0]; if(lunchCarb)add(lunchCarb,2);
-  const dinnerCarb=byCat('carb')[0]; if(dinnerCarb)add(dinnerCarb,4);
-  const legume=byCat('legume')[0]; if(legume)add(legume,2);
-  const legume2=byCat('legume')[0]; if(legume2)add(legume2,4);
-  const veg1=byCat('vegetable')[0]; if(veg1)add(veg1,2);
-  const veg2=byCat('vegetable')[0]; if(veg2)add(veg2,4);
-  const fat1=byCat('fat')[0]; if(fat1)add(fat1,2);
-  const fat2=byCat('fat')[0]; if(fat2)add(fat2,4);
+  add(take('fruit'),3);
+  add(take('dairy')||take('fat'),3);
 
-  // Qualquer alimento adicional escolhido é distribuído por compatibilidade, uma única vez.
-  foods.forEach(f=>{
-    if(used.has(f.name))return;
-    const c=category(keyOf(f));
-    const preferred=c==='fruit'||c==='dairy'||c==='fat'?[1,3,0,2,4]:c==='protein'?[2,4,0,3,1]:[2,4,0,1,3];
-    const slot=preferred.find(i=>groups[i].foods.length<4) ?? 2;
+  add(take('protein'),4);
+  add(take('carb'),4);
+  add(take('legume'),4);
+  add(take('vegetable'),4);
+  add(take('fat'),4);
+
+  tagged.forEach(f=>{
+    if(used.has(f.key))return;
+    const c=cat(f);
+    const order=c==='protein'?[2,4,0,3,1]:c==='dairy'||c==='fruit'?[1,3,0]:c==='vegetable'||c==='legume'||c==='carb'?[2,4,0]:[3,1,2,4,0];
+    const ok=i=>c!=='protein'||!hasProtein(i);
+    const slot=order.filter(ok).sort((a,b)=>groups[a].foods.length-groups[b].foods.length || order.indexOf(a)-order.indexOf(b))[0];
     add(f,slot);
   });
 
@@ -719,7 +725,7 @@ function planToBuilderDraft(plan){
   (plan?.meals||[]).forEach((m,mi)=>{
     const target=meals.find(x=>x.name===m.name)||meals[mi]||meals[0];
     (m.foods||[]).forEach(f=>{
-      const key=f.key||foodKey(f)||byName[String(f.name||'').toLowerCase()];
+      const key=resolveFoodKeyFromFood(f)||byName[String(f.name||'').toLowerCase()];
       if(!key||!foodCatalog[key])return;
       const amount=Number(f.amount)||builderDefaultAmount(foodCatalog[key]);
       const existing=target.items.find(it=>it.key===key);
@@ -744,7 +750,15 @@ function openMealPlanModal(edit=false){
 const openAddPlan=()=>openMealPlanModal(false);
 byId('addMealPlanBtn')?.addEventListener('click',openAddPlan);byId('foodAddPlanBtn')?.addEventListener('click',openAddPlan);document.addEventListener('click',e=>{if(e.target.closest('#bannerAddPlan,#foodEmptyAddPlan'))openAddPlan()});byId('closeMealPlanModal')?.addEventListener('click',()=>closeModal(mealPlanModal));byId('cancelMealPlan')?.addEventListener('click',()=>closeModal(mealPlanModal));mealPlanModal?.addEventListener('click',e=>{if(e.target===mealPlanModal)closeModal(mealPlanModal)});
 byId('calculateMealPlanBtn')?.addEventListener('click',()=>{const p=selectedPatient;if(!p)return;const keys=[...document.querySelectorAll('.plan-food-check:checked')].map(x=>x.value);if(keys.length<2){showToast('Escolha pelo menos 2 alimentos para calcular.');return}const meta=getPlanMeta(p);const optimized=optimizeFoods(keys,meta);const meals=distributeCalculatedPlan(optimized.foods,meta);const total=meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{kcal:0,protein:0,carbs:0,fat:0});calculatedPlan={meta,keys,meals,total,foods:optimized.foods};const diff={kcal:total.kcal-meta.calories,protein:total.protein-meta.protein,carbs:total.carbs-meta.carbs,fat:total.fat-meta.fat};byId('calculatedPlanPanel').hidden=false;byId('calculatedPlanPanel').innerHTML=`<div class="calculated-head"><div><span class="eyebrow">RESULTADO</span><h3>Quantidades calculadas</h3><p class="muted">As quantidades foram ajustadas para aproximar simultaneamente as quatro metas.</p></div><div class="calculated-total"><b>${Math.round(total.kcal).toLocaleString('pt-BR')} kcal</b><small>${Math.round(total.protein)} g P · ${Math.round(total.carbs)} g C · ${Math.round(total.fat)} g G</small></div></div><div class="calculated-foods">${optimized.foods.map(f=>`<div><b>${f.name}</b><strong>${f.amount}${f.unit==='un'?' un':' g'}</strong><span>${f.kcal} kcal · ${f.protein} P · ${f.carbs} C · ${f.fat} G</span></div>`).join('')}</div><div class="calculated-meals">${meals.map(m=>`<article><b>${m.time} · ${m.name}</b><strong>${m.kcal} kcal</strong><small>${m.items.join(' · ')}</small></article>`).join('')}</div><div class="target-difference">Diferença da meta: ${diff.kcal>=0?'+':''}${Math.round(diff.kcal)} kcal · ${diff.protein>=0?'+':''}${Math.round(diff.protein)} g P · ${diff.carbs>=0?'+':''}${Math.round(diff.carbs)} g C · ${diff.fat>=0?'+':''}${Math.round(diff.fat)} g G</div>`;byId('saveCalculatedPlanBtn').disabled=false;byId('planCalcStatus').textContent='Cálculo concluído. Revise e salve o plano.';showToast('Quantidades calculadas com base nas metas da calculadora.')});
-byId('mealPlanForm')?.addEventListener('submit',e=>{e.preventDefault();const p=selectedPatient;if(!p||!calculatedPlan){showToast('Calcule as quantidades antes de salvar.');return}patientPlans[p.id]={name:byId('mealPlanName').value.trim()||`Plano alimentar — ${p.name}`,calories:Math.round(calculatedPlan.meta.calories),protein:Math.round(calculatedPlan.meta.protein),carbs:Math.round(calculatedPlan.meta.carbs),fat:Math.round(calculatedPlan.meta.fat),meals:calculatedPlan.meals,foods:calculatedPlan.foods,preferences:calculatedPlan.keys,updatedAt:new Date().toISOString()};persistPlans();renderPatientPlan();renderAlimentacao();closeModal(mealPlanModal);showToast(`Plano de ${p.name} salvo com sucesso.`)});
+function applyAssignedPlan(p,plan){
+  patientPlans[p.id]=plan;
+  persistPlans();
+  saveBuilderDraft(p.id,planToBuilderDraft(plan));
+  renderPatientPlan();
+  renderAlimentacao();
+  if(typeof renderDashboard==='function')renderDashboard();
+}
+byId('mealPlanForm')?.addEventListener('submit',e=>{e.preventDefault();const p=selectedPatient;if(!p||!calculatedPlan){showToast('Calcule as quantidades antes de salvar.');return}applyAssignedPlan(p,{name:byId('mealPlanName').value.trim()||`Plano alimentar — ${p.name}`,calories:Math.round(calculatedPlan.meta.calories),protein:Math.round(calculatedPlan.meta.protein),carbs:Math.round(calculatedPlan.meta.carbs),fat:Math.round(calculatedPlan.meta.fat),meals:calculatedPlan.meals,foods:calculatedPlan.foods,preferences:calculatedPlan.keys,updatedAt:new Date().toISOString()});closeModal(mealPlanModal);showToast(`Plano de ${p.name} salvo com sucesso.`)});
 
 function getMetabolicData(p){
   const weight=Number(String(p.weight||'0').replace(' kg','').replace(',','.'))||0;
@@ -813,17 +827,19 @@ const foodCatalog={
 };
 const foodAliases={arroz:'arroz','arroz branco':'arroz','arroz integral':'arroz_integral','feijão':'feijao',feijao:'feijao',frango:'frango','peito de frango':'frango',carne:'carne',peixe:'peixe',ovo:'ovos',ovos:'ovos',aveia:'aveia',banana:'banana',iogurte:'iogurte',batata:'batata','batata doce':'batata','batata-doce':'batata',pão:'pao',pao:'pao',leite:'leite',queijo:'queijo',azeite:'azeite',castanha:'castanhas',castanhas:'castanhas',salada:'salada'};
 function foodKey(t){const s=String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');for(const [a,k] of Object.entries(foodAliases)){const aa=a.normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(s.includes(aa))return k}return null}
-function foodCalc(k,amount){const f=foodCatalog[k],x=Number(amount)||0;if(!f||!x)return null;const q=x/f.ref;return {name:f.name,amount:x,unit:f.unit,kcal:Math.round(f.kcal*q),protein:+(f.protein*q).toFixed(1),carbs:+(f.carbs*q).toFixed(1),fat:+(f.fat*q).toFixed(1)}}
+function foodCalc(k,amount){const f=foodCatalog[k],x=Number(amount)||0;if(!f||!x)return null;const q=x/f.ref;return {key:k,name:f.name,amount:x,unit:f.unit,kcal:Math.round(f.kcal*q),protein:+(f.protein*q).toFixed(1),carbs:+(f.carbs*q).toFixed(1),fat:+(f.fat*q).toFixed(1)}}
 function smartPlan(p,request){
  const meta=getMetabolicData(p), target=Math.max(800,Number(meta.target)||2000);
  const text=String(request||'').toLowerCase(); let keys=[...new Set(Object.entries(foodAliases).filter(([a])=>text.includes(a.normalize('NFD').replace(/[\u0300-\u036f]/g,''))).map(([,k])=>k))];
  if(text.includes('sem lactose'))keys=keys.filter(k=>!['leite','iogurte','queijo'].includes(k));
  if(text.includes('sem peixe'))keys=keys.filter(k=>k!=='peixe');
  if(!keys.length)keys=['arroz','feijao','frango','ovos','banana','aveia'];
- const prot=keys.filter(k=>['frango','carne','peixe','ovos','iogurte','queijo'].includes(k)), carb=keys.filter(k=>['arroz','arroz_integral','feijao','batata','pao','aveia','banana'].includes(k));
+ const prot=keys.filter(k=>['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k)), carb=keys.filter(k=>['arroz','arroz_integral','feijao','batata','pao','aveia','banana'].includes(k));
  const defs=[['07:00','Café da manhã',.25],['10:00','Lanche da manhã',.10],['12:30','Almoço',.30],['16:30','Lanche da tarde',.10],['20:00','Jantar',.25]];
+ const lunchP=prot.find(k=>k!=='ovos')||prot[0];
+ const dinnerP=prot.find(k=>k!=='ovos'&&k!==lunchP);
  const meals=defs.map(([time,name,share],i)=>{
-   let ks=i===0?keys.filter(k=>['ovos','aveia','banana','iogurte','pao','leite','queijo'].includes(k)).slice(0,3):((i===2||i===4)?[prot[i===2?0:Math.min(1,prot.length-1)]||'ovos',carb[0]||'arroz',keys.includes('feijao')&&i===2?'feijao':null,keys.includes('salada')?'salada':null,keys.includes('azeite')?'azeite':null].filter(Boolean):keys.filter(k=>['banana','aveia','iogurte','pao','castanhas','ovos'].includes(k)).slice(0,2));
+   let ks=i===0?keys.filter(k=>['ovos','aveia','banana','iogurte','pao','leite'].includes(k)).slice(0,3):((i===2||i===4)?[i===2?lunchP:dinnerP,carb[0]||'arroz',keys.includes('feijao')&&i===2?'feijao':null,keys.includes('salada')?'salada':null,keys.includes('azeite')&&i===2?'azeite':null].filter(Boolean):keys.filter(k=>['banana','aveia','iogurte','pao','castanhas'].includes(k)).slice(0,2));
    if(!ks.length)ks=['ovos','banana'];
    const per=target*share/ks.length; let foods=ks.map(k=>{const f=foodCatalog[k];let a=f.ref*per/f.kcal;if(f.unit==='un')a=Math.max(1,Math.round(a));else a=Math.max(5,Math.round(a/5)*5);return foodCalc(k,a)}).filter(Boolean);
    const total=foods.reduce((a,f)=>({kcal:a.kcal+f.kcal,protein:a.protein+f.protein,carbs:a.carbs+f.carbs,fat:a.fat+f.fat}),{kcal:0,protein:0,carbs:0,fat:0});
@@ -893,7 +909,7 @@ byId('suggestPlanForm')?.addEventListener('submit',e=>{
   box.innerHTML=`<div class="generated-head"><div><span class="eyebrow">SUGESTÃO GERADA</span><h3>Plano de ${p.name}</h3><p class="muted">Meta calculada pela TMB/TDEE: ${meta.target.toLocaleString('pt-BR')} kcal/dia · ${meta.protein} g de proteína</p></div><b>${meta.target.toLocaleString('pt-BR')} kcal</b></div>${meals.map(m=>`<div class="generated-meal"><span>${m.time}</span><div><b>${m.name}</b><p>${m.foods.map(f=>`${f.name}: ${f.unit}`).join(' · ')}</p><small>${m.protein} g proteína · ${m.carbs} g carboidratos · ${m.fat} g gorduras</small></div><strong>${m.kcal} kcal</strong></div>`).join('')}<div class="disclaimer">Sugestão automática para apoio ao atendimento. Revise o plano antes de entregar ao paciente.</div><button class="primary full" type="button" id="assignGeneratedPlan">Atribuir este plano ao paciente</button>`;
   byId('assignGeneratedPlan')?.addEventListener('click',()=>{
     const plan={id:`plan_${Date.now()}`,type:'suggested',name:`Plano personalizado — ${p.name}`,calories:smart.target,protein:Math.round(smart.total.protein),carbs:Math.round(smart.total.carbs),fat:Math.round(smart.total.fat),meals:smart.meals.map(m=>({time:m.time,name:m.name,kcal:m.kcal,protein:m.protein,carbs:m.carbs,fat:m.fat,foods:m.foods,items:m.items})),preferences:smart.keys,updatedAt:new Date().toISOString()};
-    patientPlans[p.id]=plan; persistPlans(); saveBuilderDraft(p.id,planToBuilderDraft(plan)); renderPatientPlan(); renderAlimentacao(); closeModal(suggestPlanModal); showToast(`Plano de ${p.name} criado e disponível para edição.`);
+    applyAssignedPlan(p,plan); closeModal(suggestPlanModal); showToast(`Plano de ${p.name} criado e disponível para edição.`);
   });
 });
 
