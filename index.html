@@ -122,14 +122,14 @@
       </section>
 
       <section class="page" id="agua">
-        <div class="section-head"><div><h2>Hidratação</h2><p>Acompanhe seu consumo de água.</p></div></div>
-        <div class="hydration-large card"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">1,8 L</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong>2,5 L</strong><div class="progress large"><i id="waterBar" style="width:72%"></i></div><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
+        <div class="section-head"><div><h2>Hidratação</h2><p id="waterPageSubtitle">Selecione um paciente para acompanhar a hidratação.</p></div></div>
+        <div class="hydration-large card" id="aguaCard"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">—</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong id="waterGoalValue">—</strong><div class="progress large"><i id="waterBar" style="width:0%"></i></div><p class="hint" id="waterPageHint">Selecione um paciente para ver a hidratação real.</p><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
       </section>
 
       <section class="page" id="evolucao">
-        <div class="section-head"><div><h2>Evolução</h2><p>Veja como seu corpo está respondendo ao plano.</p></div><button class="outline-btn">Últimos 30 dias</button></div>
-        <div class="evolution-cards"><div class="card"><span>Peso atual</span><strong>82,0 kg</strong><em>↓ 4,8 kg</em></div><div class="card"><span>Cintura</span><strong>88 cm</strong><em>↓ 6 cm</em></div><div class="card"><span>Adesão</span><strong>92%</strong><em>↑ 8%</em></div></div>
-        <article class="card big-chart"><div class="card-head"><div><h3>Histórico de peso</h3><p>Agosto — Setembro</p></div></div><div class="chart tall"><svg viewBox="0 0 900 300" preserveAspectRatio="none"><path d="M0 55 C90 45 120 80 210 95 S330 125 420 145 S540 125 620 190 S770 205 900 250" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg></div></article>
+        <div class="section-head"><div><h2>Evolução</h2><p id="evoPageSubtitle">Selecione um paciente para ver os dados reais.</p></div><button class="outline-btn" type="button">Últimos 30 dias</button></div>
+        <div class="evolution-cards"><div class="card"><span>Peso atual</span><strong id="evoWeight">—</strong><em id="evoWeightNote">Selecione um paciente</em></div><div class="card"><span>Cintura</span><strong id="evoWaist">—</strong><em id="evoWaistNote">Não informado</em></div><div class="card"><span>Adesão</span><strong id="evoAdherence">—</strong><em id="evoAdherenceNote">Não informado</em></div></div>
+        <article class="card big-chart"><div class="card-head"><div><h3>Histórico de peso</h3><p id="evoChartCaption">Nenhum histórico cadastrado</p></div></div><div class="chart tall evo-chart-empty" id="evoChartBox"><p class="evo-empty-chart" id="evoChartEmpty">Nenhum gráfico fictício é exibido. O histórico aparece quando houver registros do paciente.</p></div></article>
       </section>
 
       <section class="page" id="receitas">
@@ -240,10 +240,10 @@
   </div>
 
   <div class="modal" id="recipeModal" aria-hidden="true">
-    <div class="modal-content wide-modal recipe-modal">
+    <div class="modal-content wide-modal nf-plan-modal-premium recipe-modal">
       <button class="close" id="closeRecipeModal" type="button" aria-label="Fechar">×</button>
-      <form id="recipeForm">
-        <div class="edit-patient-header">
+      <form id="recipeForm" class="recipe-modal-form">
+        <div class="edit-patient-header suggest-patient-header recipe-modal-header">
           <div class="recipe-emoji-preview" id="recipeEmojiPreview">🥗</div>
           <div>
             <span class="eyebrow">RECEITAS</span>
