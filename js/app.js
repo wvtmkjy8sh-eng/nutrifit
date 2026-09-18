@@ -11,6 +11,7 @@ function showPage(id){
   if(title)title.textContent=titles[id]||'NutriFit';
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.remove('open');
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -26,10 +27,22 @@ function applyTheme(theme){
   if(themeToggle){themeToggle.textContent=dark?'☀':'◐';themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro')}
   localStorage.setItem('nutrifit-theme',theme);
 }
-applyTheme(localStorage.getItem('nutrifit-theme')||'light');
+const storedTheme=localStorage.getItem('nutrifit-theme');
+const prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+applyTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
 themeToggle?.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
 
-document.getElementById('mobileMenu')?.addEventListener('click',()=>document.querySelector('.sidebar')?.classList.toggle('open'));
+function toggleSidebar(forceOpen){
+  const sidebar=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  if(!sidebar)return;
+  const open=typeof forceOpen==='boolean' ? forceOpen : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open',open);
+  overlay?.classList.toggle('open',open);
+}
+document.getElementById('mobileMenu')?.addEventListener('click',()=>toggleSidebar());
+document.getElementById('bottomNavMore')?.addEventListener('click',()=>toggleSidebar());
+document.getElementById('sidebarOverlay')?.addEventListener('click',()=>toggleSidebar(false));
 
 let water=Number(localStorage.getItem('nutrifit-water')||1800);
 function currentWaterGoal(){
