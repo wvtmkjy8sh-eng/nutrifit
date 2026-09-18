@@ -24,6 +24,7 @@ function showPage(id){
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
+  document.body.classList.remove('menu-open');
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -51,6 +52,9 @@ function toggleSidebar(forceOpen){
   const open=typeof forceOpen==='boolean' ? forceOpen : !sidebar.classList.contains('open');
   sidebar.classList.toggle('open',open);
   overlay?.classList.toggle('open',open);
+  // Evita que o botão flutuante (FAB) e a navegação inferior fiquem visíveis
+  // por cima do menu lateral aberto no mobile.
+  document.body.classList.toggle('menu-open',open);
 }
 document.getElementById('mobileMenu')?.addEventListener('click',()=>toggleSidebar());
 document.getElementById('bottomNavMore')?.addEventListener('click',()=>toggleSidebar());
@@ -470,6 +474,21 @@ const byId=id=>document.getElementById(id);
 renderDashboard();
 function openModal(m){if(!m)return;m.classList.add('open');m.setAttribute('aria-hidden','false')}
 function closeModal(m){if(!m)return;m.classList.remove('open');m.setAttribute('aria-hidden','true')}
+// Fecha qualquer modal/aba flutuante ao clicar fora do conteúdo (no fundo escurecido).
+document.addEventListener('click',e=>{
+  const target=e.target;
+  if(target?.classList?.contains('modal') && target.classList.contains('open')){
+    if(target===patientModal) closePatientModal();
+    else closeModal(target);
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  const openModalEl=document.querySelector('.modal.open');
+  if(!openModalEl)return;
+  if(openModalEl===patientModal) closePatientModal();
+  else closeModal(openModalEl);
+});
 let editingPatientId=null;
 function fillEditForm(p,mode='edit'){
   const isCreate=mode==='create'||!p; editingPatientId=isCreate?null:p.id;
@@ -548,7 +567,7 @@ byId('editPatientForm')?.addEventListener('submit',e=>{
  pendingPatient=p;persistPatients();if(selectedPatient?.id===p.id){selectedPatient=p;applyPatientData(p);renderPatientPlan();renderAlimentacao();}
  renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');closeModal(editPatientModal);showToast(isCreate?`${p.name} foi cadastrado.`:`Dados de ${p.name} salvos.`);
 });
-byId('settingsBtn')?.addEventListener('click',()=>{byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
+byId('settingsBtn')?.addEventListener('click',()=>{toggleSidebar(false);byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
 byId('closeSettingsModal')?.addEventListener('click',()=>closeModal(settingsModal));
 byId('saveSettingsBtn')?.addEventListener('click',()=>{applyTheme(byId('settingDark').checked?'dark':'light');localStorage.setItem('nutrifit-autosave',byId('settingAutoSave').checked?'1':'0');localStorage.setItem('nutrifit-suggestions',byId('settingSuggestions').checked?'1':'0');closeModal(settingsModal);showToast('Configurações salvas.')});
 byId('clearAppDataBtn')?.addEventListener('click',()=>{

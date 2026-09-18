@@ -1059,6 +1059,10 @@ body{min-width:0;overflow-x:hidden}
 @media(max-width:900px){
   .sidebar-overlay.open{display:block;opacity:1}
   .sidebar{z-index:10}
+  /* Enquanto o menu lateral estiver aberto, esconde elementos flutuantes que
+     ficariam por cima dele (bottom nav e botão de ação flutuante). */
+  body.menu-open .bottom-nav,
+  body.menu-open .fab-action{display:none!important}
 }
 
 /* =====================================================
@@ -1108,21 +1112,26 @@ body{min-width:0;overflow-x:hidden}
 .fab-action .fab-icon{display:inline;margin-right:6px;font-weight:800}
 .fab-action .fab-label{display:inline}
 @media(max-width:600px){
-  .fab-action{
+  /* Especificidade elevada (.primary.fab-action) para vencer regras gerais
+     como ".section-head .primary{width:100%}" definidas mais acima. */
+  .primary.fab-action{
     position:fixed;
     right:18px;
+    left:auto;
     bottom:calc(88px + env(safe-area-inset-bottom,0px));
-    z-index:25;
-    width:56px;
+    z-index:15;
+    width:56px!important;
     height:56px;
+    min-height:0;
     padding:0;
+    margin:0;
     border-radius:50%;
     display:grid;
     place-items:center;
     box-shadow:0 10px 28px rgba(30,55,35,.28);
   }
-  .fab-action .fab-icon{display:block;font-size:26px;line-height:1;font-weight:700}
-  .fab-action .fab-label{display:none}
+  .primary.fab-action .fab-icon{display:block;font-size:26px;line-height:1;font-weight:700}
+  .primary.fab-action .fab-label{display:none}
 }
 
 /* =====================================================
@@ -1214,4 +1223,47 @@ body{min-width:0;overflow-x:hidden}
 @media(max-width:700px){
   #settingsModal .settings-danger-card{flex-direction:column;align-items:flex-start;padding:12px}
   #settingsModal .settings-danger-card .danger-btn{width:100%;min-height:44px}
+}
+
+/* =====================================================
+   NUTRIFIT v25 — MENU SUPERIOR COM ROLAGEM HORIZONTAL (MOBILE/TABLET)
+   Reaproveita os mesmos botões [data-page] já usados pelo menu lateral.
+   ===================================================== */
+.mobile-tabs{display:none}
+@media(max-width:900px){
+  .mobile-tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+    padding:2px 2px 14px;
+    margin-bottom:4px;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent);
+  }
+  .mobile-tabs::-webkit-scrollbar{display:none}
+  .mobile-tabs .nav-item{
+    flex:0 0 auto;
+    scroll-snap-align:start;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    white-space:nowrap;
+    padding:10px 15px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--muted-strong);
+    font-size:11px;
+    font-weight:700;
+    box-shadow:0 2px 8px rgba(20,35,25,.05);
+  }
+  .mobile-tabs .nav-item img{width:16px;height:16px;filter:var(--icon-filter,none)}
+  .mobile-tabs .nav-item.active{background:var(--green-soft);color:var(--green-strong);border-color:transparent}
+}
+@media(max-width:380px){
+  .mobile-tabs .nav-item{padding:9px 12px;font-size:10px}
 }
