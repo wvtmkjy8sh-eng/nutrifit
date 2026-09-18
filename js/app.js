@@ -88,11 +88,7 @@ calc?.addEventListener('submit',e=>{
 // ===============================
 // SELEÇÃO E CARREGAMENTO DE PACIENTE
 // ===============================
-const patients = [
-  {id:'mardem', name:'Mardem Alves', initials:'MA', email:'mardem@nutrifit.local', age:41, sex:'m', height:175, objective:'Emagrecimento', calories:2200, protein:160, waterGoal:2500, weight:'82,0 kg', restrictions:'', preferences:'Comida brasileira, refeições simples'},
-  {id:'ana', name:'Ana Souza', initials:'AS', email:'ana@nutrifit.local', age:34, sex:'f', height:165, objective:'Ganho de massa muscular', calories:2350, protein:145, waterGoal:2200, weight:'64,2 kg', restrictions:'', preferences:'Alta proteína'},
-  {id:'carlos', name:'Carlos Lima', initials:'CL', email:'carlos@nutrifit.local', age:38, sex:'m', height:180, objective:'Manutenção de peso', calories:2500, protein:175, waterGoal:2800, weight:'78,6 kg', restrictions:'', preferences:'Alimentação variada'}
-];
+const patients = [];
 let selectedPatient = null;
 let pendingPatient = null;
 let patientPlans = {};
