@@ -1301,3 +1301,19 @@ body:not(.is-dashboard) .topbar #pageTitle,
   .modal-content .suggest-patient-header,
   .modal-content .modal-identity{padding-right:44px}
 }
+
+#calculatorResultCard.is-empty #tdee{color:var(--muted);font-size:26px}
+.recipe-card{display:flex;flex-direction:column;padding:16px}
+.recipe-card .recipe-photo{margin-bottom:12px}
+.recipe-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.recipe-card-actions .text-btn,.recipe-card-actions .outline-btn,.recipe-card-actions .danger-btn{margin:0;padding:8px 10px;min-height:36px}
+.recipe-empty{grid-column:1/-1;text-align:center;padding:36px 22px}
+.recipe-empty h3{margin:8px 0 6px}
+.recipe-empty p{margin:0 0 16px;color:var(--muted);font-size:13px}
+.recipe-emoji-preview{width:56px;height:56px;border-radius:16px;background:var(--green-tint);display:grid;place-items:center;font-size:28px;flex:0 0 auto}
+.recipe-emoji-picks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-emoji-picks button{width:42px;height:42px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--line);font-size:20px}
+.recipe-emoji-picks button.is-on{border-color:var(--green);background:var(--green-soft)}
+.recipe-ingredients,.recipe-steps{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.6}
+.recipe-view-macros{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-view-macros span{background:var(--green-soft);color:var(--green-strong);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700}

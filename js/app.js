@@ -47,6 +47,7 @@ function showPage(id){
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
   if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
   if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
+  if(id==='receitas' && typeof window.renderRecipes==='function') window.renderRecipes();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 navItems.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
@@ -104,18 +105,50 @@ function updateWater(){
 document.querySelectorAll('[data-water]').forEach(b=>b.addEventListener('click',()=>{water+=Number(b.dataset.water);updateWater();if(typeof renderDashboard==='function')renderDashboard()}));
 updateWater();
 
+function paintCalculatorEstimate(data){
+  const card=document.getElementById('calculatorResultCard');
+  const list=document.getElementById('calculatorResultList');
+  const hint=document.getElementById('calculatorResultHint');
+  const note=document.getElementById('calculatorResultNote');
+  const tdeeEl=document.getElementById('tdee');
+  const bmrEl=document.getElementById('bmr');
+  const mEl=document.getElementById('maintenance');
+  const dEl=document.getElementById('deficit');
+  if(!data){
+    card?.classList.add('is-empty');
+    if(tdeeEl)tdeeEl.textContent='—';
+    if(bmrEl)bmrEl.textContent='—';
+    if(mEl)mEl.textContent='—';
+    if(dEl)dEl.textContent='—';
+    if(hint)hint.textContent='Carregue um paciente para ver o gasto energético real.';
+    if(note)note.textContent='Nenhuma estimativa fictícia é exibida sem um perfil carregado.';
+    if(list)list.hidden=true;
+    return;
+  }
+  const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
+  card?.classList.remove('is-empty');
+  if(tdeeEl)tdeeEl.textContent=fmt(data.tdee);
+  if(bmrEl)bmrEl.textContent=fmt(data.bmr);
+  if(mEl)mEl.textContent=fmt(data.tdee);
+  if(dEl)dEl.textContent=fmt(Math.max(0,data.tdee-500));
+  if(hint)hint.textContent='Gasto energético diário do paciente carregado.';
+  if(note)note.textContent='*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.';
+  if(list)list.hidden=false;
+}
 const calc=document.getElementById('calcForm');
 calc?.addEventListener('submit',e=>{
   e.preventDefault();
+  const patient=typeof selectedPatient!=='undefined'?selectedPatient:null;
+  if(!patient){showToast('Carregue um paciente para calcular o resultado estimado.');paintCalculatorEstimate(null);return;}
   const sex=document.getElementById('sex').value;
   const age=Number(document.getElementById('age').value);
   const weight=Number(document.getElementById('weight').value);
   const height=Number(document.getElementById('height').value);
   const activity=Number(document.getElementById('activity').value);
-  if(!age||!weight||!height||age<10||weight<=0||height<=0)return;
+  if(!age||!weight||!height||age<10||weight<=0||height<=0){showToast('Preencha idade, peso e altura do paciente.');return;}
   const bmr=10*weight+6.25*height-5*age+(sex==='m'?5:-161);
   const tdee=bmr*activity;
-  const objective=String(document.getElementById('objective')?.value||selectedPatient?.objective||'').toLowerCase();
+  const objective=String(document.getElementById('objective')?.value||patient.objective||'').toLowerCase();
   let target=tdee;
   if(objective.includes('emag')) target=tdee-500;
   else if(objective.includes('massa')||objective.includes('hipertrof')) target=tdee+250;
@@ -124,12 +157,8 @@ calc?.addEventListener('submit',e=>{
   const remaining=Math.max(0,target-protein*4);
   const carbs=Math.round((remaining*.60)/4);
   const fat=Math.round((remaining*.40)/9);
-  const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
-  document.getElementById('bmr').textContent=fmt(bmr);
-  document.getElementById('tdee').textContent=fmt(tdee);
-  document.getElementById('maintenance').textContent=fmt(tdee);
-  document.getElementById('deficit').textContent=fmt(Math.max(0,tdee-500));
-  const pid=calc.dataset.patientId||selectedPatient?.id;
+  paintCalculatorEstimate({bmr,tdee});
+  const pid=calc.dataset.patientId||patient.id;
   if(pid){const all=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}');all[pid]={calories:target,protein,carbs,fat,bmr:Math.round(bmr),tdee:Math.round(tdee),activity,objective,sex,age,weight,height,updatedAt:new Date().toISOString()};localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(all));}
 });
 
@@ -159,7 +188,8 @@ function getDisplayPlanMeals(plan,p){
   if(!plan)return base;
   const source=Array.isArray(plan.meals)?plan.meals:[];
   source.forEach((m,mi)=>{
-    const target=base.find(x=>x.name===m.name)||base.find(x=>x.id===m.id)||base[mi]||base[0];
+    const target=base.find(x=>x.name===m.name)||base.find(x=>x.time===m.time)||base.find(x=>x.id===m.id)||base[mi];
+    if(!target)return;
     const foods=Array.isArray(m.foods)?m.foods:[];
     if(foods.length){
       foods.forEach(f=>{
@@ -361,29 +391,31 @@ function loadCalculatorPatient(patient){
     if(summaryAvatar)summaryAvatar.textContent='—';
     const form=document.getElementById('calcForm');
     if(form)delete form.dataset.patientId;
+    paintCalculatorEstimate(null);
     return;
   }
   const weight=Number(String(patient.weight||'0').replace(' kg','').replace(',','.'))||0;
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=value??''};
   set('sex',patient.sex||'m');
   set('age',patient.age||'');
-  set('weight',weight);
+  set('weight',weight||'');
   set('height',patient.height||'');
   set('objective',patient.objective||'Manutenção de peso');
   const summaryName=document.getElementById('calculatorPatientName');
   const summaryAvatar=document.querySelector('#calculatorPatientSummary .avatar');
   if(summaryName)summaryName.textContent=patient.name;
   if(summaryAvatar)summaryAvatar.textContent=patient.initials||patient.name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
-  // Usa a meta calórica cadastrada como referência, mas mantém o cálculo metabólico independente.
   const form=document.getElementById('calcForm');
   if(form)form.dataset.patientId=patient.id;
   if(weight && patient.age && patient.height){
     const activity=document.getElementById('activity');
     const bmr=10*weight+6.25*Number(patient.height)-5*Number(patient.age)+(patient.sex==='m'?5:-161);
     const tdee=bmr*Number(activity?.value||1.55);
-    const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
-    const b=document.getElementById('bmr'),t=document.getElementById('tdee'),m=document.getElementById('maintenance'),d=document.getElementById('deficit');
-    if(b)b.textContent=fmt(bmr); if(t)t.textContent=fmt(tdee); if(m)m.textContent=fmt(tdee); if(d)d.textContent=fmt(Math.max(0,tdee-500));
+    paintCalculatorEstimate({bmr,tdee});
+  }else{
+    paintCalculatorEstimate(null);
+    const hint=document.getElementById('calculatorResultHint');
+    if(hint)hint.textContent='Complete idade, peso e altura do paciente para calcular.';
   }
 }
 window.loadSelectedPatientCalculator=()=>loadCalculatorPatient(selectedPatient);
@@ -655,10 +687,16 @@ function foodCategory(k){
   if(['salada','brocolis','cenoura','abobora','tomate'].includes(k))return 'vegetable';
   return 'other';
 }
+const MEAL_FOOD_RULES=[
+  {allow:{protein:['ovos'],dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['aveia','granola','pao','pao_integral','cuscuz','tapioca'],fruit:['banana','maca','laranja','mamao','morango','abacate'],fat:['castanhas','amendoim','pasta_amendoim','chia']},max:{protein:1,dairy:1,carb:1,fruit:1,fat:1,total:4}},
+  {allow:{dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['pao','pao_integral','tapioca','aveia','cuscuz'],fruit:['banana','maca','laranja','mamao','morango'],fat:['castanhas','amendoim','pasta_amendoim']},max:{dairy:1,carb:1,fruit:1,fat:1,total:2}},
+  {allow:{protein:['frango','carne','carne_moida','peixe','tilapia','atum','sardinha'],carb:['arroz','arroz_integral','macarrao','batata','batata_inglesa','mandioca'],legume:['feijao','lentilha','grao_bico'],vegetable:['salada','brocolis','cenoura','abobora','tomate'],fat:['azeite']},max:{protein:1,carb:1,legume:1,vegetable:2,fat:1,total:5}},
+  {allow:{dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['pao','pao_integral','tapioca','cuscuz'],fruit:['banana','maca','laranja','mamao','morango'],fat:['castanhas','amendoim','pasta_amendoim']},max:{dairy:1,carb:1,fruit:1,fat:1,total:2}},
+  {allow:{protein:['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'],carb:['arroz','arroz_integral','macarrao','batata','batata_inglesa','mandioca'],legume:['feijao','lentilha','grao_bico'],vegetable:['salada','brocolis','cenoura','abobora','tomate'],fat:['azeite']},max:{protein:1,carb:1,legume:1,vegetable:2,fat:1,total:5}}
+];
 function distributeCalculatedPlan(foods){
-  /* Uma proteína animal por refeição. Café: ovo ou lácteo + cereal + fruta.
-     Almoço e jantar: 1 proteína + carboidrato + (leguminosa/vegetal/gordura).
-     Lanches: fruta, lácteo ou oleaginosa — sem proteína principal. */
+  /* Pratos típicos: café (ovo/lácteo + pão/aveia + fruta), lanches (fruta/lácteo/castanha),
+     almoço e jantar (1 proteína + 1 carboidrato + feijão/legume + vegetais). Sem despejar o restante no almoço. */
   const defs=[['07:00','Café da manhã'],['10:00','Lanche da manhã'],['12:30','Almoço'],['16:30','Lanche da tarde'],['20:00','Jantar']];
   const groups=defs.map(([time,name])=>({time,name,foods:[]}));
   const used=new Set();
@@ -667,46 +705,62 @@ function distributeCalculatedPlan(foods){
     return key?{...f,key}:null;
   }).filter(Boolean);
   const cat=f=>foodCategory(f.key);
-  const hasProtein=i=>groups[i].foods.some(x=>cat(x)==='protein');
+  const countCat=(i,c)=>groups[i].foods.filter(x=>cat(x)===c).length;
+  const canAdd=(f,i)=>{
+    if(!f||i==null||used.has(f.key))return false;
+    const rule=MEAL_FOOD_RULES[i], c=cat(f);
+    if(!rule.allow[c]||!rule.allow[c].includes(f.key))return false;
+    if(groups[i].foods.length>=rule.max.total)return false;
+    if(countCat(i,c)>=(rule.max[c]||0))return false;
+    return true;
+  };
   const add=(f,i)=>{
-    if(!f||used.has(f.key)||i==null)return false;
-    if(cat(f)==='protein' && hasProtein(i))return false;
+    if(!canAdd(f,i))return false;
     groups[i].foods.push(f); used.add(f.key); return true;
   };
   const unused=c=>tagged.filter(f=>!used.has(f.key)&&(c?cat(f)===c:true));
-  const take=(c,pred)=>{
-    const list=unused(c);
-    return pred?list.find(pred):list[0];
+  const take=(i,c,pred)=>{
+    const list=unused(c).filter(f=>!pred||pred(f)).filter(f=>canAdd(f,i));
+    return list[0];
   };
 
-  add(take('protein',f=>f.key==='ovos')||take('dairy'),0);
-  add(take('carb',f=>['aveia','pao','pao_integral','cuscuz','tapioca','granola'].includes(f.key))||take('carb'),0);
-  add(take('fruit'),0);
+  add(take(0,'protein',f=>f.key==='ovos')||take(0,'dairy'),0);
+  add(take(0,'carb'),0);
+  add(take(0,'fruit'),0);
+  add(take(0,'fat'),0);
 
-  add(take('fruit'),1);
-  add(take('dairy')||take('fat'),1);
+  add(take(1,'fruit'),1);
+  add(take(1,'dairy')||take(1,'fat')||take(1,'carb'),1);
 
-  add(take('protein',f=>f.key!=='ovos')||take('protein'),2);
-  add(take('carb'),2);
-  add(take('legume'),2);
-  add(take('vegetable'),2);
-  add(take('fat'),2);
+  add(take(2,'protein'),2);
+  add(take(2,'carb'),2);
+  add(take(2,'legume'),2);
+  add(take(2,'vegetable'),2);
+  add(take(2,'fat'),2);
 
-  add(take('fruit'),3);
-  add(take('dairy')||take('fat'),3);
+  add(take(3,'fruit'),3);
+  add(take(3,'dairy')||take(3,'fat')||take(3,'carb'),3);
 
-  add(take('protein'),4);
-  add(take('carb'),4);
-  add(take('legume'),4);
-  add(take('vegetable'),4);
-  add(take('fat'),4);
+  add(take(4,'protein'),4);
+  add(take(4,'carb'),4);
+  add(take(4,'legume'),4);
+  add(take(4,'vegetable'),4);
+  add(take(4,'fat'),4);
 
+  const typical={
+    ovos:[0,4], aveia:[0,1], granola:[0], pao:[0,1,3], pao_integral:[0,1,3], cuscuz:[0,1,3], tapioca:[0,1,3],
+    banana:[0,1,3], maca:[0,1,3], laranja:[1,3,0], mamao:[1,3,0], morango:[1,3,0], abacate:[0],
+    iogurte:[1,3,0], leite:[0,1,3], leite_integral:[0,1,3], queijo:[0,1,3], cottage:[0,1,3], ricota:[0,1,3],
+    frango:[2,4], carne:[2,4], carne_moida:[2,4], peixe:[4,2], tilapia:[4,2], atum:[4,2], sardinha:[4,2],
+    arroz:[2,4], arroz_integral:[2,4], macarrao:[2,4], batata:[4,2], batata_inglesa:[4,2], mandioca:[2,4],
+    feijao:[2,4], lentilha:[2,4], grao_bico:[2,4],
+    azeite:[2,4], castanhas:[1,3,0], amendoim:[1,3], pasta_amendoim:[1,3,0], chia:[0,1],
+    salada:[2,4], brocolis:[2,4], cenoura:[2,4], abobora:[2,4], tomate:[2,4]
+  };
   tagged.forEach(f=>{
     if(used.has(f.key))return;
-    const c=cat(f);
-    const order=c==='protein'?[2,4,0,3,1]:c==='dairy'||c==='fruit'?[1,3,0]:c==='vegetable'||c==='legume'||c==='carb'?[2,4,0]:[3,1,2,4,0];
-    const ok=i=>c!=='protein'||!hasProtein(i);
-    const slot=order.filter(ok).sort((a,b)=>groups[a].foods.length-groups[b].foods.length || order.indexOf(a)-order.indexOf(b))[0];
+    const order=typical[f.key]||[0,1,2,3,4].filter(i=>canAdd(f,i));
+    const slot=order.find(i=>canAdd(f,i));
     add(f,slot);
   });
 
@@ -747,9 +801,19 @@ function openMealPlanModal(edit=false){
  if(edit && plan){ saveBuilderDraft(p.id,planToBuilderDraft(plan)); }
  const oldKeys=plan?.preferences||plan?.foods?.map(f=>foodKey(f))||[];renderFoodChoices(oldKeys);calculatedPlan=null;byId('calculatedPlanPanel').hidden=true;byId('saveCalculatedPlanBtn').disabled=true;byId('planCalcStatus').textContent=edit?'Plano carregado para edição. Use a aba Plano alimentar para ajustar alimentos e quantidades.':'Escolha os alimentos para começar.';mealPlanModal?.classList.add('open');mealPlanModal?.setAttribute('aria-hidden','false');
 }
+function buildCalculatedMeals(keys,meta){
+  const draftFoods=keys.map(k=>foodCalc(k,foodCatalog[k].unit==='un'?1:foodCatalog[k].ref)).filter(Boolean);
+  const draft=distributeCalculatedPlan(draftFoods);
+  const placed=[...new Set(draft.flatMap(m=>(m.foods||[]).map(f=>f.key)).filter(Boolean))];
+  const use=placed.length>=2?placed:keys;
+  const optimized=optimizeFoods(use,meta);
+  const meals=distributeCalculatedPlan(optimized.foods);
+  const total=meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{kcal:0,protein:0,carbs:0,fat:0});
+  return {optimized,meals,total,keys:use};
+}
 const openAddPlan=()=>openMealPlanModal(false);
 byId('addMealPlanBtn')?.addEventListener('click',openAddPlan);byId('foodAddPlanBtn')?.addEventListener('click',openAddPlan);document.addEventListener('click',e=>{if(e.target.closest('#bannerAddPlan,#foodEmptyAddPlan'))openAddPlan()});byId('closeMealPlanModal')?.addEventListener('click',()=>closeModal(mealPlanModal));byId('cancelMealPlan')?.addEventListener('click',()=>closeModal(mealPlanModal));mealPlanModal?.addEventListener('click',e=>{if(e.target===mealPlanModal)closeModal(mealPlanModal)});
-byId('calculateMealPlanBtn')?.addEventListener('click',()=>{const p=selectedPatient;if(!p)return;const keys=[...document.querySelectorAll('.plan-food-check:checked')].map(x=>x.value);if(keys.length<2){showToast('Escolha pelo menos 2 alimentos para calcular.');return}const meta=getPlanMeta(p);const optimized=optimizeFoods(keys,meta);const meals=distributeCalculatedPlan(optimized.foods,meta);const total=meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{kcal:0,protein:0,carbs:0,fat:0});calculatedPlan={meta,keys,meals,total,foods:optimized.foods};const diff={kcal:total.kcal-meta.calories,protein:total.protein-meta.protein,carbs:total.carbs-meta.carbs,fat:total.fat-meta.fat};byId('calculatedPlanPanel').hidden=false;byId('calculatedPlanPanel').innerHTML=`<div class="calculated-head"><div><span class="eyebrow">RESULTADO</span><h3>Quantidades calculadas</h3><p class="muted">As quantidades foram ajustadas para aproximar simultaneamente as quatro metas.</p></div><div class="calculated-total"><b>${Math.round(total.kcal).toLocaleString('pt-BR')} kcal</b><small>${Math.round(total.protein)} g P · ${Math.round(total.carbs)} g C · ${Math.round(total.fat)} g G</small></div></div><div class="calculated-foods">${optimized.foods.map(f=>`<div><b>${f.name}</b><strong>${f.amount}${f.unit==='un'?' un':' g'}</strong><span>${f.kcal} kcal · ${f.protein} P · ${f.carbs} C · ${f.fat} G</span></div>`).join('')}</div><div class="calculated-meals">${meals.map(m=>`<article><b>${m.time} · ${m.name}</b><strong>${m.kcal} kcal</strong><small>${m.items.join(' · ')}</small></article>`).join('')}</div><div class="target-difference">Diferença da meta: ${diff.kcal>=0?'+':''}${Math.round(diff.kcal)} kcal · ${diff.protein>=0?'+':''}${Math.round(diff.protein)} g P · ${diff.carbs>=0?'+':''}${Math.round(diff.carbs)} g C · ${diff.fat>=0?'+':''}${Math.round(diff.fat)} g G</div>`;byId('saveCalculatedPlanBtn').disabled=false;byId('planCalcStatus').textContent='Cálculo concluído. Revise e salve o plano.';showToast('Quantidades calculadas com base nas metas da calculadora.')});
+byId('calculateMealPlanBtn')?.addEventListener('click',()=>{const p=selectedPatient;if(!p)return;const keys=[...document.querySelectorAll('.plan-food-check:checked')].map(x=>x.value);if(keys.length<2){showToast('Escolha pelo menos 2 alimentos para calcular.');return}const meta=getPlanMeta(p);const built=buildCalculatedMeals(keys,meta);const {optimized,meals,total}=built;calculatedPlan={meta,keys:built.keys,meals,total,foods:optimized.foods};const diff={kcal:total.kcal-meta.calories,protein:total.protein-meta.protein,carbs:total.carbs-meta.carbs,fat:total.fat-meta.fat};byId('calculatedPlanPanel').hidden=false;byId('calculatedPlanPanel').innerHTML=`<div class="calculated-head"><div><span class="eyebrow">RESULTADO</span><h3>Quantidades calculadas</h3><p class="muted">As refeições usam combinações típicas de cada horário. As quantidades valem só para os alimentos que entram no cardápio.</p></div><div class="calculated-total"><b>${Math.round(total.kcal).toLocaleString('pt-BR')} kcal</b><small>${Math.round(total.protein)} g P · ${Math.round(total.carbs)} g C · ${Math.round(total.fat)} g G</small></div></div><div class="calculated-foods">${optimized.foods.map(f=>`<div><b>${f.name}</b><strong>${f.amount}${f.unit==='un'?' un':' g'}</strong><span>${f.kcal} kcal · ${f.protein} P · ${f.carbs} C · ${f.fat} G</span></div>`).join('')}</div><div class="calculated-meals">${meals.map(m=>`<article><b>${m.time} · ${m.name}</b><strong>${m.kcal} kcal</strong><small>${m.items.join(' · ')}</small></article>`).join('')}</div><div class="target-difference">Diferença da meta: ${diff.kcal>=0?'+':''}${Math.round(diff.kcal)} kcal · ${diff.protein>=0?'+':''}${Math.round(diff.protein)} g P · ${diff.carbs>=0?'+':''}${Math.round(diff.carbs)} g C · ${diff.fat>=0?'+':''}${Math.round(diff.fat)} g G</div>`;byId('saveCalculatedPlanBtn').disabled=false;byId('planCalcStatus').textContent='Cálculo concluído. Revise e salve o plano.';showToast('Quantidades calculadas com base nas metas da calculadora.')});
 function applyAssignedPlan(p,plan){
   patientPlans[p.id]=plan;
   persistPlans();
@@ -956,3 +1020,113 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('#addMealPlanBtn');
   if(b){e.preventDefault();showPage('plano');renderPatientPlan();}
 });
+
+const RECIPE_EMOJIS=['🥗','🥣','🍳','🍲','🥘','🥑','🍓','🍞','🍗','🐟','🧀','☕'];
+const recipeModal=byId('recipeModal');
+let editingRecipeId=null;
+let recipeEmoji='🥗';
+function loadRecipes(){
+  try{const saved=JSON.parse(localStorage.getItem('nutrifit-recipes')||'[]');if(Array.isArray(saved))return saved;}catch(e){}
+  return [];
+}
+function persistRecipes(list){localStorage.setItem('nutrifit-recipes',JSON.stringify(list))}
+function recipeMacros(r){
+  const bits=[];
+  if(Number(r.kcal))bits.push(`${Number(r.kcal).toLocaleString('pt-BR')} kcal`);
+  if(Number(r.protein))bits.push(`${r.protein} g proteína`);
+  if(Number(r.carbs))bits.push(`${r.carbs} g carboidratos`);
+  if(Number(r.fat))bits.push(`${r.fat} g gordura`);
+  return bits.join(' · ');
+}
+function renderRecipeEmojiPicks(){
+  const box=byId('recipeEmojiPicks'); if(!box)return;
+  box.innerHTML=RECIPE_EMOJIS.map(e=>`<button type="button" data-emoji="${e}" class="${e===recipeEmoji?'is-on':''}">${e}</button>`).join('');
+  const preview=byId('recipeEmojiPreview'); if(preview)preview.textContent=recipeEmoji;
+}
+function openRecipeModal(recipe){
+  editingRecipeId=recipe?.id||null;
+  recipeEmoji=recipe?.emoji||'🥗';
+  byId('recipeModalTitle').textContent=recipe?'Editar receita':'Nova receita';
+  byId('recipeModalSubtitle').textContent=recipe?'Ajuste os dados e salve. Você também pode excluir esta receita.':'Monte uma receita simples: nome, refeição, ingredientes e modo de preparo.';
+  byId('recipeName').value=recipe?.name||'';
+  byId('recipeMeal').value=recipe?.meal||'Almoço';
+  byId('recipeKcal').value=recipe?.kcal||'';
+  byId('recipeProtein').value=recipe?.protein||'';
+  byId('recipeCarbs').value=recipe?.carbs||'';
+  byId('recipeFat').value=recipe?.fat||'';
+  byId('recipeIngredients').value=(recipe?.ingredients||[]).join('\n');
+  byId('recipeSteps').value=recipe?.steps||'';
+  const del=byId('deleteRecipeBtn'); if(del)del.hidden=!recipe;
+  renderRecipeEmojiPicks();
+  openModal(recipeModal);
+}
+function renderRecipes(){
+  const grid=byId('recipeGrid'), sub=byId('recipesPageSubtitle');
+  if(!grid)return;
+  const recipes=loadRecipes();
+  if(sub)sub.textContent=recipes.length?`${recipes.length} receita${recipes.length===1?'':'s'} cadastrada${recipes.length===1?'':'s'}.`:'Cadastre receitas do consultório, edite e exclua quando quiser.';
+  if(!recipes.length){
+    grid.innerHTML='<div class="recipe-empty card"><div class="recipe-photo">🍽️</div><h3>Nenhuma receita ainda</h3><p>Crie a primeira receita com nome, refeição, ingredientes e preparo. Depois você edita ou exclui com um toque.</p><button class="primary" type="button" id="emptyAddRecipeBtn">+ Nova receita</button></div>';
+    byId('emptyAddRecipeBtn')?.addEventListener('click',()=>openRecipeModal(null));
+    return;
+  }
+  grid.innerHTML=recipes.map(r=>{
+    const macros=recipeMacros(r);
+    const preview=(r.ingredients||[]).slice(0,2).join(' · ');
+    return `<article class="recipe-card card" data-recipe-id="${escapeHtml(r.id)}"><div class="recipe-photo">${r.emoji||'🥗'}</div><div><span>${escapeHtml(r.meal||'Receita')}${Number(r.kcal)?` · ${Number(r.kcal).toLocaleString('pt-BR')} kcal`:''}</span><h3>${escapeHtml(r.name)}</h3><p>${macros||preview||'Sem informações nutricionais'}</p><div class="recipe-card-actions"><button class="text-btn" type="button" data-recipe-view="${escapeHtml(r.id)}">Ver</button><button class="outline-btn" type="button" data-recipe-edit="${escapeHtml(r.id)}">Editar</button><button class="danger-btn" type="button" data-recipe-delete="${escapeHtml(r.id)}">Excluir</button></div></div></article>`;
+  }).join('');
+}
+window.renderRecipes=renderRecipes;
+function recipeById(id){return loadRecipes().find(r=>r.id===id)||null}
+function deleteRecipe(id){
+  const r=recipeById(id); if(!r)return;
+  if(!confirm(`Excluir a receita “${r.name}”?`))return;
+  persistRecipes(loadRecipes().filter(x=>x.id!==id));
+  closeModal(recipeModal);
+  renderRecipes();
+  showToast('Receita excluída.');
+}
+byId('addRecipeBtn')?.addEventListener('click',()=>openRecipeModal(null));
+byId('closeRecipeModal')?.addEventListener('click',()=>closeModal(recipeModal));
+byId('cancelRecipeBtn')?.addEventListener('click',()=>closeModal(recipeModal));
+recipeModal?.addEventListener('click',e=>{if(e.target===recipeModal)closeModal(recipeModal)});
+byId('recipeEmojiPicks')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-emoji]'); if(!b)return;
+  recipeEmoji=b.dataset.emoji; renderRecipeEmojiPicks();
+});
+byId('deleteRecipeBtn')?.addEventListener('click',()=>{if(editingRecipeId)deleteRecipe(editingRecipeId)});
+byId('recipeForm')?.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=byId('recipeName').value.trim();
+  if(!name){showToast('Informe o nome da receita.');return;}
+  const recipe={
+    id:editingRecipeId||`recipe_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+    name, meal:byId('recipeMeal').value, emoji:recipeEmoji,
+    kcal:byId('recipeKcal').value?Number(byId('recipeKcal').value):'',
+    protein:byId('recipeProtein').value?Number(byId('recipeProtein').value):'',
+    carbs:byId('recipeCarbs').value?Number(byId('recipeCarbs').value):'',
+    fat:byId('recipeFat').value?Number(byId('recipeFat').value):'',
+    ingredients:byId('recipeIngredients').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    steps:byId('recipeSteps').value.trim(),
+    updatedAt:new Date().toISOString()
+  };
+  const list=loadRecipes();
+  const idx=list.findIndex(r=>r.id===recipe.id);
+  if(idx>=0)list[idx]=recipe; else list.unshift(recipe);
+  persistRecipes(list);
+  closeModal(recipeModal);
+  renderRecipes();
+  showToast(editingRecipeId?'Receita atualizada.':'Receita salva.');
+});
+byId('recipeGrid')?.addEventListener('click',e=>{
+  const del=e.target.closest('[data-recipe-delete]');
+  if(del){deleteRecipe(del.dataset.recipeDelete);return;}
+  const edit=e.target.closest('[data-recipe-edit]');
+  if(edit){openRecipeModal(recipeById(edit.dataset.recipeEdit));return;}
+  const view=e.target.closest('[data-recipe-view]');
+  if(view){
+    const r=recipeById(view.dataset.recipeView); if(!r)return;
+    openRecipeModal(r);
+  }
+});
+renderRecipes();
