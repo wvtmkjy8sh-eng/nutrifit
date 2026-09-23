@@ -1719,3 +1719,83 @@ body{
   }
   .eyebrow{font-size:12px}
 }
+
+/* Cabeçalho da refeição: nome e horário separados do restante da lista. */
+.food-meal-title{
+  align-items:center;
+  gap:12px;
+  margin:4px 0 12px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:var(--surface-alt);
+  border:1px solid var(--line);
+}
+.food-meal-title>div{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.food-meal-title b{font-size:15px;letter-spacing:-.02em}
+.food-meal-title small{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+.food-meal-title>span{flex:0 0 auto;font-size:14px}
+.food-item{gap:12px;align-items:baseline}
+.food-item b{font-size:14px}
+.food-item span{font-size:13px}
+
+.nf-builder-meal-head>div:first-child{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.nf-builder-meal-head>div:first-child>span{
+  display:inline-flex;
+  align-items:center;
+  margin:0;
+  padding:4px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+}
+.nf-builder-meal-head h4{margin:0;font-size:16px;letter-spacing:-.02em}
+.nf-meal-suggestion{gap:10px}
+.nf-meal-suggestion>span{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+}
+.nf-meal-suggestion b{font-size:14px}
+.nf-meal-suggestion small{font-size:12px}
+.nf-meal-suggestion strong{font-size:14px}
+
+@media(max-width:700px){
+  .food-meal-title b{font-size:16px}
+  .food-meal-title small,.food-meal-title>span{font-size:13px}
+  .food-item{display:flex;justify-content:space-between}
+  .food-item b{font-size:15px}
+  .food-item span{font-size:13px;text-align:right}
+  .nf-meal-suggestion{padding:12px}
+  .nf-meal-suggestion b{font-size:15px}
+  .nf-meal-suggestion small{font-size:13px}
+  .nf-meal-suggestion strong{font-size:15px}
+  .nf-builder-meal-head{padding:14px}
+  .nf-builder-meal-head h4{font-size:16px}
+  .nf-meal-kcal b{font-size:15px}
+  .nf-meal-kcal small{font-size:12px}
+  .nf-builder-item b{font-size:15px}
+  .nf-builder-item small{font-size:12px;line-height:1.4}
+  .nf-builder-item input{font-size:15px;min-height:40px}
+  .builder-move span,.nf-meal-picker span{font-size:12px;letter-spacing:.06em}
+  .builder-move select{font-size:15px;min-height:44px}
+}

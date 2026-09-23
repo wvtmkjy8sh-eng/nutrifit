@@ -1,3 +1,4 @@
+const byId=id=>document.getElementById(id);
 const navItems=document.querySelectorAll('[data-page]');
 const pages=document.querySelectorAll('.page');
 const title=document.getElementById('pageTitle');
@@ -29,6 +30,7 @@ function playRouteProgress(){
   playRouteProgress._t=setTimeout(()=>bar.classList.remove('active'),500);
 }
 
+let viewsReady=false;
 function showPage(id){
   const target=document.getElementById(id);
   if(!target)return;
@@ -44,6 +46,10 @@ function showPage(id){
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
   document.getElementById('sidebarOverlay')?.classList.remove('open');
+  if(!viewsReady){
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
   if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
   if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
@@ -688,7 +694,6 @@ renderEvolucao();
 const editPatientModal=document.getElementById('editPatientModal');
 const settingsModal=document.getElementById('settingsModal');
 const suggestPlanModal=document.getElementById('suggestPlanModal');
-const byId=id=>document.getElementById(id);
 renderDashboard();
 function openModal(m){if(!m)return;m.classList.add('open');m.setAttribute('aria-hidden','false')}
 function closeModal(m){if(!m)return;m.classList.remove('open');m.setAttribute('aria-hidden','true')}
@@ -1343,6 +1348,7 @@ byId('recipeGrid')?.addEventListener('click',e=>{
     openRecipeModal(r);
   }
 });
+viewsReady=true;
 renderRecipes();
 try{
   const savedPatientId=localStorage.getItem('nutrifit-selected-patient');
