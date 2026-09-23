@@ -1799,3 +1799,31 @@ body{
   .builder-move span,.nf-meal-picker span{font-size:12px;letter-spacing:.06em}
   .builder-move select{font-size:15px;min-height:44px}
 }
+
+/* Plano alimentar: piso de leitura para os textos que ainda ficavam miúdos. */
+#plano .eyebrow{font-size:12px;letter-spacing:.08em}
+#plano .nf-builder-head p,
+#plano .nf-builder-section-head p,
+#plano .nf-patient-card small,
+#plano .nf-budget-label span,
+#plano .nf-budget-foot,
+#plano .nf-budget-source,
+#plano .nf-target-row span,
+#plano .nf-builder-save label,
+#plano .nf-builder-empty p,
+#plano .nf-meal-empty{font-size:13px;line-height:1.4}
+#plano .nf-food-search span{font-size:12px}
+#plano .nf-food-main b{font-size:15px}
+#plano .nf-food-main span{font-size:13px}
+#plano .nf-food-nutrients b,
+#plano .nf-food-nutrients span{font-size:13px}
+#plano .nf-add-food{font-size:13px!important}
+#plano .nf-meal-picker select,
+#plano .builder-move select,
+#plano .nf-builder-item input{font-size:15px}
+#plano .nf-builder-item b{font-size:15px}
+#plano .nf-builder-item small,
+#plano .nf-builder-item label{font-size:13px}
+#plano .nf-builder-meal-head h4{font-size:16px}
+#plano .nf-meal-kcal b{font-size:15px}
+#plano .nf-meal-kcal small{font-size:13px}
