@@ -1643,7 +1643,7 @@ body{
 }
 @media(max-width:900px){
   .sidebar{width:248px}
-  .main{margin-left:0;width:100%;padding:0 16px 32px}
+  .main{margin-left:0;width:100%;padding-left:16px;padding-right:16px}
   .hero{padding:22px}
   .hero h2{font-size:22px}
   .topbar h1{font-size:24px}
@@ -1662,4 +1662,17 @@ body{
   }
   #patientModal .patient-modal-head .outline-btn{top:14px;right:62px}
   #patientModal .patient-modal-head>div{padding-right:0}
+}
+
+/* Rodapé: o conteúdo termina acima da barra flutuante.
+   No desktop a barra não existe e o respiro inferior da página permanece. */
+@media(max-width:900px){
+  .main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:900px) and (display-mode:standalone),
+(max-width:900px) and (display-mode:fullscreen){
+  .bottom-nav{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))}
+  .section-head .fab-action.fab-action{bottom:calc(116px + env(safe-area-inset-bottom,0px))}
+  body.menu-open .sidebar{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 }
