@@ -1097,10 +1097,12 @@ body{min-width:0;overflow-x:hidden}
   .sidebar-overlay.open{display:block;opacity:1}
   .sidebar{z-index:40}
 }
-/* Enquanto o menu lateral estiver aberto, a barra inferior fica oculta para
-   não sobrepor/"vazar" por cima do menu (lei da hierarquia de camadas). */
-body.menu-open .bottom-nav,
+/* O botão de ação flutua por cima do menu; a barra do rodapé permanece. */
 body.menu-open .fab-action{visibility:hidden;pointer-events:none}
+@media(max-width:900px){
+  body.menu-open .bottom-nav{z-index:50}
+  body.menu-open .sidebar{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
 
 /* =====================================================
    NUTRIFIT v23 — BARRA DE NAVEGAÇÃO INFERIOR (MOBILE)
