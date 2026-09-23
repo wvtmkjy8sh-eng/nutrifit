@@ -1671,3 +1671,51 @@ body{
   .main{padding-bottom:calc(82px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
   .section-head .fab-action.fab-action{bottom:calc(78px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
 }
+
+/* Cadastro de paciente no celular: o último botão precisa caber acima da borda. */
+@media(max-width:760px){
+  #editPatientModal{align-items:stretch;padding:0}
+  #editPatientModal .modal-content,
+  #editPatientModal .edit-patient-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+    box-sizing:border-box;
+    padding:20px 16px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Leitura no celular: textos de apoio sobem para um tamanho legível. */
+@media(max-width:600px){
+  .form-grid label,
+  .suggest-plan-form label,
+  .edit-section-title small,
+  .card-head p,
+  .section-head p,
+  .meal-row span,
+  .hint,
+  .outline-btn,
+  .metric-card em,
+  .metric-card>span,
+  .food-item,
+  .patient-selector small,
+  .plan-banner p,
+  .food-empty p,
+  .nf-builder-head p,
+  .result-card>p,
+  .result-card>small,
+  .setting-row small,
+  .patient-option span span{
+    font-size:13px;
+  }
+  .meal-status,
+  .small-btn,
+  .water-actions button,
+  .water-buttons button,
+  .bottom-nav .nav-item{
+    font-size:12px;
+  }
+  .eyebrow{font-size:12px}
+}
