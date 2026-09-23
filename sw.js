@@ -1,13 +1,13 @@
 // Service worker do NutriFit — cache básico do app shell para uso offline.
-const CACHE_NAME = 'nutrifit-shell-v12';
+const CACHE_NAME = 'nutrifit-shell-v14';
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/manifest.json',
-  '/assets/icon-192.png',
-  '/assets/icon-512.png'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/app.js',
+  './manifest.json',
+  './assets/icon-192.png',
+  './assets/icon-512.png'
 ];
 
 self.addEventListener('install', e => {

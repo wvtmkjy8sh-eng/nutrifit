@@ -66,11 +66,100 @@ function applyTheme(theme){
     themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');
   }
   localStorage.setItem('nutrifit-theme',theme);
+  const themeColor=document.getElementById('themeColor');
+  if(themeColor) themeColor.setAttribute('content', dark ? '#101412' : '#f4f6f5');
 }
 const storedTheme=localStorage.getItem('nutrifit-theme');
 const prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 applyTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
 themeToggle?.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
+
+function refreshHeaderDate(){
+  const el=document.getElementById('currentDate');
+  if(!el)return;
+  const now=new Date();
+  const weekdays=['DOMINGO','SEGUNDA-FEIRA','TERÇA-FEIRA','QUARTA-FEIRA','QUINTA-FEIRA','SEXTA-FEIRA','SÁBADO'];
+  const months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const day=String(now.getDate()).padStart(2,'0');
+  el.dateTime=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${day}`;
+  el.textContent=`${weekdays[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+}
+refreshHeaderDate();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') refreshHeaderDate(); });
+
+const installBtn=document.getElementById('installAppBtn');
+const installSettingsBtn=document.getElementById('installAppSettingsBtn');
+const installHint=document.getElementById('installAppHint');
+const installModal=document.getElementById('installModal');
+const installPromptBtn=document.getElementById('installPromptBtn');
+let deferredInstall=null;
+
+function isIosDevice(){
+  const ua=navigator.userAgent||'';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function installPlatform(){
+  if(isIosDevice()) return 'ios';
+  if(/Android/i.test(navigator.userAgent||'')) return 'android';
+  return 'desktop';
+}
+function updateInstallUi(){
+  const installed=isStandaloneApp();
+  if(installBtn) installBtn.hidden=installed;
+  if(installSettingsBtn){
+    installSettingsBtn.disabled=installed;
+    installSettingsBtn.textContent=installed ? 'Instalado' : (deferredInstall ? 'Instalar agora' : 'Como instalar');
+  }
+  if(installHint){
+    installHint.textContent=installed
+      ? 'O NutriFit já está instalado neste dispositivo.'
+      : 'Disponível no computador, Android e iPhone.';
+  }
+  if(installPromptBtn) installPromptBtn.hidden=!deferredInstall;
+}
+function openInstallGuide(){
+  const platform=installPlatform();
+  document.getElementById('installStepsIos').hidden=platform!=='ios';
+  document.getElementById('installStepsAndroid').hidden=platform!=='android';
+  document.getElementById('installStepsDesktop').hidden=platform!=='desktop';
+  const lead=document.getElementById('installLead');
+  if(lead){
+    lead.textContent=platform==='ios'
+      ? 'No iPhone e no iPad, a instalação é feita pelo Safari.'
+      : 'Adicione o NutriFit à tela inicial para abrir como aplicativo, sem a barra do navegador.';
+  }
+  openModal(installModal);
+}
+async function runInstallPrompt(){
+  if(!deferredInstall){ openInstallGuide(); return; }
+  deferredInstall.prompt();
+  const choice=await deferredInstall.userChoice.catch(()=>({outcome:'dismissed'}));
+  deferredInstall=null;
+  updateInstallUi();
+  if(choice && choice.outcome==='accepted') installBtn && (installBtn.hidden=true);
+}
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();
+  deferredInstall=event;
+  updateInstallUi();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstall=null;
+  updateInstallUi();
+});
+installBtn?.addEventListener('click',()=>runInstallPrompt());
+installSettingsBtn?.addEventListener('click',()=>runInstallPrompt());
+installPromptBtn?.addEventListener('click',()=>runInstallPrompt());
+document.getElementById('closeInstallModal')?.addEventListener('click',()=>closeModal(installModal));
+document.getElementById('closeInstallModalBtn')?.addEventListener('click',()=>closeModal(installModal));
+installModal?.addEventListener('click',event=>{ if(event.target===installModal) closeModal(installModal); });
+updateInstallUi();
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 
 function toggleSidebar(forceOpen){
   const sidebar=document.querySelector('.sidebar');
@@ -537,7 +626,7 @@ function renderDashboard(){
   updateWater();
 }
 
-function applyPatientData(patient){
+function applyPatientData(patient, silent){
   if(!patient)return;
   selectedPatient=patient;
   localStorage.setItem('nutrifit-selected-patient',patient.id);
@@ -548,11 +637,11 @@ function applyPatientData(patient){
   refreshDashboardGreeting();
   // Atualiza os principais indicadores com os dados do paciente carregado.
   const kcalStrong=document.querySelector('.metric-card strong');
-  if(kcalStrong)kcalStrong.innerHTML=`1.850 <small>/ ${patient.calories.toLocaleString('pt-BR')} kcal</small>`;
+  if(kcalStrong)kcalStrong.innerHTML=`1.850 <small>/ ${Number(patient.calories||0).toLocaleString('pt-BR')} kcal</small>`;
   const proteinStrong=document.querySelectorAll('.metric-card strong')[1];
-  if(proteinStrong)proteinStrong.innerHTML=`142 <small>/ ${patient.protein} g</small>`;
+  if(proteinStrong)proteinStrong.innerHTML=`142 <small>/ ${Number(patient.protein||0)} g</small>`;
   const goal=document.querySelector('.goal-card strong');
-  if(goal)goal.innerHTML=`${patient.weight.replace(' kg','')} <small>kg</small>`;
+  if(goal)goal.innerHTML=`${String(patient.weight??'').replace(' kg','')} <small>kg</small>`;
   loadCalculatorPatient(patient);
   renderDashboard();
   renderPatientsCrud(byId('patientSearch')?.value||'');
@@ -561,7 +650,7 @@ function applyPatientData(patient){
   if(typeof renderAgua==='function') renderAgua();
   if(typeof renderEvolucao==='function') renderEvolucao();
   closePatientModal();
-  showToast(`Informações de ${patient.name} carregadas.`);
+  if(!silent) showToast(`Informações de ${patient.name} carregadas.`);
 }
 function showToast(message){
   let toast=document.getElementById('nutrifitToast');
@@ -580,10 +669,6 @@ patientList?.addEventListener('click',e=>{
   if(btn)selectPatient(btn.dataset.patientId);
 });
 loadPatientBtn?.addEventListener('click',()=>{if(pendingPatient){applyPatientData(pendingPatient);renderPatientPlan()}});
-// Nenhum paciente é carregado por padrão. A seleção deve ser feita explicitamente a cada sessão.
-localStorage.removeItem('nutrifit-selected-patient');
-selectedPatient=null;
-pendingPatient=null;
 const initialName=document.getElementById('selectedPatientName');
 const initialProfile=document.getElementById('profilePatientName');
 const initialSelectorAvatar=document.querySelector('#patientSelector .small-avatar');
@@ -689,6 +774,51 @@ byId('editPatientForm')?.addEventListener('submit',e=>{
 byId('settingsBtn')?.addEventListener('click',()=>{byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
 byId('closeSettingsModal')?.addEventListener('click',()=>closeModal(settingsModal));
 byId('saveSettingsBtn')?.addEventListener('click',()=>{applyTheme(byId('settingDark').checked?'dark':'light');localStorage.setItem('nutrifit-autosave',byId('settingAutoSave').checked?'1':'0');localStorage.setItem('nutrifit-suggestions',byId('settingSuggestions').checked?'1':'0');closeModal(settingsModal);showToast('Configurações salvas.')});
+function nutrifitStorageEntries(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(key&&key.startsWith('nutrifit-')) data[key]=localStorage.getItem(key);
+  }
+  return data;
+}
+byId('exportBackupBtn')?.addEventListener('click',()=>{
+  const payload={app:'NutriFit',version:1,exportedAt:new Date().toISOString(),data:nutrifitStorageEntries()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`nutrifit-backup-${payload.exportedAt.slice(0,10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('Backup JSON baixado.');
+});
+byId('importBackupBtn')?.addEventListener('click',()=>byId('importBackupFile')?.click());
+byId('importBackupFile')?.addEventListener('change',event=>{
+  const file=event.target.files&&event.target.files[0];
+  event.target.value='';
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let parsed;
+    try{parsed=JSON.parse(String(reader.result||''));}catch(e){showToast('Não foi possível ler o arquivo JSON.');return;}
+    const data=parsed&&parsed.data&&typeof parsed.data==='object'&&!Array.isArray(parsed.data)?parsed.data:null;
+    if(!data||parsed.app!=='NutriFit'){showToast('Este JSON não é um backup do NutriFit.');return;}
+    const keys=Object.keys(data).filter(key=>key.startsWith('nutrifit-'));
+    if(!keys.length){showToast('O backup não contém dados do NutriFit.');return;}
+    if(!confirm('Importar este backup substitui os dados atuais deste navegador. Deseja continuar?'))return;
+    Object.keys(localStorage).filter(key=>key.startsWith('nutrifit-')).forEach(key=>localStorage.removeItem(key));
+    keys.forEach(key=>{
+      const value=data[key];
+      localStorage.setItem(key,typeof value==='string'?value:JSON.stringify(value));
+    });
+    showToast('Backup importado. Recarregando...');
+    setTimeout(()=>window.location.reload(),700);
+  };
+  reader.readAsText(file);
+});
 byId('clearAppDataBtn')?.addEventListener('click',()=>{
   const confirmed=confirm('Tem certeza que deseja limpar todos os dados salvos (pacientes, planos, metas e preferências) neste navegador? Esta ação não pode ser desfeita.');
   if(!confirmed)return;
@@ -1214,3 +1344,9 @@ byId('recipeGrid')?.addEventListener('click',e=>{
   }
 });
 renderRecipes();
+try{
+  const savedPatientId=localStorage.getItem('nutrifit-selected-patient');
+  const savedPatient=savedPatientId&&patients.find(p=>p.id===savedPatientId);
+  if(savedPatient) applyPatientData(savedPatient, true);
+  else if(savedPatientId) localStorage.removeItem('nutrifit-selected-patient');
+}catch(e){}

@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NutriFit — Nutrição inteligente</title>
   <meta name="description" content="Dashboard profissional de nutrição e acompanhamento.">
-  <meta name="theme-color" content="#67a83d">
+  <meta name="theme-color" id="themeColor" content="#f4f6f5">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="NutriFit">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" href="assets/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="assets/icon-512.png" type="image/png" sizes="512x512">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
 </head>
 <body class="is-dashboard">
@@ -44,11 +45,12 @@
       <header class="topbar">
         <div>
           <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Abrir menu"><img src="assets/icons/menu.svg" alt=""></button>
-          <span class="eyebrow">SEGUNDA-FEIRA, 14 SET</span>
+          <time class="eyebrow" id="currentDate" datetime=""></time>
           <h1 id="pageTitle">Olá,</h1>
         </div>
         <div class="top-actions">
           <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron"><img src="assets/icons/chevron-down.svg" alt=""></span></button>
+          <button class="icon-btn install-btn" id="installAppBtn" type="button" title="Instalar aplicativo" aria-label="Instalar aplicativo"><img src="assets/icons/download.svg" alt=""></button>
           <button class="icon-btn" title="Notificações"><img src="assets/icons/bell.svg"></button>
           <button class="theme-btn" id="themeToggle" type="button" aria-label="Alternar tema"><img src="assets/icons/moon.svg" alt=""></button>
         </div>
@@ -178,7 +180,9 @@
         <label class="setting-row"><span><b>Modo escuro</b><small>Alternar aparência do sistema.</small></span><input id="settingDark" type="checkbox"></label>
         <label class="setting-row"><span><b>Salvar automaticamente</b><small>Guardar paciente, metas e preferências neste navegador.</small></span><input id="settingAutoSave" type="checkbox" checked></label>
         <label class="setting-row"><span><b>Mostrar sugestões de alimentação</b><small>Disponibilizar recomendações no plano alimentar.</small></span><input id="settingSuggestions" type="checkbox" checked></label>
+        <div class="setting-block settings-install-card" id="installAppCard"><div><b>Instalar aplicativo</b><small id="installAppHint">Disponível no computador, Android e iPhone.</small></div><button class="outline-btn" id="installAppSettingsBtn" type="button">Como instalar</button></div>
         <div class="setting-block settings-patient-card"><div class="settings-patient-title"><span class="settings-patient-avatar" id="settingsPatientAvatar">—</span><div><b>Paciente ativo</b><span id="settingsPatientName">Nenhum paciente selecionado</span></div></div><button class="outline-btn" id="settingsEditPatient" type="button">Editar paciente</button></div>
+        <div class="setting-block settings-backup-card"><div><b>Backup e importação</b><small>Baixe um JSON com pacientes, planos, receitas e preferências, ou restaure um arquivo exportado neste navegador.</small></div><div class="settings-backup-actions"><button class="outline-btn" id="exportBackupBtn" type="button">Baixar backup</button><button class="primary" id="importBackupBtn" type="button">Importar JSON</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden></div></div>
         <div class="setting-block settings-danger-card"><div><b>Limpar dados do aplicativo</b><small>Remove todos os pacientes, planos e preferências salvos neste navegador. Esta ação não pode ser desfeita.</small></div><button class="danger-btn" id="clearAppDataBtn" type="button">Limpar dados</button></div>
       </div>
       <div class="modal-actions"><button class="primary" id="saveSettingsBtn" type="button">Salvar configurações</button></div>
@@ -270,12 +274,33 @@
       </form>
     </div>
   </div>
+  <div class="modal" id="installModal" aria-hidden="true">
+    <div class="modal-content install-modal">
+      <button class="close" id="closeInstallModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
+      <span class="eyebrow">APLICATIVO</span>
+      <h2>Instalar o NutriFit</h2>
+      <p class="muted" id="installLead">Adicione o NutriFit à tela inicial para abrir como aplicativo, sem a barra do navegador.</p>
+      <ol class="install-steps" id="installStepsIos" hidden>
+        <li>Abra este endereço no Safari.</li>
+        <li>Toque em <b>Compartilhar</b>.</li>
+        <li>Toque em <b>Adicionar à Tela de Início</b> e confirme.</li>
+      </ol>
+      <ol class="install-steps" id="installStepsAndroid" hidden>
+        <li>Abra o menu do Chrome (três pontos).</li>
+        <li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li>
+        <li>Confirme para criar o ícone do NutriFit.</li>
+      </ol>
+      <ol class="install-steps" id="installStepsDesktop" hidden>
+        <li>No Chrome ou Edge, use o ícone de instalar na barra de endereço.</li>
+        <li>Ou abra o menu do navegador e escolha <b>Instalar NutriFit</b>.</li>
+      </ol>
+      <div class="modal-actions">
+        <button class="outline-btn" id="closeInstallModalBtn" type="button">Fechar</button>
+        <button class="primary" id="installPromptBtn" type="button" hidden>Instalar agora</button>
+      </div>
+    </div>
+  </div>
   <div class="modal" id="toastModal" aria-hidden="true"></div>
   <script src="js/app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
-    }
-  </script>
 </body>
 </html>

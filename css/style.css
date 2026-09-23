@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root{
-  --bg:#f5f7f4; --surface:#ffffff; --surface-alt:#f0f4ef; --text:#17201b;
-  --muted:#718078; --muted-strong:#5f6d64; --line:#e3e9e4;
-  --green:#67a83d; --green-strong:#4d8d2e; --green-soft:#eaf5e4;
-  --green-tint:#eef7e9; --icon-bg:#f2f5f1; --progress-bg:#e8eee6;
-  --shadow:0 10px 30px rgba(30,55,35,.07); --radius:20px;
+  --bg:#f4f6f5; --surface:#ffffff; --surface-alt:#f7f8f7; --text:#14201a;
+  --muted:#66736c; --muted-strong:#46564e; --line:#e4eae6;
+  --green:#3d8f34; --green-strong:#2d7426; --green-soft:#e7f3e3;
+  --green-tint:#f3faf1; --icon-bg:#f2f5f3; --progress-bg:#e6eee8;
+  --shadow:0 1px 2px rgba(20,32,26,.04),0 10px 28px rgba(20,32,26,.05); --radius:16px;
 }
 body.dark{
-  --bg:#121713; --surface:#1b211e; --surface-alt:#222a25; --text:#f1f5f1;
-  --muted:#9ca99f; --muted-strong:#c2ccc4; --line:#303a33;
-  --green:#82c65c; --green-strong:#9bd477; --green-soft:#233923;
-  --green-tint:#1e2b20; --icon-bg:#252e28; --progress-bg:#303a33;
-  --shadow:0 12px 30px rgba(0,0,0,.22);
+  --bg:#101412; --surface:#181e1b; --surface-alt:#202824; --text:#f3f6f4;
+  --muted:#9aa69f; --muted-strong:#c5d0c9; --line:#2c3630;
+  --green:#7dcb58; --green-strong:#9ad97a; --green-soft:#1e2e22;
+  --green-tint:#1a241d; --icon-bg:#232c27; --progress-bg:#2c3630;
+  --shadow:0 1px 2px rgba(0,0,0,.28),0 12px 28px rgba(0,0,0,.28);
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s}
@@ -1255,6 +1255,31 @@ body.menu-open .fab-action{visibility:hidden;pointer-events:none}
 }
 
 /* =====================================================
+   NUTRIFIT — BACKUP JSON NAS CONFIGURAÇÕES
+   ===================================================== */
+#settingsModal .settings-backup-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface)!important;
+}
+#settingsModal .settings-backup-card b{display:block;font-size:12px}
+#settingsModal .settings-backup-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-backup-actions{display:flex;gap:8px;flex:0 0 auto}
+#settingsModal .settings-backup-actions .outline-btn,
+#settingsModal .settings-backup-actions .primary{white-space:nowrap}
+@media(max-width:700px){
+  #settingsModal .settings-backup-card{flex-direction:column;align-items:flex-start;padding:12px}
+  #settingsModal .settings-backup-actions{width:100%;flex-direction:column}
+  #settingsModal .settings-backup-actions .outline-btn,
+  #settingsModal .settings-backup-actions .primary{width:100%;min-height:44px}
+}
+
+/* =====================================================
    NUTRIFIT v24 — ZONA DE PERIGO NAS CONFIGURAÇÕES
    Botão para limpar dados salvos no localStorage deste navegador.
    ===================================================== */
@@ -1394,6 +1419,38 @@ body:not(.is-dashboard) .topbar #pageTitle,
   }
 }
 
+#installAppBtn[hidden]{display:none !important}
+.install-steps{margin:16px 0 0;padding-left:18px;display:grid;gap:8px;color:var(--text);font-size:13px;line-height:1.45}
+.install-steps[hidden]{display:none !important}
+#installPromptBtn[hidden]{display:none !important}
+#settingsModal .settings-install-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)!important}
+#settingsModal .settings-install-card b{display:block;font-size:12px}
+#settingsModal .settings-install-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-install-card .outline-btn{flex:0 0 auto}
+/* Abas flutuantes — o mesmo invólucro de "Escolha o paciente". Só apresentação. */
+#patientModal > .modal-content,
+#editPatientModal > .modal-content,
+#settingsModal > .modal-content,
+#mealPlanModal > .modal-content,
+#suggestPlanModal > .modal-content,
+#recipeModal > .modal-content,
+#installModal > .modal-content{
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+}
+#installModal > .modal-content{
+  width:min(600px,94vw);
+  max-width:600px;
+  padding:28px;
+  box-sizing:border-box;
+}
+#installModal > .modal-content > .eyebrow{display:block;margin-top:2px}
+#installModal > .modal-content > h2{margin:7px 0 5px;font-size:24px;line-height:1.2}
+#installModal > .modal-content > .muted{margin:0;line-height:1.55}
+#installModal > .modal-content > .install-steps{margin-top:16px}
 .inline-icon{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
 .primary .inline-icon{filter:brightness(0) invert(1)}
 .text-btn .inline-icon{margin-left:2px}
@@ -1443,6 +1500,153 @@ body:not(.is-dashboard) .topbar #pageTitle,
   justify-content:center;
   box-sizing:border-box;
 }
+/* =====================================================
+   NUTRIFIT — VISUAL CLEAN
+   Só apresentação: paleta, tipo, cartões e respiro.
+   Ícones SVG, estrutura e funções permanecem iguais.
+   ===================================================== */
+body{
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-.011em;
+}
+.sidebar{
+  width:240px;
+  padding:22px 14px 18px;
+  background:var(--surface);
+  border-right:1px solid var(--line);
+}
+.brand{padding:2px 10px 22px;gap:12px}
+.brand-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--green);font-size:16px;letter-spacing:0;
+  box-shadow:none;
+}
+.brand strong{font-size:15px;letter-spacing:-.02em;font-weight:700}
+.brand span{font-size:11px;letter-spacing:0;color:var(--muted);font-weight:500}
+.nav{gap:2px}
+.nav-item{
+  gap:12px;padding:10px 12px;border-radius:10px;
+  font-size:13.5px;font-weight:600;letter-spacing:-.01em;
+  color:var(--muted-strong);
+}
+.nav-item img{width:18px;height:18px;opacity:.9}
+.nav-item:hover{background:var(--surface-alt)}
+.nav-item.active{
+  background:var(--green-soft);
+  color:var(--green-strong);
+  box-shadow:inset 2px 0 0 var(--green);
+}
+.main{margin-left:240px;width:calc(100% - 240px);padding:0 32px 48px}
+.topbar{height:84px;margin-bottom:6px}
+.eyebrow{font-size:11px;letter-spacing:.12em;font-weight:600;color:var(--muted)}
+.topbar h1{font-size:28px;margin:4px 0 0;letter-spacing:-.035em;font-weight:700}
+.icon-btn,.theme-btn{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--surface);box-shadow:none;
+}
+.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}
+.patient-selector{
+  min-height:44px;border-radius:12px;padding:6px 10px 6px 6px;
+  box-shadow:none;background:var(--surface);
+}
+.patient-selector:hover{transform:none;border-color:var(--green)}
+.patient-selector b{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.patient-selector small{font-size:11px}
+
+.hero{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:28px 32px;
+}
+.hero h2{font-size:26px;letter-spacing:-.035em;font-weight:700;margin:12px 0 8px}
+.hero p{font-size:14px;line-height:1.5;max-width:46ch;color:var(--muted)}
+.pill{
+  display:inline-flex;align-items:center;
+  background:var(--green-soft);color:var(--green-strong);
+  border:0;letter-spacing:.02em;font-size:11px;padding:5px 10px;
+}
+.primary{
+  border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;
+  letter-spacing:-.01em;box-shadow:none;
+}
+.primary:hover{filter:brightness(.96);transform:none}
+.outline-btn{
+  border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;
+  background:var(--surface);color:var(--muted-strong);letter-spacing:-.01em;
+}
+.outline-btn:hover{background:var(--surface-alt);color:var(--text)}
+.text-btn{font-size:13px;font-weight:600;letter-spacing:-.01em}
+
+.section-head{margin:26px 0 12px}
+.section-head h2{font-size:22px;letter-spacing:-.03em;font-weight:700}
+.section-head h3{font-size:16px;letter-spacing:-.02em;font-weight:700}
+.section-head p{font-size:13px;color:var(--muted)}
+
+.metric-grid{gap:12px}
+.metric-card,.card{
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  border-color:var(--line);
+}
+.metric-card{padding:16px 16px 14px}
+.metric-icon,.goal-icon,.plan-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--green-soft);
+}
+.metric-icon{margin-bottom:14px}
+.goal-icon,.plan-icon{margin:0}
+.metric-card>span,.card span{font-size:12px;font-weight:500;letter-spacing:-.01em}
+.metric-card strong{font-size:22px;letter-spacing:-.03em;font-weight:700;margin:4px 0}
+.metric-card em{font-size:12px}
+.progress{height:4px;margin:12px 0 8px;background:var(--progress-bg)}
+
+.card{padding:18px 18px 16px}
+.card-head h3{font-size:15px;letter-spacing:-.02em;font-weight:700}
+.card-head p{font-size:12px}
+.meal-row{padding:12px 0;gap:12px}
+.meal-icon{width:36px;height:36px;border-radius:10px;background:var(--icon-bg)}
+.meal-row b{font-size:13px;font-weight:600}
+.meal-row span{font-size:12px}
+.water-visual{border-radius:14px;background:var(--surface-alt)}
+.water-fill{background:var(--green-soft)}
+.water-actions button,.water-buttons button,.small-btn{
+  border-radius:10px;font-size:12px;font-weight:600;padding:9px 12px;
+}
+.hint{font-size:12px}
+.goal-card strong{font-size:24px;letter-spacing:-.03em}
+
+.form-grid input,.form-grid select,.modal textarea,
+.nf-meal-picker select,.builder-move select{
+  border-radius:10px;min-height:42px;
+}
+.form-grid input:focus,.form-grid select:focus,.modal textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px var(--green-soft);
+}
+.modal{background:rgba(16,22,18,.45);backdrop-filter:blur(8px)}
+.toast{border-radius:12px;font-size:13px;font-weight:500}
+
+.nf-builder-head h2{letter-spacing:-.03em;font-weight:700}
+.nf-patient-card,.nf-calorie-budget,.nf-target-row>div,
+.nf-food-row,.nf-builder-meal,.nf-meal-card,.nf-no-plan,.nf-plan-overview{
+  box-shadow:none;
+}
+.selected-calc-patient,.patient-selector{box-shadow:none}
+
+@media(min-width:1201px){
+  .main{padding-left:32px;padding-right:32px}
+}
+@media(max-width:900px){
+  .sidebar{width:248px}
+  .main{margin-left:0;width:100%;padding:0 16px 32px}
+  .hero{padding:22px}
+  .hero h2{font-size:22px}
+  .topbar h1{font-size:24px}
+}
+
 @media(max-width:700px){
   #patientModal .patient-modal{padding-top:68px}
   #patientModal .patient-modal>.close{
