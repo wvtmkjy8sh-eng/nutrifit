@@ -1,12 +1,22 @@
 {
-  "name": "Nome do Meu App",
-  "short_name": "MeuApp",
-  "start_url": "/",
+  "id": "./",
+  "name": "NutriFit — Nutrição inteligente",
+  "short_name": "NutriFit",
+  "description": "Dashboard profissional de nutrição e acompanhamento de pacientes.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#f4f6f5",
+  "theme_color": "#67a83d",
+  "orientation": "any",
+  "categories": ["health", "lifestyle"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

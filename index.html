@@ -2,13 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>NutriFit — Nutrição inteligente</title>
   <meta name="description" content="Dashboard profissional de nutrição e acompanhamento.">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" id="themeColor" content="#f4f6f5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NutriFit">
+  <link rel="stylesheet" href="css/style.css?v=23">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="assets/icon-512.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
 </head>
-<body>
+<body class="is-dashboard">
+  <div class="nf-route-progress" id="routeProgress" aria-hidden="true"></div>
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
@@ -18,7 +27,6 @@
 
       <nav class="nav">
         <button class="nav-item active" data-page="dashboard"><img src="assets/icons/home.svg">Dashboard</button>
-        <button class="nav-item" data-page="clientes"><img src="assets/icons/users.svg">Pacientes</button>
         <button class="nav-item" data-page="alimentacao"><img src="assets/icons/nutrition.svg">Alimentação</button>
         <button class="nav-item" data-page="plano"><img src="assets/icons/clipboard.svg">Plano alimentar</button>
         <button class="nav-item" data-page="calculadora"><img src="assets/icons/calculator.svg">Calculadora</button>
@@ -29,21 +37,22 @@
 
       <div class="sidebar-bottom">
         <button class="nav-item" id="settingsBtn" type="button"><img src="assets/icons/settings.svg">Configurações</button>
-        <button class="profile-mini" id="profilePatientBtn" type="button"><div class="avatar">—</div><div><b id="profilePatientName">Nenhum paciente</b><span>Paciente</span></div><img src="assets/icons/more.svg"></button>
       </div>
     </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <main class="main">
       <header class="topbar">
         <div>
-          <button class="mobile-menu" id="mobileMenu">☰</button>
-          <span class="eyebrow">SEGUNDA-FEIRA, 14 SET</span>
-          <h1 id="pageTitle">Olá, Nutri</h1>
+          <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Abrir menu"><img src="assets/icons/menu.svg" alt=""></button>
+          <time class="eyebrow" id="currentDate" datetime=""></time>
+          <h1 id="pageTitle">Olá,</h1>
         </div>
         <div class="top-actions">
-          <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron">⌄</span></button>
+          <button class="patient-selector" id="patientSelector" type="button" aria-haspopup="dialog"><span class="avatar small-avatar">—</span><span><b id="selectedPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span><span class="chevron"><img src="assets/icons/chevron-down.svg" alt=""></span></button>
+          <button class="icon-btn install-btn" id="installAppBtn" type="button" title="Instalar aplicativo" aria-label="Instalar aplicativo"><img src="assets/icons/download.svg" alt=""></button>
           <button class="icon-btn" title="Notificações"><img src="assets/icons/bell.svg"></button>
-          <button class="theme-btn" id="themeToggle">◐</button>
+          <button class="theme-btn" id="themeToggle" type="button" aria-label="Alternar tema"><img src="assets/icons/moon.svg" alt=""></button>
         </div>
       </header>
 
@@ -53,7 +62,7 @@
             <span class="pill">● Plano em andamento</span>
             <h2>Seu progresso começa<br>com pequenas escolhas.</h2>
             <p>Você está seguindo bem. Mantenha o foco nas metas de hoje.</p>
-            <button class="primary" data-page="alimentacao">Ver alimentação <span>→</span></button>
+            <button class="primary" data-page="alimentacao">Ver alimentação <img class="inline-icon" src="assets/icons/arrow-right.svg" alt=""></button>
           </div>
           <div class="hero-ring"><div><strong id="dashboardProgress">0%</strong><span>meta diária</span></div></div>
         </div>
@@ -68,11 +77,8 @@
 
         <div class="content-grid">
           <article class="card meals-card">
-            <div class="card-head"><div><h3>Refeições de hoje</h3><p id="dashboardMealsSubtitle">Seu plano alimentar</p></div><button class="text-btn" data-page="alimentacao">Ver tudo →</button></div>
-            <div class="meal-row done"><div class="meal-icon"><img src="assets/icons/sun.svg"></div><div><b>Café da manhã</b><span>07:30 · 420 kcal</span></div><div class="meal-status">Concluído</div></div>
-            <div class="meal-row done"><div class="meal-icon"><img src="assets/icons/restaurant.svg"></div><div><b>Almoço</b><span>12:30 · 610 kcal</span></div><div class="meal-status">Concluído</div></div>
-            <div class="meal-row current"><div class="meal-icon"><img src="assets/icons/apple.svg"></div><div><b>Lanche da tarde</b><span>16:30 · 280 kcal</span></div><button class="small-btn">Registrar</button></div>
-            <div class="meal-row"><div class="meal-icon"><img src="assets/icons/moon.svg"></div><div><b>Jantar</b><span>20:00 · 520 kcal</span></div><span class="pending">Pendente</span></div>
+            <div class="card-head"><div><h3>Refeições de hoje</h3><p id="dashboardMealsSubtitle">Selecione um paciente para carregar o plano.</p></div><button class="text-btn" data-page="alimentacao">Ver tudo <img class="inline-icon" src="assets/icons/arrow-right.svg" alt=""></button></div>
+            <div class="meal-row"><div class="meal-icon"><img src="assets/icons/clipboard.svg"></div><div><b>Nenhum paciente selecionado</b><span>Use o seletor no topo para carregar as informações.</span></div><span class="pending">Pendente</span></div>
           </article>
 
           <article class="card hydration">
@@ -92,20 +98,8 @@
         </div>
       </section>
 
-      <section class="page" id="clientes">
-        <div class="section-head clients-page-head">
-          <div><span class="eyebrow">CADASTRO</span><h2>Pacientes</h2><p>Gerencie pacientes, dados, metas e acesso em um único lugar.</p></div>
-          <button class="primary" id="addPatientBtn" type="button">+ Novo paciente</button>
-        </div>
-        <div class="clients-toolbar card">
-          <div class="clients-search"><img src="assets/icons/search.svg" alt=""><input id="patientSearch" type="search" placeholder="Buscar por nome ou e-mail" autocomplete="off"></div>
-          <div class="clients-stats" id="patientStats"></div>
-        </div>
-        <div class="clients-grid" id="patientsCrudList"></div>
-      </section>
-
       <section class="page" id="alimentacao">
-        <div class="section-head"><div><h2>Alimentação</h2><p id="foodPageSubtitle">Selecione um paciente para visualizar a alimentação.</p></div><button class="primary" id="foodAddPlanBtn" type="button">+ Adicionar plano</button></div>
+        <div class="section-head"><div><h2>Alimentação</h2><p id="foodPageSubtitle">Selecione um paciente para visualizar a alimentação.</p></div><button class="primary fab-action" id="foodAddPlanBtn" type="button"><img class="fab-icon" src="assets/icons/plus.svg" alt=""><span class="fab-label">Adicionar plano</span></button></div>
         <div id="foodPlanContent"></div>
       </section>
 
@@ -126,33 +120,38 @@
 
       <section class="page" id="calculadora">
         <div class="section-head"><div><h2>Calculadora metabólica</h2><p>Dados preenchidos automaticamente com o paciente selecionado.</p></div><div class="selected-calc-patient" id="calculatorPatientSummary"><span class="avatar small-avatar">—</span><span><b id="calculatorPatientName">Nenhum paciente</b><small>Selecione um paciente</small></span></div></div>
-        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" value="41"></label><label>Peso (kg)<input id="weight" type="number" value="85"></label><label>Altura (cm)<input id="height" type="number" value="175"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">2.548 kcal</strong><p>Gasto energético diário</p><div class="result-list"><div><span>TMB</span><b id="bmr">1.644 kcal</b></div><div><span>Manutenção</span><b id="maintenance">2.548 kcal</b></div><div><span>Déficit sugerido*</span><b id="deficit">2.048 kcal</b></div></div><small>*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.</small></div></div>
+        <div class="calculator-grid"><form class="card calculator" id="calcForm"><h3>Seus dados</h3><div class="form-grid"><label>Sexo<select id="sex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label><label>Idade<input id="age" type="number" inputmode="numeric" min="10" placeholder="—"></label><label>Peso (kg)<input id="weight" type="number" inputmode="decimal" step="0.1" min="1" placeholder="—"></label><label>Altura (cm)<input id="height" type="number" inputmode="numeric" min="50" placeholder="—"></label><label class="wide">Atividade<select id="activity"><option value="1.2">Sedentário</option><option value="1.375">Levemente ativo</option><option value="1.55" selected>Moderadamente ativo</option><option value="1.725">Muito ativo</option><option value="1.9">Extremamente ativo</option></select></label></div><button class="primary full" type="submit">Calcular</button></form><div class="card result-card is-empty" id="calculatorResultCard"><div class="metric-icon"><img src="assets/icons/calculator.svg"></div><span>Resultado estimado</span><strong id="tdee">—</strong><p id="calculatorResultHint">Carregue um paciente para ver o gasto energético real.</p><div class="result-list" id="calculatorResultList" hidden><div><span>TMB</span><b id="bmr">—</b></div><div><span>Manutenção</span><b id="maintenance">—</b></div><div><span>Déficit sugerido*</span><b id="deficit">—</b></div></div><small id="calculatorResultNote">Nenhuma estimativa fictícia é exibida sem um perfil carregado.</small></div></div>
       </section>
 
       <section class="page" id="agua">
-        <div class="section-head"><div><h2>Hidratação</h2><p>Acompanhe seu consumo de água.</p></div></div>
-        <div class="hydration-large card"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">1,8 L</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong>2,5 L</strong><div class="progress large"><i id="waterBar" style="width:72%"></i></div><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
+        <div class="section-head"><div><h2>Hidratação</h2><p id="waterPageSubtitle">Selecione um paciente para acompanhar a hidratação.</p></div></div>
+        <div class="hydration-large card" id="aguaCard"><div class="big-water"><img src="assets/icons/water.svg"><strong id="waterLiters">—</strong><span>consumidos hoje</span></div><div class="hydration-info"><span>Meta diária</span><strong id="waterGoalValue">—</strong><div class="progress large"><i id="waterBar" style="width:0%"></i></div><p class="hint" id="waterPageHint">Selecione um paciente para ver a hidratação real.</p><div class="water-buttons"><button data-water="250">+250 ml</button><button data-water="500">+500 ml</button><button data-water="-250">−250 ml</button></div></div></div>
       </section>
 
       <section class="page" id="evolucao">
-        <div class="section-head"><div><h2>Evolução</h2><p>Veja como seu corpo está respondendo ao plano.</p></div><button class="outline-btn">Últimos 30 dias</button></div>
-        <div class="evolution-cards"><div class="card"><span>Peso atual</span><strong>82,0 kg</strong><em>↓ 4,8 kg</em></div><div class="card"><span>Cintura</span><strong>88 cm</strong><em>↓ 6 cm</em></div><div class="card"><span>Adesão</span><strong>92%</strong><em>↑ 8%</em></div></div>
-        <article class="card big-chart"><div class="card-head"><div><h3>Histórico de peso</h3><p>Agosto — Setembro</p></div></div><div class="chart tall"><svg viewBox="0 0 900 300" preserveAspectRatio="none"><path d="M0 55 C90 45 120 80 210 95 S330 125 420 145 S540 125 620 190 S770 205 900 250" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg></div></article>
+        <div class="section-head"><div><h2>Evolução</h2><p id="evoPageSubtitle">Selecione um paciente para ver os dados reais.</p></div><button class="outline-btn" type="button">Últimos 30 dias</button></div>
+        <div class="evolution-cards"><div class="card"><span>Peso atual</span><strong id="evoWeight">—</strong><em id="evoWeightNote">Selecione um paciente</em></div><div class="card"><span>Cintura</span><strong id="evoWaist">—</strong><em id="evoWaistNote">Não informado</em></div><div class="card"><span>Adesão</span><strong id="evoAdherence">—</strong><em id="evoAdherenceNote">Não informado</em></div></div>
+        <article class="card big-chart"><div class="card-head"><div><h3>Histórico de peso</h3><p id="evoChartCaption">Nenhum histórico cadastrado</p></div></div><div class="chart tall evo-chart-empty" id="evoChartBox"><p class="evo-empty-chart" id="evoChartEmpty">Nenhum gráfico fictício é exibido. O histórico aparece quando houver registros do paciente.</p></div></article>
       </section>
 
       <section class="page" id="receitas">
-        <div class="section-head"><div><h2>Receitas</h2><p>Opções práticas alinhadas ao seu plano.</p></div><button class="primary">+ Nova receita</button></div>
-        <div class="recipe-grid"><article class="recipe-card card"><div class="recipe-photo">🥗</div><div><span>Almoço · 420 kcal</span><h3>Frango com legumes</h3><p>48 g proteína · 18 g carboidratos · 18 g gordura</p><button class="text-btn">Ver receita →</button></div></article><article class="recipe-card card"><div class="recipe-photo">🥣</div><div><span>Café da manhã · 380 kcal</span><h3>Overnight oats</h3><p>20 g proteína · 48 g carboidratos · 11 g gordura</p><button class="text-btn">Ver receita →</button></div></article><article class="recipe-card card"><div class="recipe-photo">🍳</div><div><span>Jantar · 360 kcal</span><h3>Omelete proteico</h3><p>34 g proteína · 12 g carboidratos · 19 g gordura</p><button class="text-btn">Ver receita →</button></div></article></div>
+        <div class="section-head"><div><h2>Receitas</h2><p id="recipesPageSubtitle">Cadastre receitas do consultório, edite e exclua quando quiser.</p></div><button class="primary" id="addRecipeBtn" type="button">+ Nova receita</button></div>
+        <div class="recipe-grid" id="recipeGrid"></div>
       </section>
     </main>
   </div>
 
+  <nav class="bottom-nav" aria-label="Navegação principal">
+    <button class="nav-item" data-page="dashboard" type="button"><img src="assets/icons/home.svg" alt="">Início</button>
+    <button class="nav-item" data-page="alimentacao" type="button"><img src="assets/icons/nutrition.svg" alt="">Alimentação</button>
+    <button class="nav-item" data-page="plano" type="button"><img src="assets/icons/clipboard.svg" alt="">Plano</button>
+    <button class="nav-item" id="bottomNavMore" type="button"><img src="assets/icons/more.svg" alt="">Mais</button>
+  </nav>
+
   <div class="modal" id="patientModal" aria-hidden="true">
     <div class="modal-content patient-modal">
-      <button class="close" id="closePatientModal" type="button" aria-label="Fechar">×</button>
-      <span class="eyebrow">SELECIONAR PACIENTE</span>
-      <h2>Escolha o paciente</h2>
-      <p class="muted">Clique em um paciente para selecioná-lo e depois carregue as informações.</p>
+      <button class="close" id="closePatientModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
+      <div class="patient-modal-head"><div><span class="eyebrow">SELECIONAR PACIENTE</span><h2>Escolha o paciente</h2><p class="muted">Clique em um paciente para selecioná-lo e depois carregue as informações.</p></div><button class="outline-btn" id="addPatientBtn" type="button">+ Novo paciente</button></div>
       <div class="patient-list" id="patientList"></div>
       <div class="selected-patient-box" id="selectedPatientBox">Nenhum paciente selecionado.</div>
       <div class="modal-actions"><button class="outline-btn" id="editPatientBtn" type="button">Editar dados/metas</button><button class="primary" id="loadPatientBtn" type="button" disabled>Carregar informações do paciente</button></div>
@@ -161,12 +160,12 @@
 
   <div class="modal" id="editPatientModal" aria-hidden="true">
     <div class="modal-content wide-modal edit-patient-modal">
-      <button class="close" id="closeEditPatientModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeEditPatientModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="edit-patient-header"><div class="edit-patient-avatar" id="editPatientAvatar">MA</div><div><span class="eyebrow">FICHA DO PACIENTE</span><h2 id="editPatientTitle">Informações do paciente</h2><p class="muted" id="editPatientSubtitle">Atualize os dados usados pelo NutriFit.</p></div></div>
       <form id="editPatientForm">
-        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">1</span><div><b>Dados pessoais</b><small>Informações básicas do paciente</small></div></div><div class="form-grid"><label>Nome completo<input id="editName" required></label><label>E-mail<input id="editEmail" type="email"></label><label>Idade<input id="editAge" type="number" min="10" max="120"></label><label>Sexo<select id="editSex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label></div></div>
-        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">2</span><div><b>Dados corporais</b><small>Usados nos cálculos metabólicos</small></div></div><div class="form-grid"><label>Peso atual (kg)<input id="editWeight" type="number" step="0.1" min="1"></label><label>Altura (cm)<input id="editHeight" type="number" min="50" max="250"></label><label>Objetivo<select id="editObjective"><option>Emagrecimento</option><option>Ganho de massa muscular</option><option>Manutenção de peso</option><option>Performance esportiva</option></select></label></div></div>
-        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">3</span><div><b>Metas nutricionais</b><small>Defina os principais objetivos diários</small></div></div><div class="form-grid"><label>Meta calórica (kcal)<input id="editCalories" type="number" min="800"></label><label>Proteína (g/dia)<input id="editProtein" type="number" min="0"></label><label>Água (ml/dia)<input id="editWaterGoal" type="number" min="500"></label></div></div>
+        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">1</span><div><b>Dados pessoais</b><small>Informações básicas do paciente</small></div></div><div class="form-grid"><label>Nome completo<input id="editName" required></label><label>E-mail<input id="editEmail" type="email"></label><label>Idade<input id="editAge" type="number" inputmode="numeric" min="10" max="120"></label><label>Sexo<select id="editSex"><option value="m">Masculino</option><option value="f">Feminino</option></select></label></div></div>
+        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">2</span><div><b>Dados corporais</b><small>Usados nos cálculos metabólicos</small></div></div><div class="form-grid"><label>Peso atual (kg)<input id="editWeight" type="number" inputmode="decimal" step="0.1" min="1"></label><label>Altura (cm)<input id="editHeight" type="number" inputmode="numeric" min="50" max="250"></label><label>Objetivo<select id="editObjective"><option>Emagrecimento</option><option>Ganho de massa muscular</option><option>Manutenção de peso</option><option>Performance esportiva</option></select></label></div></div>
+        <div class="edit-section"><div class="edit-section-title"><span class="section-icon">3</span><div><b>Metas nutricionais</b><small>Defina os principais objetivos diários</small></div></div><div class="form-grid"><label>Meta calórica (kcal)<input id="editCalories" type="number" inputmode="numeric" min="800"></label><label>Proteína (g/dia)<input id="editProtein" type="number" inputmode="numeric" min="0"></label><label>Água (ml/dia)<input id="editWaterGoal" type="number" inputmode="numeric" min="500"></label></div></div>
         <div class="edit-section"><div class="edit-section-title"><span class="section-icon">4</span><div><b>Preferências e restrições</b><small>Personalize a alimentação do paciente</small></div></div><div class="form-grid"><label class="wide">Restrições e alergias<input id="editRestrictions" placeholder="Ex.: lactose, amendoim, sem peixe"></label><label class="wide">Preferências alimentares<input id="editPreferences" placeholder="Ex.: comida brasileira, refeições simples, pouco açúcar"></label></div></div>
         <div class="modal-actions edit-actions"><button class="danger-btn" type="button" id="deleteEditPatient">Excluir</button><button class="outline-btn" type="button" id="cancelEditPatient">Cancelar</button><button class="primary" type="submit" id="saveEditPatient">Salvar alterações</button></div>
       </form>
@@ -175,13 +174,16 @@
 
   <div class="modal" id="settingsModal" aria-hidden="true">
     <div class="modal-content settings-patient-modal">
-      <button class="close" id="closeSettingsModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeSettingsModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <span class="eyebrow">CONFIGURAÇÕES</span><h2>Preferências do NutriFit</h2><p class="muted">Configurações do atendimento e da experiência do aplicativo.</p>
       <div class="settings-grid">
         <label class="setting-row"><span><b>Modo escuro</b><small>Alternar aparência do sistema.</small></span><input id="settingDark" type="checkbox"></label>
         <label class="setting-row"><span><b>Salvar automaticamente</b><small>Guardar paciente, metas e preferências neste navegador.</small></span><input id="settingAutoSave" type="checkbox" checked></label>
         <label class="setting-row"><span><b>Mostrar sugestões de alimentação</b><small>Disponibilizar recomendações no plano alimentar.</small></span><input id="settingSuggestions" type="checkbox" checked></label>
+        <div class="setting-block settings-install-card" id="installAppCard"><div><b>Instalar aplicativo</b><small id="installAppHint">Disponível no computador, Android e iPhone.</small></div><button class="outline-btn" id="installAppSettingsBtn" type="button">Como instalar</button></div>
         <div class="setting-block settings-patient-card"><div class="settings-patient-title"><span class="settings-patient-avatar" id="settingsPatientAvatar">—</span><div><b>Paciente ativo</b><span id="settingsPatientName">Nenhum paciente selecionado</span></div></div><button class="outline-btn" id="settingsEditPatient" type="button">Editar paciente</button></div>
+        <div class="setting-block settings-backup-card"><div><b>Backup e importação</b><small>Baixe um JSON com pacientes, planos, receitas e preferências, ou restaure um arquivo exportado neste navegador.</small></div><div class="settings-backup-actions"><button class="outline-btn" id="exportBackupBtn" type="button">Baixar backup</button><button class="primary" id="importBackupBtn" type="button">Importar JSON</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden></div></div>
+        <div class="setting-block settings-danger-card"><div><b>Limpar dados do aplicativo</b><small>Remove todos os pacientes, planos e preferências salvos neste navegador. Esta ação não pode ser desfeita.</small></div><button class="danger-btn" id="clearAppDataBtn" type="button">Limpar dados</button></div>
       </div>
       <div class="modal-actions"><button class="primary" id="saveSettingsBtn" type="button">Salvar configurações</button></div>
     </div>
@@ -189,7 +191,7 @@
 
   <div class="modal" id="mealPlanModal" aria-hidden="true">
     <div class="modal-content wide-modal meal-plan-modal nf-plan-modal-premium">
-      <button class="close" id="closeMealPlanModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeMealPlanModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="modal-identity"><span class="avatar small-avatar" id="planHeaderAvatar">—</span><div><span class="eyebrow">PLANO DO PACIENTE</span><h2>Adicionar plano alimentar</h2></div></div>
       <p class="muted">A calculadora define as metas. Você escolhe os alimentos e o NutriFit calcula as quantidades necessárias.</p>
       <form id="mealPlanForm">
@@ -211,7 +213,7 @@
 
   <div class="modal" id="suggestPlanModal" aria-hidden="true">
     <div class="modal-content wide-modal nf-plan-modal-premium suggest-patient-modal">
-      <button class="close" id="closeSuggestPlanModal" type="button" aria-label="Fechar">×</button>
+      <button class="close" id="closeSuggestPlanModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
       <div class="edit-patient-header suggest-patient-header">
         <div class="edit-patient-avatar" id="suggestPatientAvatar">—</div>
         <div>
@@ -241,12 +243,64 @@
     </div>
   </div>
 
+  <div class="modal" id="recipeModal" aria-hidden="true">
+    <div class="modal-content wide-modal nf-plan-modal-premium recipe-modal">
+      <button class="close" id="closeRecipeModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
+      <form id="recipeForm" class="recipe-modal-form">
+        <div class="edit-patient-header suggest-patient-header recipe-modal-header">
+          <div class="recipe-emoji-preview" id="recipeEmojiPreview"><img src="assets/icons/salad.svg" alt=""></div>
+          <div>
+            <span class="eyebrow">RECEITAS</span>
+            <h2 id="recipeModalTitle">Nova receita</h2>
+            <p class="muted" id="recipeModalSubtitle">Monte uma receita simples: nome, refeição, ingredientes e modo de preparo.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>Nome da receita<input id="recipeName" required placeholder="Ex.: Frango grelhado com legumes"></label>
+          <label>Refeição<select id="recipeMeal"><option>Café da manhã</option><option>Lanche da manhã</option><option>Almoço</option><option>Lanche da tarde</option><option>Jantar</option><option>Ceia</option></select></label>
+          <label class="wide">Ícone<div class="recipe-emoji-picks" id="recipeEmojiPicks"></div></label>
+          <label>Kcal<input id="recipeKcal" type="number" min="0" placeholder="Opcional"></label>
+          <label>Proteína (g)<input id="recipeProtein" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label>Carboidratos (g)<input id="recipeCarbs" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label>Gorduras (g)<input id="recipeFat" type="number" min="0" step="0.1" placeholder="Opcional"></label>
+          <label class="wide">Ingredientes (um por linha)<textarea id="recipeIngredients" rows="4" placeholder="Ex.:&#10;150 g de peito de frango&#10;1 colher de azeite&#10;Salada variada"></textarea></label>
+          <label class="wide">Modo de preparo<textarea id="recipeSteps" rows="4" placeholder="Ex.: Grelhe o frango, tempere e sirva com a salada."></textarea></label>
+        </div>
+        <div class="modal-actions edit-actions">
+          <button class="danger-btn" type="button" id="deleteRecipeBtn" hidden>Excluir</button>
+          <button class="outline-btn" type="button" id="cancelRecipeBtn">Cancelar</button>
+          <button class="primary" type="submit" id="saveRecipeBtn">Salvar receita</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="installModal" aria-hidden="true">
+    <div class="modal-content install-modal">
+      <button class="close" id="closeInstallModal" type="button" aria-label="Fechar"><img src="assets/icons/x.svg" alt=""></button>
+      <span class="eyebrow">APLICATIVO</span>
+      <h2>Instalar o NutriFit</h2>
+      <p class="muted" id="installLead">Adicione o NutriFit à tela inicial para abrir como aplicativo, sem a barra do navegador.</p>
+      <ol class="install-steps" id="installStepsIos" hidden>
+        <li>Abra este endereço no Safari.</li>
+        <li>Toque em <b>Compartilhar</b>.</li>
+        <li>Toque em <b>Adicionar à Tela de Início</b> e confirme.</li>
+      </ol>
+      <ol class="install-steps" id="installStepsAndroid" hidden>
+        <li>Abra o menu do Chrome (três pontos).</li>
+        <li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li>
+        <li>Confirme para criar o ícone do NutriFit.</li>
+      </ol>
+      <ol class="install-steps" id="installStepsDesktop" hidden>
+        <li>No Chrome ou Edge, use o ícone de instalar na barra de endereço.</li>
+        <li>Ou abra o menu do navegador e escolha <b>Instalar NutriFit</b>.</li>
+      </ol>
+      <div class="modal-actions">
+        <button class="outline-btn" id="closeInstallModalBtn" type="button">Fechar</button>
+        <button class="primary" id="installPromptBtn" type="button" hidden>Instalar agora</button>
+      </div>
+    </div>
+  </div>
   <div class="modal" id="toastModal" aria-hidden="true"></div>
-  <script src="js/app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
-    }
-  </script>
+  <script src="js/app.js?v=20"></script>
 </body>
 </html>

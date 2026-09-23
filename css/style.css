@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root{
-  --bg:#f5f7f4; --surface:#ffffff; --surface-alt:#f0f4ef; --text:#17201b;
-  --muted:#718078; --muted-strong:#5f6d64; --line:#e3e9e4;
-  --green:#67a83d; --green-strong:#4d8d2e; --green-soft:#eaf5e4;
-  --green-tint:#eef7e9; --icon-bg:#f2f5f1; --progress-bg:#e8eee6;
-  --shadow:0 10px 30px rgba(30,55,35,.07); --radius:20px;
+  --bg:#f4f6f5; --surface:#ffffff; --surface-alt:#f7f8f7; --text:#14201a;
+  --muted:#66736c; --muted-strong:#46564e; --line:#e4eae6;
+  --green:#3d8f34; --green-strong:#2d7426; --green-soft:#e7f3e3;
+  --green-tint:#f3faf1; --icon-bg:#f2f5f3; --progress-bg:#e6eee8;
+  --shadow:0 1px 2px rgba(20,32,26,.04),0 10px 28px rgba(20,32,26,.05); --radius:16px;
 }
 body.dark{
-  --bg:#121713; --surface:#1b211e; --surface-alt:#222a25; --text:#f1f5f1;
-  --muted:#9ca99f; --muted-strong:#c2ccc4; --line:#303a33;
-  --green:#82c65c; --green-strong:#9bd477; --green-soft:#233923;
-  --green-tint:#1e2b20; --icon-bg:#252e28; --progress-bg:#303a33;
-  --shadow:0 12px 30px rgba(0,0,0,.22);
+  --bg:#101412; --surface:#181e1b; --surface-alt:#202824; --text:#f3f6f4;
+  --muted:#9aa69f; --muted-strong:#c5d0c9; --line:#2c3630;
+  --green:#7dcb58; --green-strong:#9ad97a; --green-soft:#1e2e22;
+  --green-tint:#1a241d; --icon-bg:#232c27; --progress-bg:#2c3630;
+  --shadow:0 1px 2px rgba(0,0,0,.28),0 12px 28px rgba(0,0,0,.28);
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s}
@@ -22,7 +22,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .brand{display:flex;align-items:center;gap:11px;padding:0 10px 30px}.brand-mark{width:39px;height:39px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700}.brand strong{display:block;font-size:18px}.brand span{font-size:10px;color:var(--muted)}
 .nav{display:grid;gap:5px}.nav-item{width:100%;display:flex;align-items:center;gap:13px;padding:12px 13px;border-radius:12px;background:transparent;color:var(--muted-strong);text-align:left;font-weight:600;font-size:13px;transition:.2s}.nav-item:hover{background:var(--surface-alt);color:var(--text)}.nav-item img{width:20px;height:20px;filter:var(--icon-filter,none)}.nav-item.active{background:var(--green-soft);color:var(--green-strong)}
 .sidebar-bottom{margin-top:auto;display:grid;gap:8px}.profile-mini{display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid var(--line);background:var(--surface);text-align:left;color:var(--text)}.profile-mini .avatar{width:34px;height:34px;border-radius:50%;background:var(--green-soft);color:var(--green-strong);display:grid;place-items:center;font-size:11px;font-weight:700}.profile-mini b,.profile-mini span{display:block}.profile-mini b{font-size:11px}.profile-mini span{font-size:9px;color:var(--muted)}.profile-mini>img{margin-left:auto;width:16px}
-.main{margin-left:248px;width:calc(100% - 248px);padding:0 38px 45px}.topbar{height:105px;display:flex;align-items:center;justify-content:space-between}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:1.3px;font-weight:700}.topbar h1{font-size:25px;margin:7px 0 0}.top-actions{display:flex;gap:9px}.icon-btn,.theme-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--text);transition:.2s}.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}.icon-btn img{width:19px}.theme-btn{font-size:18px}.mobile-menu{display:none}
+.main{margin-left:248px;width:calc(100% - 248px);padding:0 38px 45px}.topbar{height:105px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:1.3px;font-weight:700}.topbar h1{font-size:25px;margin:7px 0 0}.top-actions{display:flex;gap:9px}.icon-btn,.theme-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--text);transition:.2s}.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}.icon-btn img{width:19px}.theme-btn{font-size:18px}.mobile-menu{display:none}
 .page{display:none;max-width:1260px;margin:auto}.active-page{display:block}
 .hero{background:linear-gradient(105deg,var(--green-tint),var(--surface));border:1px solid var(--line);border-radius:25px;padding:30px 36px;display:flex;align-items:center;justify-content:space-between;overflow:hidden}.hero h2{font-size:28px;line-height:1.2;margin:14px 0 8px}.hero p{color:var(--muted);font-size:13px;margin:0 0 22px}.pill{font-size:10px;color:var(--green-strong);background:var(--green-soft);padding:7px 10px;border-radius:20px;font-weight:700}.hero-ring{width:125px;height:125px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0 82%,var(--line) 82% 100%);position:relative}.hero-ring:after{content:'';position:absolute;width:93px;height:93px;border-radius:50%;background:var(--surface)}.hero-ring div{position:relative;z-index:1;text-align:center}.hero-ring strong{display:block;font-size:22px}.hero-ring span{font-size:9px;color:var(--muted)}
 .primary{background:var(--green);color:#fff;padding:12px 17px;border-radius:11px;font-weight:700;font-size:12px;transition:.2s}.primary:hover{filter:brightness(.95);transform:translateY(-1px)}.primary span{margin-left:12px}
@@ -39,7 +39,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .evolution-cards{grid-template-columns:repeat(3,1fr)}.evolution-cards .card{padding:18px}.evolution-cards strong{display:block;font-size:25px;margin:7px 0}.evolution-cards em{font-size:10px;color:var(--green-strong);font-style:normal;font-weight:700}.big-chart{margin-top:14px}.tall{height:280px}
 .recipe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.recipe-photo{height:130px;border-radius:14px;background:var(--green-tint);display:grid;place-items:center;font-size:45px;margin-bottom:15px}.recipe-card h3{font-size:16px;margin:5px 0}.recipe-card p{font-size:10px;color:var(--muted);line-height:1.5}.recipe-card .text-btn{padding:0}
 @media(max-width:900px){.sidebar{transform:translateX(-100%);z-index:10;transition:.2s}.sidebar.open{transform:translateX(0)}.main{margin-left:0;width:100%;padding:0 18px 35px}.mobile-menu{display:inline-block;background:none;font-size:20px;margin-right:8px;color:var(--text)}.metric-grid,.food-summary{grid-template-columns:1fr 1fr}.content-grid,.calculator-grid{grid-template-columns:1fr}.plan-grid,.recipe-grid{grid-template-columns:1fr 1fr}.hero{padding:25px}.hero-ring{width:100px;height:100px}.hero-ring:after{width:76px;height:76px}}
-@media(max-width:600px){.topbar{height:90px}.topbar h1{font-size:20px}.hero{padding:20px;align-items:flex-start}.hero h2{font-size:22px}.hero-ring{display:none}.metric-grid,.food-summary,.plan-grid,.recipe-grid,.evolution-cards{grid-template-columns:1fr}.section-head{align-items:flex-start;gap:10px}.section-head .primary{padding:10px}.meal-row{gap:8px}.food-item{display:block}.hydration-large{padding:25px;display:block}.big-water{margin:auto;width:180px;height:180px}.hydration-info{margin-top:25px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.chart.tall{height:180px}}
+@media(max-width:600px){.topbar{height:90px;margin-bottom:14px}.topbar h1{font-size:20px}.hero{padding:20px;align-items:flex-start}.hero h2{font-size:22px}.hero-ring{display:none}.metric-grid,.food-summary,.plan-grid,.recipe-grid,.evolution-cards{grid-template-columns:1fr}.section-head{align-items:flex-start;gap:10px}.section-head .primary{padding:10px}.meal-row{gap:8px}.food-item{display:block}.hydration-large{padding:25px;display:block}.big-water{margin:auto;width:180px;height:180px}.hydration-info{margin-top:25px}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.chart.tall{height:180px}}
 
 /* SVG 2D theme visibility */
 .nav-item img,.metric-icon img,.goal-icon img,.plan-icon img,.meal-icon img,.water-visual img,.big-water img{color:var(--green)}
@@ -50,7 +50,16 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .patient-selector small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.patient-selector b{font-size:13px}.chevron{margin-left:auto;color:var(--muted);font-size:18px}.small-avatar{width:34px!important;height:34px!important;font-size:11px!important}
 .modal{position:fixed;inset:0;background:rgba(10,15,11,.58);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;backdrop-filter:blur(5px)}
 .modal.open{display:flex}.patient-modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 25px 80px rgba(0,0,0,.25);position:relative}.patient-modal h2{margin:7px 0 5px}.patient-modal .close{position:absolute;right:18px;top:15px;border:0;background:transparent;color:var(--muted);font-size:28px;cursor:pointer}.patient-list{display:grid;gap:10px;margin:20px 0}.patient-option{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--line);background:var(--surface-alt);color:var(--text);border-radius:16px;padding:12px;text-align:left;cursor:pointer}.patient-option:hover,.patient-option.selected{border-color:var(--green);background:var(--green-soft)}.patient-option .avatar{flex:0 0 42px}.patient-option b{display:block}.patient-option span{display:block;color:var(--muted);font-size:12px;margin-top:2px}.patient-option .check{margin-left:auto;color:var(--green-strong);font-weight:800}.selected-patient-box{background:var(--green-tint);border:1px solid var(--line);border-radius:14px;padding:13px;margin:10px 0 14px;font-size:13px}.load-patient-loading{opacity:.65;pointer-events:none}
-@media(max-width:850px){.patient-selector{min-width:0;padding:6px 8px}.patient-selector>span:nth-child(2){display:none}.chevron{display:none}}
+@media(max-width:850px){.patient-selector{min-width:0;width:40px;height:40px;padding:0;justify-content:center}.patient-selector>span:nth-child(2){display:none}.chevron{display:none}}
+
+/* Cabeçalho do modal "Selecionar paciente" com ação de novo cadastro */
+.patient-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.patient-modal-head .outline-btn{flex:0 0 auto;white-space:nowrap}
+.patient-option-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.patient-option-row .patient-option{margin-bottom:0;flex:1;min-width:0}
+.patient-option-row.selected .patient-option{border-color:var(--green);background:var(--green-soft);box-shadow:0 0 0 2px var(--green-soft)}
+.patient-option-delete{flex:0 0 auto;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted-strong);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.18s}
+.patient-option-delete:hover{background:rgba(190,55,55,.08);border-color:rgba(190,55,55,.35);color:#b13b3b}
 
 .toast{position:fixed;right:24px;bottom:24px;z-index:1200;background:var(--text);color:var(--surface);padding:13px 18px;border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
 
@@ -145,7 +154,7 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .nf-builder{display:grid;gap:14px}.nf-builder-top{display:grid;grid-template-columns:300px 1fr;gap:14px}.nf-patient-card,.nf-calorie-budget,.nf-target-row>div{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.nf-patient-card{display:flex;align-items:center;gap:12px;padding:18px}.nf-patient-card b{display:block;font-size:14px;margin-top:3px}.nf-patient-card small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
 .nf-calorie-budget{padding:18px 20px}.nf-budget-label{display:flex;justify-content:space-between;align-items:center;gap:10px}.nf-budget-label span{font-size:11px;color:var(--muted)}.nf-budget-label b{font-size:23px;color:var(--green-strong)}.nf-budget-bar{height:10px;background:var(--progress-bg);border-radius:20px;overflow:hidden;margin:13px 0 8px}.nf-budget-bar i{display:block;height:100%;background:var(--green);border-radius:inherit;transition:width .25s}.nf-calorie-budget.over .nf-budget-bar i{background:#d9534f}.nf-budget-foot{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted)}.nf-budget-foot b{color:var(--text)}.nf-budget-foot strong{color:var(--green-strong)}.nf-calorie-budget.over .nf-budget-foot strong{color:#d9534f}.nf-budget-source{display:block;color:var(--muted);font-size:9px;margin-top:10px}
 .nf-target-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.nf-target-row>div{padding:13px 15px}.nf-target-row span{display:block;color:var(--muted);font-size:10px}.nf-target-row b{display:block;font-size:17px;margin-top:4px}
-.nf-builder-grid{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(500px,1.4fr);gap:14px;align-items:start}.nf-food-library,.nf-menu-card{min-width:0}.nf-builder-section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.nf-builder-section-head h3{margin:4px 0;font-size:16px}.nf-builder-section-head p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.nf-food-search{display:flex;align-items:center;gap:8px;margin:14px 0 10px}.nf-food-search input{flex:1;min-width:0}.nf-food-search span{font-size:8px;color:var(--muted);white-space:nowrap}.nf-builder-food-list{display:grid;gap:7px;max-height:620px;overflow:auto;padding-right:3px}.nf-food-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--surface-alt)}.nf-food-main{min-width:0}.nf-food-main b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nf-food-main span{display:block;color:var(--muted);font-size:8px;margin-top:3px}.nf-food-nutrients{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.nf-food-nutrients b{font-size:11px;color:var(--green-strong)}.nf-food-nutrients span{font-size:8px;color:var(--muted)}.nf-add-food{padding:7px 9px!important;font-size:9px!important}
+.nf-builder-grid{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(500px,1.4fr);gap:14px;align-items:start}.nf-food-library,.nf-menu-card{min-width:0}.nf-builder-section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.nf-builder-section-head h3{margin:4px 0;font-size:16px}.nf-builder-section-head p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}.nf-food-search{display:flex;align-items:center;gap:8px;margin:14px 0 10px}.nf-food-search input{flex:1;min-width:0}.nf-food-search span{font-size:8px;color:var(--muted);white-space:nowrap}.nf-builder-food-list{display:grid;gap:7px;max-height:620px;overflow:auto;padding-right:3px}.nf-food-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--surface-alt)}.nf-food-main{min-width:0}.nf-food-main b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nf-food-main span{display:block;color:var(--muted);font-size:8px;margin-top:3px}.nf-food-nutrients{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.nf-food-nutrients b{font-size:11px;color:var(--green-strong)}.nf-food-nutrients span{font-size:8px;color:var(--muted)}.nf-add-food{padding:7px 9px!important;font-size:11px!important}
 .nf-meal-suggestions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:13px 0}.nf-meal-suggestion{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-alt)}.nf-meal-suggestion>span{font-size:8px;color:var(--muted);font-weight:700}.nf-meal-suggestion b{display:block;font-size:9px}.nf-meal-suggestion small{display:block;color:var(--muted);font-size:8px;margin-top:2px}.nf-meal-suggestion strong{font-size:9px;color:var(--green-strong);white-space:nowrap}.nf-meal-suggestion strong.warn{color:#c88700}
 .nf-menu-list{display:grid;gap:8px}.nf-builder-meal{border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--surface)}.nf-builder-meal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 13px;background:var(--surface-alt);border-bottom:1px solid var(--line)}.nf-builder-meal-head span{font-size:9px;color:var(--muted)}.nf-builder-meal-head h4{margin:3px 0 0;font-size:12px}.nf-meal-kcal{text-align:right}.nf-meal-kcal b{display:block;font-size:12px;color:var(--green-strong)}.nf-meal-kcal small{display:block;font-size:8px;color:var(--muted);margin-top:2px}.nf-builder-items{padding:6px 10px}.nf-builder-item{display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:8px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line)}.nf-builder-item:last-child{border-bottom:0}.nf-builder-item b{display:block;font-size:10px}.nf-builder-item small{display:block;color:var(--muted);font-size:8px;margin-top:2px}.nf-builder-item label{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:8px}.nf-builder-item input{width:68px;padding:7px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font-size:10px;text-align:right}.builder-remove-item{width:24px;height:24px;border-radius:8px;background:transparent;color:var(--muted);font-size:15px}.builder-remove-item:hover{background:var(--surface-alt);color:#d9534f}.nf-meal-empty{padding:13px;text-align:center;color:var(--muted);font-size:9px}.nf-builder-save{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.nf-builder-save label{font-size:9px;color:var(--muted)}.nf-builder-save input{display:block;width:100%;margin-top:5px}.nf-builder-save button{min-height:40px}.nf-builder-empty{display:flex;align-items:center;gap:14px;padding:28px}.nf-builder-empty-icon{width:48px;height:48px;border-radius:14px;background:var(--green-soft);display:grid;place-items:center;flex:0 0 48px}.nf-builder-empty-icon img{width:23px}.nf-builder-empty h3{margin:5px 0;font-size:16px}.nf-builder-empty p{margin:0;color:var(--muted);font-size:11px}
 @media(max-width:1050px){.nf-builder-top{grid-template-columns:1fr}.nf-builder-grid{grid-template-columns:1fr}.nf-builder-food-list{max-height:none}.nf-meal-suggestions{grid-template-columns:repeat(2,1fr)}}
@@ -156,7 +165,10 @@ button,input,select{font:inherit}button{cursor:pointer;border:0}
 .nf-food-row{grid-template-columns:minmax(180px,1fr) auto minmax(150px,190px) auto;align-items:center;gap:12px}
 .nf-meal-picker,.builder-move{display:flex;flex-direction:column;gap:4px;min-width:145px}
 .nf-meal-picker span,.builder-move span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.65}
-.nf-meal-picker select,.builder-move select{width:100%;border:1px solid var(--border,#ddd);background:var(--surface,#fff);border-radius:10px;padding:9px 10px;font:inherit;font-size:12px}
+.nf-meal-picker select,.builder-move select{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;font-size:12px;outline:none}
+.nf-meal-picker select:focus,.builder-move select:focus{border-color:var(--green)}
+.nf-meal-picker select option,.builder-move select option{background:var(--surface);color:var(--text)}
+.builder-food-meal:invalid{color:var(--muted)}
 .nf-builder-item{grid-template-columns:minmax(0,1fr) auto minmax(145px,170px) auto!important;align-items:center}
 .builder-move{margin-left:4px}
 @media(max-width:1050px){.nf-food-row{grid-template-columns:1fr 1fr}.nf-food-row .nf-add-food{justify-self:start}.nf-meal-picker{grid-column:2}.nf-builder-item{grid-template-columns:1fr auto!important}.nf-builder-item .builder-move{grid-column:1/-1;margin-left:0}.nf-builder-item .builder-remove-item{grid-column:2;grid-row:2}}
@@ -731,6 +743,30 @@ body{min-width:0;overflow-x:hidden}
   #suggestPlanModal .suggest-patient-meta{grid-template-columns:1fr 1fr}
   #suggestPlanModal .suggest-actions{grid-template-columns:1fr}
 }
+
+/* =====================================================
+   NUTRIFIT — "SUGERIR PLANO ALIMENTAR" 100% FLUTUANTE E RESPONSIVA
+   No mobile, a aba ocupa toda a tela (sem margens/backdrop visível),
+   permanecendo com rolagem interna própria.
+   ===================================================== */
+@media(max-width:700px){
+  #suggestPlanModal{padding:0;align-items:stretch}
+  #suggestPlanModal .suggest-patient-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    height:100svh;
+    max-height:100dvh;
+    max-height:100svh;
+    border-radius:0;
+    margin:0;
+  }
+}
+@supports not (height: 100dvh){
+  @media(max-width:700px){
+    #suggestPlanModal .suggest-patient-modal{height:100vh;max-height:100vh}
+  }
+}
 /* =====================================================
    BOTAO FECHAR — PADRAO GLOBAL DOS MODAIS/ABAS FLUTUANTES
    ===================================================== */
@@ -1050,3 +1086,744 @@ body{min-width:0;overflow-x:hidden}
 #dashboard .goal-card strong small{font-size:10px;color:var(--muted);font-weight:500}
 #dashboard .metric-card .progress i,#dashboard .goal-progress i{transition:width .25s ease}
 #dashboard .meal-row .small-btn{cursor:pointer}
+
+/* =====================================================
+   NUTRIFIT v23 — MENU MOBILE COM OVERLAY
+   Apenas apresentação: reaproveita a mesma abertura/fechamento já existente.
+   Hierarquia de camadas: menu lateral > overlay > barra inferior > FAB > conteúdo.
+   ===================================================== */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,11,.5);backdrop-filter:blur(2px);z-index:35;opacity:0;transition:opacity .2s}
+@media(max-width:900px){
+  .sidebar-overlay.open{display:block;opacity:1}
+  .sidebar{z-index:40}
+}
+/* O botão de ação flutua por cima do menu; a barra do rodapé permanece. */
+body.menu-open .fab-action{visibility:hidden;pointer-events:none}
+@media(max-width:900px){
+  body.menu-open .bottom-nav{z-index:50}
+  body.menu-open .sidebar{padding-bottom:calc(74px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
+}
+
+/* =====================================================
+   NUTRIFIT v23 — BARRA DE NAVEGAÇÃO INFERIOR (MOBILE)
+   Barra flutuante, arredondada e com rolagem horizontal quando os itens
+   não couberem na largura da tela. Reaproveita os mesmos botões [data-page].
+   ===================================================== */
+.bottom-nav{display:none}
+@media(max-width:900px){
+  .bottom-nav{
+    display:flex;
+    align-items:stretch;
+    gap:4px;
+    position:fixed;
+    left:10px;right:10px;
+    bottom:max(8px, calc(env(safe-area-inset-bottom, 0px) - 18px));
+    margin:0 auto;
+    max-width:520px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:0 14px 34px rgba(20,35,25,.16);
+    z-index:20;
+    padding:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .bottom-nav::-webkit-scrollbar{display:none}
+  .bottom-nav .nav-item{
+    flex:1 0 0;
+    width:auto;
+    scroll-snap-align:start;
+    flex-direction:column;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    padding:8px 10px;
+    min-width:64px;
+    border-radius:16px;
+    background:transparent;
+    color:var(--muted);
+    font-size:9px;
+    font-weight:700;
+    text-align:center;
+    white-space:nowrap;
+    min-height:52px;
+  }
+  .bottom-nav .nav-item img{width:19px;height:19px;flex:0 0 auto}
+  .bottom-nav .nav-item.active{background:var(--green-soft);color:var(--green-strong)}
+  .main{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:380px){
+  .bottom-nav .nav-item{font-size:8px;min-width:58px;padding:8px 6px}
+  .bottom-nav .nav-item img{width:18px;height:18px}
+}
+
+/* =====================================================
+   NUTRIFIT v23 — BOTÃO DE AÇÃO FLUTUANTE (FAB) NO MOBILE
+   Mesmo botão/ID/clique já existente; apenas reposicionado visualmente.
+   Especificidade reforçada para não ser sobrescrito por ".section-head .primary".
+   ===================================================== */
+.fab-action .fab-icon{display:inline-block;width:16px;height:16px;margin-right:6px;vertical-align:-3px;filter:brightness(0) invert(1)}
+.fab-action .fab-label{display:inline}
+@media(max-width:600px){
+  .section-head .fab-action.fab-action{
+    position:fixed;
+    right:18px;
+    bottom:calc(104px + env(safe-area-inset-bottom,0px));
+    left:auto;
+    z-index:22;
+    width:56px;
+    height:56px;
+    padding:0;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    box-shadow:0 10px 28px rgba(30,55,35,.28);
+  }
+  .fab-action .fab-icon{display:block;width:24px;height:24px;margin:0;font-size:inherit;filter:brightness(0) invert(1)}
+  .fab-action .fab-label{display:none}
+}
+
+/* =====================================================
+   NUTRIFIT v23 — FEEDBACK TÁTIL EM BOTÕES (TOQUE)
+   Apenas CSS: nenhuma função é alterada, só o retorno visual ao toque.
+   ===================================================== */
+.primary:active,.outline-btn:active,.danger-btn:active,.icon-btn:active,.theme-btn:active,
+.small-btn:active,.text-btn:active,.nav-item:active,.client-main:active,.food-choice:active{
+  transform:scale(.96);
+}
+@media(prefers-reduced-motion:reduce){
+  .primary:active,.outline-btn:active,.danger-btn:active,.icon-btn:active,.theme-btn:active,
+  .small-btn:active,.text-btn:active,.nav-item:active,.client-main:active,.food-choice:active{
+    transform:none;
+  }
+}
+
+/* =====================================================
+   NUTRIFIT v23 — ENTRADA SUAVE DE CONTEÚDO
+   Apenas uma animação de aparição; nenhum dado ou estado é alterado.
+   ===================================================== */
+@keyframes nfFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page.active-page{animation:nfFadeIn .28s ease}
+.card,.metric-card,.client-card,.recipe-card{animation:nfFadeIn .3s ease}
+@media(prefers-reduced-motion:reduce){
+  .page.active-page,.card,.metric-card,.client-card,.recipe-card{animation:none}
+}
+
+/* =====================================================
+   NUTRIFIT v24 — EFEITOS DE CARREGAMENTO SUAVES
+   Apenas apresentação: transições visuais de entrada/saída.
+   Nenhum dado, tempo de resposta real ou funcionalidade é alterado.
+   ===================================================== */
+
+/* Barra de progresso no topo ao trocar de página (feedback visual imediato) */
+.nf-route-progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--green-strong));z-index:2000;opacity:0;pointer-events:none;transition:opacity .15s ease}
+.nf-route-progress.active{opacity:1;animation:nfRouteProgress .45s ease forwards}
+@keyframes nfRouteProgress{0%{width:0}30%{width:45%}70%{width:78%}100%{width:100%}}
+
+/* Fade-in ampliado para listas e itens que são re-renderizados dinamicamente */
+.patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+.generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+.nf-meal-suggestion,.plan-meal,.client-card{
+  animation:nfFadeIn .32s ease;
+}
+
+/* Efeito de abertura suave dos modais (fade + leve escala), mantendo o mesmo
+   fluxo de abrir/fechar já existente via a classe "open". */
+@keyframes nfModalBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes nfModalContentIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal.open{animation:nfModalBackdropIn .18s ease}
+.modal.open .modal-content{animation:nfModalContentIn .22s cubic-bezier(.2,.7,.3,1)}
+
+/* Placeholder de carregamento (shimmer) reutilizável para estados vazios/transitórios */
+@keyframes nfShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.nf-skeleton{
+  border-radius:10px;
+  background:linear-gradient(90deg,var(--surface-alt) 25%,var(--line) 37%,var(--surface-alt) 63%);
+  background-size:200% 100%;
+  animation:nfShimmer 1.4s ease infinite;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nf-route-progress.active{animation:none;opacity:1;width:100%}
+  .patient-option,.nf-food-row,.nf-builder-meal,.nf-meal-card,.meal-row,.food-meal,
+  .generated-meal,.calculated-foods>div,.calculated-meals article,.recipe-card,
+  .nf-meal-suggestion,.plan-meal,.client-card,
+  .modal.open,.modal.open .modal-content{animation:none}
+  .nf-skeleton{animation:none}
+}
+
+/* =====================================================
+   NUTRIFIT — BACKUP JSON NAS CONFIGURAÇÕES
+   ===================================================== */
+#settingsModal .settings-backup-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface)!important;
+}
+#settingsModal .settings-backup-card b{display:block;font-size:12px}
+#settingsModal .settings-backup-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-backup-actions{display:flex;gap:8px;flex:0 0 auto}
+#settingsModal .settings-backup-actions .outline-btn,
+#settingsModal .settings-backup-actions .primary{white-space:nowrap}
+@media(max-width:700px){
+  #settingsModal .settings-backup-card{flex-direction:column;align-items:flex-start;padding:12px}
+  #settingsModal .settings-backup-actions{width:100%;flex-direction:column}
+  #settingsModal .settings-backup-actions .outline-btn,
+  #settingsModal .settings-backup-actions .primary{width:100%;min-height:44px}
+}
+
+/* =====================================================
+   NUTRIFIT v24 — ZONA DE PERIGO NAS CONFIGURAÇÕES
+   Botão para limpar dados salvos no localStorage deste navegador.
+   ===================================================== */
+#settingsModal .settings-danger-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(190,55,55,.28);
+  border-radius:14px;
+  background:rgba(190,55,55,.05)!important;
+}
+#settingsModal .settings-danger-card b{display:block;font-size:12px;color:#b13b3b}
+#settingsModal .settings-danger-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-danger-card .danger-btn{flex:0 0 auto;white-space:nowrap}
+@media(max-width:700px){
+  #settingsModal .settings-danger-card{flex-direction:column;align-items:flex-start;padding:12px}
+  #settingsModal .settings-danger-card .danger-btn{width:100%;min-height:44px}
+}
+
+/* =====================================================
+   NUTRIFIT — CABEÇALHO DAS ABAS INTERNAS
+   Evita o título duplicado (topo + seção). Fora do dashboard,
+   cada página usa apenas o próprio cabeçalho de seção.
+   ===================================================== */
+body:not(.is-dashboard) .topbar #pageTitle,
+.topbar #pageTitle[hidden]{display:none!important}
+
+/* =====================================================
+   NUTRIFIT — FOLGA DO BOTÃO FECHAR NOS MODAIS
+   Garante que eyebrows/títulos nunca fiquem sob o "×".
+   ===================================================== */
+.modal-content>.eyebrow:first-child,
+.modal-content>h2:first-of-type{padding-right:48px}
+.modal-content .edit-patient-header,
+.modal-content .suggest-patient-header,
+.modal-content .modal-identity{padding-right:48px}
+@media(max-width:430px){
+  .modal-content>.eyebrow:first-child,
+  .modal-content>h2:first-of-type,
+  .modal-content .edit-patient-header,
+  .modal-content .suggest-patient-header,
+  .modal-content .modal-identity{padding-right:44px}
+}
+
+#calculatorResultCard.is-empty #tdee{color:var(--muted);font-size:26px}
+.recipe-card{display:flex;flex-direction:column;padding:16px}
+.recipe-card .recipe-photo{margin-bottom:12px}
+.recipe-card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.recipe-card-actions .text-btn,.recipe-card-actions .outline-btn,.recipe-card-actions .danger-btn{margin:0;padding:8px 10px;min-height:36px}
+.recipe-empty{grid-column:1/-1;text-align:center;padding:36px 22px}
+.recipe-empty h3{margin:8px 0 6px}
+.recipe-empty p{margin:0 0 16px;color:var(--muted);font-size:13px}
+.recipe-emoji-preview{width:56px;height:56px;border-radius:16px;background:var(--green-tint);display:grid;place-items:center;font-size:28px;flex:0 0 auto}
+.recipe-emoji-picks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-emoji-picks button{width:42px;height:42px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--line);font-size:20px}
+.recipe-emoji-picks button.is-on{border-color:var(--green);background:var(--green-soft)}
+.recipe-ingredients,.recipe-steps{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.6}
+.recipe-view-macros{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.recipe-view-macros span{background:var(--green-soft);color:var(--green-strong);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700}
+
+.evo-empty-chart{margin:0;padding:28px 18px;color:var(--muted);font-size:13px;line-height:1.5;text-align:center;align-self:center}
+.evo-chart-empty{display:grid;place-items:center;background:var(--surface-alt);border-radius:16px}
+#aguaCard.is-empty .big-water strong{color:var(--muted)}
+
+/* Receitas — mesmo padrão das abas flutuantes (Sugerir plano / Adicionar plano) */
+#recipeModal{padding:clamp(12px,2vw,28px)}
+#recipeModal .recipe-modal{
+  width:min(820px,calc(100vw - 32px));
+  max-width:820px;
+  max-height:min(92vh,920px);
+  overflow:auto;
+  box-sizing:border-box;
+  padding:clamp(22px,3vw,34px);
+  border-radius:24px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+}
+#recipeModal .recipe-modal-header{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--surface-alt);
+  margin-bottom:18px;
+  align-items:center;
+  padding-right:48px;
+}
+#recipeModal .recipe-modal-header h2{font-size:20px;line-height:1.2;margin:3px 0 4px;overflow-wrap:anywhere}
+#recipeModal .recipe-modal-header .muted{font-size:11px;line-height:1.45;margin:0;overflow-wrap:anywhere}
+#recipeModal .recipe-modal-form .form-grid{margin-top:0}
+#recipeModal .recipe-modal-form textarea{
+  width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--surface);color:var(--text);
+  border-radius:12px;padding:12px;font:inherit;min-width:0;resize:vertical;min-height:92px;margin-top:6px;
+}
+#recipeModal .recipe-modal-form input,
+#recipeModal .recipe-modal-form select{
+  width:100%;box-sizing:border-box;min-height:46px;
+}
+#recipeModal .recipe-modal-form input:focus,
+#recipeModal .recipe-modal-form select:focus,
+#recipeModal .recipe-modal-form textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+#recipeModal .edit-actions{padding-top:18px;gap:8px}
+@media(max-width:900px){
+  #recipeModal .recipe-modal{width:min(94vw,760px);max-height:92vh;padding:24px}
+}
+@media(max-width:700px){
+  #recipeModal{align-items:stretch;overflow-y:auto;padding:0}
+  #recipeModal .recipe-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    height:100svh;
+    max-height:100dvh;
+    max-height:100svh;
+    border-radius:0;
+    margin:0;
+    padding:48px 16px 16px;
+  }
+  #recipeModal .recipe-modal-header{align-items:flex-start;margin-bottom:12px}
+  #recipeModal .recipe-modal-header h2{font-size:19px}
+  #recipeModal .recipe-modal-form .form-grid{grid-template-columns:1fr}
+  #recipeModal .recipe-modal-form .form-grid .wide{grid-column:auto}
+  #recipeModal .edit-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  #recipeModal .edit-actions button{width:100%;min-height:44px}
+  #recipeModal .recipe-emoji-picks button{width:44px;height:44px}
+}
+@media(max-width:430px){
+  #recipeModal .recipe-modal{padding:48px 13px 14px}
+  #recipeModal .recipe-modal-header{gap:9px}
+  #recipeModal .edit-actions{grid-template-columns:1fr}
+}
+@supports not (height: 100dvh){
+  @media(max-width:700px){
+    #recipeModal .recipe-modal{height:100vh;max-height:100vh}
+  }
+}
+
+#installAppBtn[hidden]{display:none !important}
+.install-steps{margin:16px 0 0;padding-left:18px;display:grid;gap:8px;color:var(--text);font-size:13px;line-height:1.45}
+.install-steps[hidden]{display:none !important}
+#installPromptBtn[hidden]{display:none !important}
+#settingsModal .settings-install-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)!important}
+#settingsModal .settings-install-card b{display:block;font-size:12px}
+#settingsModal .settings-install-card small{display:block;margin-top:4px;font-size:11px;line-height:1.4;color:var(--muted)}
+#settingsModal .settings-install-card .outline-btn{flex:0 0 auto}
+/* Abas flutuantes — o mesmo invólucro de "Escolha o paciente". Só apresentação. */
+#patientModal > .modal-content,
+#editPatientModal > .modal-content,
+#settingsModal > .modal-content,
+#mealPlanModal > .modal-content,
+#suggestPlanModal > .modal-content,
+#recipeModal > .modal-content,
+#installModal > .modal-content{
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+}
+#installModal > .modal-content{
+  width:min(600px,94vw);
+  max-width:600px;
+  padding:28px;
+  box-sizing:border-box;
+}
+#installModal > .modal-content > .eyebrow{display:block;margin-top:2px}
+#installModal > .modal-content > h2{margin:7px 0 5px;font-size:24px;line-height:1.2}
+#installModal > .modal-content > .muted{margin:0;line-height:1.55}
+#installModal > .modal-content > .install-steps{margin-top:16px}
+.inline-icon{width:14px;height:14px;vertical-align:-2px;margin-left:4px}
+.primary .inline-icon{filter:brightness(0) invert(1)}
+.text-btn .inline-icon{margin-left:2px}
+.theme-btn img,.mobile-menu img,.chevron img,.icon-btn img{width:18px;height:18px;display:block}
+.mobile-menu{border:0;padding:0}
+.mobile-menu img{width:22px;height:22px}
+.modal-content>.close img,.patient-modal .close img{width:16px;height:16px;display:block}
+.patient-option .check img{width:16px;height:16px;display:block}
+.patient-option-delete img{width:14px;height:14px;display:block}
+.food-empty-icon img{width:24px;height:24px}
+.food-choice i img{width:12px;height:12px;opacity:0;filter:brightness(0) invert(1)}
+.food-choice:has(input:checked) i img{opacity:1}
+.recipe-photo img,.recipe-emoji-preview img{width:52px;height:52px;display:block;margin:auto}
+.recipe-emoji-picks button img{width:22px;height:22px;display:block}
+.builder-remove-item img{width:12px;height:12px;display:block}
+.nf-builder-empty-icon img{width:28px;height:28px}
+
+/* Alinha + Novo paciente com o botão fechar no seletor de paciente */
+#patientModal .patient-modal{padding-top:22px}
+#patientModal .patient-modal>.close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  float:none;
+  margin:0;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  min-height:40px;
+}
+#patientModal .patient-modal-head{
+  display:block;
+  padding-right:0;
+}
+#patientModal .patient-modal-head>div{padding-right:min(230px,48%);box-sizing:border-box}
+#patientModal .patient-modal-head .outline-btn{
+  position:absolute;
+  top:20px;
+  right:68px;
+  width:auto;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+/* =====================================================
+   NUTRIFIT — VISUAL CLEAN
+   Só apresentação: paleta, tipo, cartões e respiro.
+   Ícones SVG, estrutura e funções permanecem iguais.
+   ===================================================== */
+body{
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-.011em;
+}
+.sidebar{
+  width:240px;
+  padding:22px 14px 18px;
+  background:var(--surface);
+  border-right:1px solid var(--line);
+}
+.brand{padding:2px 10px 22px;gap:12px}
+.brand-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--green);font-size:16px;letter-spacing:0;
+  box-shadow:none;
+}
+.brand strong{font-size:15px;letter-spacing:-.02em;font-weight:700}
+.brand span{font-size:11px;letter-spacing:0;color:var(--muted);font-weight:500}
+.nav{gap:2px}
+.nav-item{
+  gap:12px;padding:10px 12px;border-radius:10px;
+  font-size:13.5px;font-weight:600;letter-spacing:-.01em;
+  color:var(--muted-strong);
+}
+.nav-item img{width:18px;height:18px;opacity:.9}
+.nav-item:hover{background:var(--surface-alt)}
+.nav-item.active{
+  background:var(--green-soft);
+  color:var(--green-strong);
+  box-shadow:inset 2px 0 0 var(--green);
+}
+.main{margin-left:240px;width:calc(100% - 240px);padding:0 32px 48px}
+.topbar{height:84px;margin-bottom:6px}
+.eyebrow{font-size:11px;letter-spacing:.12em;font-weight:600;color:var(--muted)}
+.topbar h1{font-size:28px;margin:4px 0 0;letter-spacing:-.035em;font-weight:700}
+.icon-btn,.theme-btn{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--surface);box-shadow:none;
+}
+.icon-btn:hover,.theme-btn:hover{background:var(--surface-alt)}
+.patient-selector{
+  min-height:44px;border-radius:12px;padding:6px 10px 6px 6px;
+  box-shadow:none;background:var(--surface);
+}
+.patient-selector:hover{transform:none;border-color:var(--green)}
+.patient-selector b{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.patient-selector small{font-size:11px}
+
+.hero{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:28px 32px;
+}
+.hero h2{font-size:26px;letter-spacing:-.035em;font-weight:700;margin:12px 0 8px}
+.hero p{font-size:14px;line-height:1.5;max-width:46ch;color:var(--muted)}
+.pill{
+  display:inline-flex;align-items:center;
+  background:var(--green-soft);color:var(--green-strong);
+  border:0;letter-spacing:.02em;font-size:11px;padding:5px 10px;
+}
+.primary{
+  border-radius:10px;padding:11px 16px;font-size:13px;font-weight:600;
+  letter-spacing:-.01em;box-shadow:none;
+}
+.primary:hover{filter:brightness(.96);transform:none}
+.outline-btn{
+  border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;
+  background:var(--surface);color:var(--muted-strong);letter-spacing:-.01em;
+}
+.outline-btn:hover{background:var(--surface-alt);color:var(--text)}
+.text-btn{font-size:13px;font-weight:600;letter-spacing:-.01em}
+
+.section-head{margin:26px 0 12px}
+.section-head h2{font-size:22px;letter-spacing:-.03em;font-weight:700}
+.section-head h3{font-size:16px;letter-spacing:-.02em;font-weight:700}
+.section-head p{font-size:13px;color:var(--muted)}
+
+.metric-grid{gap:12px}
+.metric-card,.card{
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  border-color:var(--line);
+}
+.metric-card{padding:16px 16px 14px}
+.metric-icon,.goal-icon,.plan-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--green-soft);
+}
+.metric-icon{margin-bottom:14px}
+.goal-icon,.plan-icon{margin:0}
+.metric-card>span,.card span{font-size:12px;font-weight:500;letter-spacing:-.01em}
+.metric-card strong{font-size:22px;letter-spacing:-.03em;font-weight:700;margin:4px 0}
+.metric-card em{font-size:12px}
+.progress{height:4px;margin:12px 0 8px;background:var(--progress-bg)}
+
+.card{padding:18px 18px 16px}
+.card-head h3{font-size:15px;letter-spacing:-.02em;font-weight:700}
+.card-head p{font-size:12px}
+.meal-row{padding:12px 0;gap:12px}
+.meal-icon{width:36px;height:36px;border-radius:10px;background:var(--icon-bg)}
+.meal-row b{font-size:13px;font-weight:600}
+.meal-row span{font-size:12px}
+.water-visual{border-radius:14px;background:var(--surface-alt)}
+.water-fill{background:var(--green-soft)}
+.water-actions button,.water-buttons button,.small-btn{
+  border-radius:10px;font-size:12px;font-weight:600;padding:9px 12px;
+}
+.hint{font-size:12px}
+.goal-card strong{font-size:24px;letter-spacing:-.03em}
+
+.form-grid input,.form-grid select,.modal textarea,
+.nf-meal-picker select,.builder-move select{
+  border-radius:10px;min-height:42px;
+}
+.form-grid input:focus,.form-grid select:focus,.modal textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px var(--green-soft);
+}
+.modal{background:rgba(16,22,18,.45);backdrop-filter:blur(8px)}
+.toast{border-radius:12px;font-size:13px;font-weight:500}
+
+.nf-builder-head h2{letter-spacing:-.03em;font-weight:700}
+.nf-patient-card,.nf-calorie-budget,.nf-target-row>div,
+.nf-food-row,.nf-builder-meal,.nf-meal-card,.nf-no-plan,.nf-plan-overview{
+  box-shadow:none;
+}
+.selected-calc-patient,.patient-selector{box-shadow:none}
+
+@media(min-width:1201px){
+  .main{padding-left:32px;padding-right:32px}
+}
+@media(max-width:900px){
+  .sidebar{width:248px}
+  .main{margin-left:0;width:100%;padding-left:16px;padding-right:16px}
+  .hero{padding:22px}
+  .hero h2{font-size:22px}
+  .topbar h1{font-size:24px}
+}
+
+@media(max-width:700px){
+  #patientModal .patient-modal{padding-top:68px}
+  #patientModal .patient-modal>.close{
+    top:14px;
+    right:14px;
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    margin:0;
+  }
+  #patientModal .patient-modal-head .outline-btn{top:14px;right:62px}
+  #patientModal .patient-modal-head>div{padding-right:0}
+}
+
+/* Rodapé: a barra fica perto da borda, só o bastante para o indicador do sistema.
+   O conteúdo termina acima dela. No desktop a barra não existe. */
+@media(max-width:900px){
+  .bottom-nav{bottom:max(8px, calc(env(safe-area-inset-bottom, 0px) - 18px))}
+  .main{padding-bottom:calc(82px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
+  .section-head .fab-action.fab-action{bottom:calc(78px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
+}
+
+/* Cadastro de paciente no celular: o último botão precisa caber acima da borda. */
+@media(max-width:760px){
+  #editPatientModal{align-items:stretch;padding:0}
+  #editPatientModal .modal-content,
+  #editPatientModal .edit-patient-modal{
+    width:100%;
+    max-width:none;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+    box-sizing:border-box;
+    padding:20px 16px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Leitura no celular: textos de apoio sobem para um tamanho legível. */
+@media(max-width:600px){
+  .form-grid label,
+  .suggest-plan-form label,
+  .edit-section-title small,
+  .card-head p,
+  .section-head p,
+  .meal-row span,
+  .hint,
+  .outline-btn,
+  .metric-card em,
+  .metric-card>span,
+  .food-item,
+  .patient-selector small,
+  .plan-banner p,
+  .food-empty p,
+  .nf-builder-head p,
+  .result-card>p,
+  .result-card>small,
+  .setting-row small,
+  .patient-option span span{
+    font-size:13px;
+  }
+  .meal-status,
+  .small-btn,
+  .water-actions button,
+  .water-buttons button,
+  .bottom-nav .nav-item{
+    font-size:12px;
+  }
+  .eyebrow{font-size:12px}
+}
+
+/* Cabeçalho da refeição: nome e horário separados do restante da lista. */
+.food-meal-title{
+  align-items:center;
+  gap:12px;
+  margin:4px 0 12px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:var(--surface-alt);
+  border:1px solid var(--line);
+}
+.food-meal-title>div{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.food-meal-title b{font-size:15px;letter-spacing:-.02em}
+.food-meal-title small{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+.food-meal-title>span{flex:0 0 auto;font-size:14px}
+.food-item{gap:12px;align-items:baseline}
+.food-item b{font-size:14px}
+.food-item span{font-size:13px}
+
+.nf-builder-meal-head>div:first-child{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.nf-builder-meal-head>div:first-child>span{
+  display:inline-flex;
+  align-items:center;
+  margin:0;
+  padding:4px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+}
+.nf-builder-meal-head h4{margin:0;font-size:16px;letter-spacing:-.02em}
+.nf-meal-suggestion{gap:10px}
+.nf-meal-suggestion>span{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 8px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--green-strong);
+  font-size:12px;
+  font-weight:700;
+}
+.nf-meal-suggestion b{font-size:14px}
+.nf-meal-suggestion small{font-size:12px}
+.nf-meal-suggestion strong{font-size:14px}
+
+@media(max-width:700px){
+  .food-meal-title b{font-size:16px}
+  .food-meal-title small,.food-meal-title>span{font-size:13px}
+  .food-item{display:flex;justify-content:space-between}
+  .food-item b{font-size:15px}
+  .food-item span{font-size:13px;text-align:right}
+  .nf-meal-suggestion{padding:12px}
+  .nf-meal-suggestion b{font-size:15px}
+  .nf-meal-suggestion small{font-size:13px}
+  .nf-meal-suggestion strong{font-size:15px}
+  .nf-builder-meal-head{padding:14px}
+  .nf-builder-meal-head h4{font-size:16px}
+  .nf-meal-kcal b{font-size:15px}
+  .nf-meal-kcal small{font-size:12px}
+  .nf-builder-item b{font-size:15px}
+  .nf-builder-item small{font-size:12px;line-height:1.4}
+  .nf-builder-item input{font-size:15px;min-height:40px}
+  .builder-move span,.nf-meal-picker span{font-size:12px;letter-spacing:.06em}
+  .builder-move select{font-size:15px;min-height:44px}
+}
+
+/* Plano alimentar: piso de leitura para os textos que ainda ficavam miúdos. */
+#plano .eyebrow{font-size:12px;letter-spacing:.08em}
+#plano .nf-builder-head p,
+#plano .nf-builder-section-head p,
+#plano .nf-patient-card small,
+#plano .nf-budget-label span,
+#plano .nf-budget-foot,
+#plano .nf-budget-source,
+#plano .nf-target-row span,
+#plano .nf-builder-save label,
+#plano .nf-builder-empty p,
+#plano .nf-meal-empty{font-size:13px;line-height:1.4}
+#plano .nf-food-search span{font-size:12px}
+#plano .nf-food-main b{font-size:15px}
+#plano .nf-food-main span{font-size:13px}
+#plano .nf-food-nutrients b,
+#plano .nf-food-nutrients span{font-size:13px}
+#plano .nf-add-food{font-size:13px!important}
+#plano .nf-meal-picker select,
+#plano .builder-move select,
+#plano .nf-builder-item input{font-size:15px}
+#plano .nf-builder-item b{font-size:15px}
+#plano .nf-builder-item small,
+#plano .nf-builder-item label{font-size:13px}
+#plano .nf-builder-meal-head h4{font-size:16px}
+#plano .nf-meal-kcal b{font-size:15px}
+#plano .nf-meal-kcal small{font-size:13px}
