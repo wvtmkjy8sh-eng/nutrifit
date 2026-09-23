@@ -1101,7 +1101,7 @@ body{min-width:0;overflow-x:hidden}
 body.menu-open .fab-action{visibility:hidden;pointer-events:none}
 @media(max-width:900px){
   body.menu-open .bottom-nav{z-index:50}
-  body.menu-open .sidebar{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  body.menu-open .sidebar{padding-bottom:calc(74px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
 }
 
 /* =====================================================
@@ -1117,7 +1117,7 @@ body.menu-open .fab-action{visibility:hidden;pointer-events:none}
     gap:4px;
     position:fixed;
     left:10px;right:10px;
-    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    bottom:max(8px, calc(env(safe-area-inset-bottom, 0px) - 18px));
     margin:0 auto;
     max-width:520px;
     background:var(--surface);
@@ -1664,15 +1664,10 @@ body{
   #patientModal .patient-modal-head>div{padding-right:0}
 }
 
-/* Rodapé: o conteúdo termina acima da barra flutuante.
-   No desktop a barra não existe e o respiro inferior da página permanece. */
+/* Rodapé: a barra fica perto da borda, só o bastante para o indicador do sistema.
+   O conteúdo termina acima dela. No desktop a barra não existe. */
 @media(max-width:900px){
-  .main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-}
-@media(max-width:900px) and (display-mode:standalone),
-(max-width:900px) and (display-mode:fullscreen){
-  .bottom-nav{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
-  .main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))}
-  .section-head .fab-action.fab-action{bottom:calc(116px + env(safe-area-inset-bottom,0px))}
-  body.menu-open .sidebar{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  .bottom-nav{bottom:max(8px, calc(env(safe-area-inset-bottom, 0px) - 18px))}
+  .main{padding-bottom:calc(82px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
+  .section-head .fab-action.fab-action{bottom:calc(78px + max(8px, env(safe-area-inset-bottom, 0px) - 18px))}
 }
