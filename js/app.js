@@ -1,17 +1,61 @@
+const byId=id=>document.getElementById(id);
 const navItems=document.querySelectorAll('[data-page]');
 const pages=document.querySelectorAll('.page');
 const title=document.getElementById('pageTitle');
-const titles={dashboard:'Olá, Nutri',clientes:'Pacientes',alimentacao:'Alimentação',plano:'Plano alimentar',calculadora:'Calculadora metabólica',agua:'Hidratação',evolucao:'Evolução',receitas:'Receitas'};
+const titles={dashboard:'Olá,',clientes:'Pacientes',alimentacao:'Alimentação',plano:'Plano alimentar',calculadora:'Calculadora metabólica',agua:'Hidratação',evolucao:'Evolução',receitas:'Receitas'};
 
+// Saudação do dashboard: sem nome enquanto nenhum paciente estiver carregado.
+function patientFirstName(){
+  try{ if(typeof selectedPatient!=='undefined' && selectedPatient && selectedPatient.name){ return String(selectedPatient.name).trim().split(/\s+/)[0]||''; } }catch(e){}
+  return '';
+}
+function dashboardGreeting(){
+  const first=patientFirstName();
+  return first ? `Olá, ${first}` : 'Olá,';
+}
+function refreshDashboardGreeting(){
+  if(!title)return;
+  const current=localStorage.getItem('nutrifit-page')||'dashboard';
+  if(current==='dashboard'){title.hidden=false;title.textContent=dashboardGreeting();}
+}
+
+function playRouteProgress(){
+  const bar=document.getElementById('routeProgress');
+  if(!bar)return;
+  bar.classList.remove('active');
+  // Força reflow para permitir reiniciar a animação em navegações seguidas.
+  void bar.offsetWidth;
+  bar.classList.add('active');
+  clearTimeout(playRouteProgress._t);
+  playRouteProgress._t=setTimeout(()=>bar.classList.remove('active'),500);
+}
+
+let viewsReady=false;
 function showPage(id){
   const target=document.getElementById(id);
   if(!target)return;
+  playRouteProgress();
   pages.forEach(p=>p.classList.toggle('active-page',p.id===id));
   document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
-  if(title)title.textContent=titles[id]||'NutriFit';
+  document.body.dataset.page=id;
+  document.body.classList.toggle('is-dashboard',id==='dashboard');
+  if(title){
+    if(id==='dashboard'){title.hidden=false;title.textContent=dashboardGreeting();}
+    else{title.hidden=true;title.textContent='';}
+  }
   localStorage.setItem('nutrifit-page',id);
   document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.remove('open');
+  if(!viewsReady){
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
   if(id==='calculadora' && typeof window.loadSelectedPatientCalculator==='function') window.loadSelectedPatientCalculator();
+  if(id==='alimentacao' && typeof window.renderAlimentacao==='function') window.renderAlimentacao();
+  if(id==='plano' && typeof window.renderPatientPlan==='function') window.renderPatientPlan();
+  if(id==='receitas' && typeof window.renderRecipes==='function') window.renderRecipes();
+  if(id==='agua' && typeof renderAgua==='function') renderAgua();
+  if(id==='evolucao' && typeof renderEvolucao==='function') renderEvolucao();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 navItems.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
@@ -23,15 +67,120 @@ const themeToggle=document.getElementById('themeToggle');
 function applyTheme(theme){
   const dark=theme==='dark';
   document.body.classList.toggle('dark',dark);
-  if(themeToggle){themeToggle.textContent=dark?'☀':'◐';themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro')}
+  if(themeToggle){
+    themeToggle.innerHTML=dark?'<img src="assets/icons/sun.svg" alt="">':'<img src="assets/icons/moon.svg" alt="">';
+    themeToggle.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');
+  }
   localStorage.setItem('nutrifit-theme',theme);
+  const themeColor=document.getElementById('themeColor');
+  if(themeColor) themeColor.setAttribute('content', dark ? '#101412' : '#f4f6f5');
 }
-applyTheme(localStorage.getItem('nutrifit-theme')||'light');
+const storedTheme=localStorage.getItem('nutrifit-theme');
+const prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+applyTheme(storedTheme || (prefersDark ? 'dark' : 'light'));
 themeToggle?.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
 
-document.getElementById('mobileMenu')?.addEventListener('click',()=>document.querySelector('.sidebar')?.classList.toggle('open'));
+function refreshHeaderDate(){
+  const el=document.getElementById('currentDate');
+  if(!el)return;
+  const now=new Date();
+  const weekdays=['DOMINGO','SEGUNDA-FEIRA','TERÇA-FEIRA','QUARTA-FEIRA','QUINTA-FEIRA','SEXTA-FEIRA','SÁBADO'];
+  const months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const day=String(now.getDate()).padStart(2,'0');
+  el.dateTime=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${day}`;
+  el.textContent=`${weekdays[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+}
+refreshHeaderDate();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') refreshHeaderDate(); });
 
-let water=Number(localStorage.getItem('nutrifit-water')||1800);
+const installBtn=document.getElementById('installAppBtn');
+const installSettingsBtn=document.getElementById('installAppSettingsBtn');
+const installHint=document.getElementById('installAppHint');
+const installModal=document.getElementById('installModal');
+const installPromptBtn=document.getElementById('installPromptBtn');
+let deferredInstall=null;
+
+function isIosDevice(){
+  const ua=navigator.userAgent||'';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function installPlatform(){
+  if(isIosDevice()) return 'ios';
+  if(/Android/i.test(navigator.userAgent||'')) return 'android';
+  return 'desktop';
+}
+function updateInstallUi(){
+  const installed=isStandaloneApp();
+  if(installBtn) installBtn.hidden=installed;
+  if(installSettingsBtn){
+    installSettingsBtn.disabled=installed;
+    installSettingsBtn.textContent=installed ? 'Instalado' : (deferredInstall ? 'Instalar agora' : 'Como instalar');
+  }
+  if(installHint){
+    installHint.textContent=installed
+      ? 'O NutriFit já está instalado neste dispositivo.'
+      : 'Disponível no computador, Android e iPhone.';
+  }
+  if(installPromptBtn) installPromptBtn.hidden=!deferredInstall;
+}
+function openInstallGuide(){
+  const platform=installPlatform();
+  document.getElementById('installStepsIos').hidden=platform!=='ios';
+  document.getElementById('installStepsAndroid').hidden=platform!=='android';
+  document.getElementById('installStepsDesktop').hidden=platform!=='desktop';
+  const lead=document.getElementById('installLead');
+  if(lead){
+    lead.textContent=platform==='ios'
+      ? 'No iPhone e no iPad, a instalação é feita pelo Safari.'
+      : 'Adicione o NutriFit à tela inicial para abrir como aplicativo, sem a barra do navegador.';
+  }
+  openModal(installModal);
+}
+async function runInstallPrompt(){
+  if(!deferredInstall){ openInstallGuide(); return; }
+  deferredInstall.prompt();
+  const choice=await deferredInstall.userChoice.catch(()=>({outcome:'dismissed'}));
+  deferredInstall=null;
+  updateInstallUi();
+  if(choice && choice.outcome==='accepted') installBtn && (installBtn.hidden=true);
+}
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();
+  deferredInstall=event;
+  updateInstallUi();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstall=null;
+  updateInstallUi();
+});
+installBtn?.addEventListener('click',()=>runInstallPrompt());
+installSettingsBtn?.addEventListener('click',()=>runInstallPrompt());
+installPromptBtn?.addEventListener('click',()=>runInstallPrompt());
+document.getElementById('closeInstallModal')?.addEventListener('click',()=>closeModal(installModal));
+document.getElementById('closeInstallModalBtn')?.addEventListener('click',()=>closeModal(installModal));
+installModal?.addEventListener('click',event=>{ if(event.target===installModal) closeModal(installModal); });
+updateInstallUi();
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+function toggleSidebar(forceOpen){
+  const sidebar=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  if(!sidebar)return;
+  const open=typeof forceOpen==='boolean' ? forceOpen : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open',open);
+  overlay?.classList.toggle('open',open);
+  document.body.classList.toggle('menu-open',open);
+}
+document.getElementById('mobileMenu')?.addEventListener('click',()=>toggleSidebar());
+document.getElementById('bottomNavMore')?.addEventListener('click',()=>toggleSidebar());
+document.getElementById('sidebarOverlay')?.addEventListener('click',()=>toggleSidebar(false));
+
+let water=Number(localStorage.getItem('nutrifit-water')||0);
 function currentWaterGoal(){
   try{if(typeof selectedPatient!=='undefined' && selectedPatient?.waterGoal)return Number(selectedPatient.waterGoal)||2500}catch(e){}
   return 2500;
@@ -40,34 +189,63 @@ function updateWater(){
   const goal=Math.max(500,currentWaterGoal());
   water=Math.max(0,Math.min(goal,water));
   localStorage.setItem('nutrifit-water',water);
-  const liters=document.getElementById('waterLiters');
-  const bar=document.getElementById('waterBar');
   const visualFill=document.querySelector('.water-fill');
   const dashTotal=document.getElementById('dashboardWaterTotal');
   const dashHint=document.getElementById('dashboardWaterHint');
   const pct=Math.min(100,(water/goal)*100);
   const remaining=Math.max(0,goal-water);
-  if(liters)liters.textContent=(water/1000).toFixed(1).replace('.',',')+' L';
-  if(bar)bar.style.width=pct+'%';
   if(visualFill)visualFill.style.height=pct+'%';
   if(dashTotal)dashTotal.innerHTML=`${(water/1000).toFixed(1).replace('.',',')} <small>/ ${(goal/1000).toFixed(1).replace('.',',')} L</small>`;
   if(dashHint)dashHint.innerHTML=remaining?`Faltam <b>${remaining.toLocaleString('pt-BR')} ml</b> para atingir sua meta.`:'<b>Meta de hidratação atingida.</b>';
+  if(typeof renderAgua==='function') try{renderAgua()}catch(e){}
 }
 document.querySelectorAll('[data-water]').forEach(b=>b.addEventListener('click',()=>{water+=Number(b.dataset.water);updateWater();if(typeof renderDashboard==='function')renderDashboard()}));
 updateWater();
 
+function paintCalculatorEstimate(data){
+  const card=document.getElementById('calculatorResultCard');
+  const list=document.getElementById('calculatorResultList');
+  const hint=document.getElementById('calculatorResultHint');
+  const note=document.getElementById('calculatorResultNote');
+  const tdeeEl=document.getElementById('tdee');
+  const bmrEl=document.getElementById('bmr');
+  const mEl=document.getElementById('maintenance');
+  const dEl=document.getElementById('deficit');
+  if(!data){
+    card?.classList.add('is-empty');
+    if(tdeeEl)tdeeEl.textContent='—';
+    if(bmrEl)bmrEl.textContent='—';
+    if(mEl)mEl.textContent='—';
+    if(dEl)dEl.textContent='—';
+    if(hint)hint.textContent='Carregue um paciente para ver o gasto energético real.';
+    if(note)note.textContent='Nenhuma estimativa fictícia é exibida sem um perfil carregado.';
+    if(list)list.hidden=true;
+    return;
+  }
+  const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
+  card?.classList.remove('is-empty');
+  if(tdeeEl)tdeeEl.textContent=fmt(data.tdee);
+  if(bmrEl)bmrEl.textContent=fmt(data.bmr);
+  if(mEl)mEl.textContent=fmt(data.tdee);
+  if(dEl)dEl.textContent=fmt(Math.max(0,data.tdee-500));
+  if(hint)hint.textContent='Gasto energético diário do paciente carregado.';
+  if(note)note.textContent='*Estimativa educativa. Ajustes individuais devem ser feitos por profissional habilitado.';
+  if(list)list.hidden=false;
+}
 const calc=document.getElementById('calcForm');
 calc?.addEventListener('submit',e=>{
   e.preventDefault();
+  const patient=typeof selectedPatient!=='undefined'?selectedPatient:null;
+  if(!patient){showToast('Carregue um paciente para calcular o resultado estimado.');paintCalculatorEstimate(null);return;}
   const sex=document.getElementById('sex').value;
   const age=Number(document.getElementById('age').value);
   const weight=Number(document.getElementById('weight').value);
   const height=Number(document.getElementById('height').value);
   const activity=Number(document.getElementById('activity').value);
-  if(!age||!weight||!height||age<10||weight<=0||height<=0)return;
+  if(!age||!weight||!height||age<10||weight<=0||height<=0){showToast('Preencha idade, peso e altura do paciente.');return;}
   const bmr=10*weight+6.25*height-5*age+(sex==='m'?5:-161);
   const tdee=bmr*activity;
-  const objective=String(document.getElementById('objective')?.value||selectedPatient?.objective||'').toLowerCase();
+  const objective=String(document.getElementById('objective')?.value||patient.objective||'').toLowerCase();
   let target=tdee;
   if(objective.includes('emag')) target=tdee-500;
   else if(objective.includes('massa')||objective.includes('hipertrof')) target=tdee+250;
@@ -76,23 +254,15 @@ calc?.addEventListener('submit',e=>{
   const remaining=Math.max(0,target-protein*4);
   const carbs=Math.round((remaining*.60)/4);
   const fat=Math.round((remaining*.40)/9);
-  const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
-  document.getElementById('bmr').textContent=fmt(bmr);
-  document.getElementById('tdee').textContent=fmt(tdee);
-  document.getElementById('maintenance').textContent=fmt(tdee);
-  document.getElementById('deficit').textContent=fmt(Math.max(0,tdee-500));
-  const pid=calc.dataset.patientId||selectedPatient?.id;
+  paintCalculatorEstimate({bmr,tdee});
+  const pid=calc.dataset.patientId||patient.id;
   if(pid){const all=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}');all[pid]={calories:target,protein,carbs,fat,bmr:Math.round(bmr),tdee:Math.round(tdee),activity,objective,sex,age,weight,height,updatedAt:new Date().toISOString()};localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(all));}
 });
 
 // ===============================
 // SELEÇÃO E CARREGAMENTO DE PACIENTE
 // ===============================
-const patients = [
-  {id:'mardem', name:'Mardem Alves', initials:'MA', email:'mardem@nutrifit.local', age:41, sex:'m', height:175, objective:'Emagrecimento', calories:2200, protein:160, waterGoal:2500, weight:'82,0 kg', restrictions:'', preferences:'Comida brasileira, refeições simples'},
-  {id:'ana', name:'Ana Souza', initials:'AS', email:'ana@nutrifit.local', age:34, sex:'f', height:165, objective:'Ganho de massa muscular', calories:2350, protein:145, waterGoal:2200, weight:'64,2 kg', restrictions:'', preferences:'Alta proteína'},
-  {id:'carlos', name:'Carlos Lima', initials:'CL', email:'carlos@nutrifit.local', age:38, sex:'m', height:180, objective:'Manutenção de peso', calories:2500, protein:175, waterGoal:2800, weight:'78,6 kg', restrictions:'', preferences:'Alimentação variada'}
-];
+const patients = [];
 let selectedPatient = null;
 let pendingPatient = null;
 let patientPlans = {};
@@ -100,16 +270,27 @@ try{ patientPlans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}
 function persistPlans(){localStorage.setItem('nutrifit-patient-plans',JSON.stringify(patientPlans))}
 function getPlan(){return selectedPatient ? patientPlans[selectedPatient.id] || null : null}
 function formatKcal(n){return Math.round(Number(n)||0).toLocaleString('pt-BR')}
+function resolveFoodKeyFromFood(f){
+  if(!f)return null;
+  if(f.key && foodCatalog[f.key])return f.key;
+  const name=String(f.name||'').trim().toLowerCase();
+  if(name){
+    const byName=Object.keys(foodCatalog).find(k=>foodCatalog[k].name.toLowerCase()===name);
+    if(byName)return byName;
+  }
+  return (typeof foodKey==='function'?foodKey(f.name||f):null)||null;
+}
 function getDisplayPlanMeals(plan,p){
   const base=BUILDER_MEALS.map(m=>({...m,items:[]}));
   if(!plan)return base;
   const source=Array.isArray(plan.meals)?plan.meals:[];
   source.forEach((m,mi)=>{
-    const target=base.find(x=>x.name===m.name)||base.find(x=>x.id===m.id)||base[mi]||base[0];
+    const target=base.find(x=>x.name===m.name)||base.find(x=>x.time===m.time)||base.find(x=>x.id===m.id)||base[mi];
+    if(!target)return;
     const foods=Array.isArray(m.foods)?m.foods:[];
     if(foods.length){
       foods.forEach(f=>{
-        const key=f.key||foodKey(f);
+        const key=resolveFoodKeyFromFood(f);
         if(key && foodCatalog[key]) target.items.push({key,amount:Number(f.amount)||builderDefaultAmount(foodCatalog[key])});
       });
     }else if(Array.isArray(m.items)){
@@ -123,6 +304,66 @@ function getDisplayPlanMeals(plan,p){
   });
   return base.filter(m=>m.items.length||source.length===0);
 }
+function renderAgua(){
+  const liters=document.getElementById('waterLiters');
+  const goalEl=document.getElementById('waterGoalValue');
+  const bar=document.getElementById('waterBar');
+  const sub=document.getElementById('waterPageSubtitle');
+  const hint=document.getElementById('waterPageHint');
+  const p=(typeof selectedPatient!=='undefined')?selectedPatient:null;
+  if(!p){
+    if(sub)sub.textContent='Selecione um paciente para acompanhar a hidratação.';
+    if(liters)liters.textContent='—';
+    if(goalEl)goalEl.textContent='—';
+    if(bar)bar.style.width='0%';
+    if(hint)hint.textContent='Nenhum volume fictício é exibido sem um perfil carregado.';
+    return;
+  }
+  const goal=Math.max(0,Number(p.waterGoal)||0);
+  const consumed=Math.max(0,Number(water)||0);
+  const pct=goal?Math.min(100,(consumed/goal)*100):0;
+  if(sub)sub.textContent=`Hidratação de ${p.name}.`;
+  if(liters)liters.textContent=(consumed/1000).toFixed(1).replace('.',',')+' L';
+  if(goalEl)goalEl.textContent=goal?(goal/1000).toFixed(1).replace('.',',')+' L':'—';
+  if(bar)bar.style.width=pct+'%';
+  if(hint){
+    if(!goal)hint.textContent='Cadastre a meta de água do paciente para acompanhar o progresso.';
+    else if(consumed>=goal)hint.textContent='Meta de hidratação atingida.';
+    else hint.textContent=`Faltam ${Math.max(0,goal-consumed).toLocaleString('pt-BR')} ml para a meta de ${p.name}.`;
+  }
+}
+function renderEvolucao(){
+  const sub=document.getElementById('evoPageSubtitle');
+  const weight=document.getElementById('evoWeight');
+  const weightNote=document.getElementById('evoWeightNote');
+  const waist=document.getElementById('evoWaist');
+  const waistNote=document.getElementById('evoWaistNote');
+  const adh=document.getElementById('evoAdherence');
+  const adhNote=document.getElementById('evoAdherenceNote');
+  const caption=document.getElementById('evoChartCaption');
+  const empty=document.getElementById('evoChartEmpty');
+  const p=(typeof selectedPatient!=='undefined')?selectedPatient:null;
+  if(waist)waist.textContent='—';
+  if(adh)adh.textContent='—';
+  if(!p){
+    if(sub)sub.textContent='Selecione um paciente para ver os dados reais.';
+    if(weight)weight.textContent='—';
+    if(weightNote)weightNote.textContent='Selecione um paciente';
+    if(waistNote)waistNote.textContent='Não informado';
+    if(adhNote)adhNote.textContent='Não informado';
+    if(caption)caption.textContent='Nenhum histórico cadastrado';
+    if(empty)empty.textContent='Nenhum gráfico fictício é exibido. O histórico aparece quando houver registros do paciente.';
+    return;
+  }
+  const w=String(p.weight||'').trim();
+  if(sub)sub.textContent=`Evolução de ${p.name}.`;
+  if(weight)weight.textContent=w||'—';
+  if(weightNote)weightNote.textContent=w?'Peso cadastrado no perfil':'Peso não informado no perfil';
+  if(waistNote)waistNote.textContent='Não há medida de cintura cadastrada';
+  if(adhNote)adhNote.textContent='Não há registro de adesão';
+  if(caption)caption.textContent='Sem histórico de pesagens';
+  if(empty)empty.textContent=`Não há histórico de peso registrado para ${p.name}.`;
+}
 function renderAlimentacao(){
   const box=byId('foodPlanContent'), sub=byId('foodPageSubtitle'), add=byId('foodAddPlanBtn');
   if(!box)return;
@@ -130,12 +371,12 @@ function renderAlimentacao(){
   if(add)add.disabled=!p;
   if(!p){
     if(sub)sub.textContent='Selecione um paciente para visualizar a alimentação.';
-    box.innerHTML='<div class="food-empty card"><div class="food-empty-icon">—</div><h3>Nenhum paciente selecionado</h3><p>A alimentação só será exibida depois que um paciente for selecionado.</p></div>';
+    box.innerHTML='<div class="food-empty card"><div class="food-empty-icon"><img src="assets/icons/users.svg" alt=""></div><h3>Nenhum paciente selecionado</h3><p>A alimentação só será exibida depois que um paciente for selecionado.</p></div>';
     return;
   }
   if(!plan){
     if(sub)sub.textContent=`Nenhum plano alimentar atribuído a ${p.name}.`;
-    box.innerHTML=`<div class="food-empty card"><div class="food-empty-icon">+</div><span class="eyebrow">SEM PLANO ALIMENTAR</span><h3>${escapeHtml(p.name)} ainda não possui um plano.</h3><p>Nenhuma refeição, caloria ou nutriente fictício será exibido. Adicione um plano ou gere uma sugestão baseada na calculadora metabólica.</p><button class="primary" type="button" id="foodEmptyAddPlan">Adicionar plano</button></div>`;
+    box.innerHTML=`<div class="food-empty card"><div class="food-empty-icon"><img src="assets/icons/plus.svg" alt=""></div><span class="eyebrow">SEM PLANO ALIMENTAR</span><h3>${escapeHtml(p.name)} ainda não possui um plano.</h3><p>Nenhuma refeição, caloria ou nutriente fictício será exibido. Adicione um plano ou gere uma sugestão baseada na calculadora metabólica.</p><button class="primary" type="button" id="foodEmptyAddPlan">Adicionar plano</button></div>`;
     return;
   }
   const meals=getDisplayPlanMeals(plan,p);
@@ -237,20 +478,20 @@ function renderBuilderFoodList(p){
   const box=byId('builderFoodList');if(!box)return;
   const search=(byId('builderFoodSearch')?.value||'').trim().toLowerCase();
   const keys=builderFoodKeyList().filter(k=>{const f=foodCatalog[k];return !search||f.name.toLowerCase().includes(search)});
-  const mealOptions=BUILDER_MEALS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
-  box.innerHTML=keys.map(k=>{const f=foodCatalog[k];return `<article class="nf-food-row"><div class="nf-food-main"><b>${escapeHtml(f.name)}</b><span>Referência: ${f.ref}${f.unit==='un'?' unidade':' g'}</span></div><div class="nf-food-nutrients"><b>${f.kcal}</b><span>kcal</span><span>${f.protein} P</span><span>${f.carbs} C</span><span>${f.fat} G</span></div><label class="nf-meal-picker"><span>Adicionar em</span><select class="builder-food-meal" data-food-key="${k}">${mealOptions}</select></label><button type="button" class="outline-btn nf-add-food" data-food-key="${k}">Adicionar</button></article>`}).join('')||'<div class="nf-empty-inline">Nenhum alimento encontrado.</div>';
+  const mealOptions=`<option value="" selected disabled hidden>Selecione</option>`+BUILDER_MEALS.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  box.innerHTML=keys.map(k=>{const f=foodCatalog[k];return `<article class="nf-food-row"><div class="nf-food-main"><b>${escapeHtml(f.name)}</b><span>Referência: ${f.ref}${f.unit==='un'?' unidade':' g'}</span></div><div class="nf-food-nutrients"><b>${f.kcal}</b><span>kcal</span><span>${f.protein} P</span><span>${f.carbs} C</span><span>${f.fat} G</span></div><label class="nf-meal-picker"><span>Adicionar em</span><select class="builder-food-meal" data-food-key="${k}" required>${mealOptions}</select></label><button type="button" class="outline-btn nf-add-food" data-food-key="${k}">Adicionar</button></article>`}).join('')||'<div class="nf-empty-inline">Nenhum alimento encontrado.</div>';
 }
 function renderBuilderMeals(p){
   const draft=getBuilderDraft(p.id), meta=getPlanMeta(p), suggestions=byId('builderMealSuggestions'), list=byId('builderMenuList');
   if(!suggestions||!list)return;
   suggestions.innerHTML=BUILDER_MEALS.map(m=>{const actual=draft.meals.find(x=>x.id===m.id)||m;const kcal=Math.round(mealKcal(actual));const suggested=Math.round(meta.calories*m.share);const diff=kcal-suggested;return `<div class="nf-meal-suggestion"><span>${m.time}</span><div><b>${m.name}</b><small>Sugerido ${suggested.toLocaleString('pt-BR')} kcal</small></div><strong class="${diff>50?'warn':''}">${kcal.toLocaleString('pt-BR')} kcal</strong></div>`}).join('');
-  list.innerHTML=draft.meals.map(m=>{const suggested=Math.round(meta.calories*m.share),mac=mealMacros(m);return `<article class="nf-builder-meal" data-meal-id="${m.id}"><div class="nf-builder-meal-head"><div><span>${m.time}</span><h4>${m.name}</h4></div><div class="nf-meal-kcal"><b>${Math.round(mac.kcal).toLocaleString('pt-BR')} kcal</b><small>meta ${suggested.toLocaleString('pt-BR')} kcal</small></div></div><div class="nf-builder-items">${m.items.length?m.items.map((it,idx)=>{const f=foodCatalog[it.key],n=foodNutrientsForAmount(f,it.amount);const moveOptions=BUILDER_MEALS.map(x=>`<option value="${x.id}" ${x.id===m.id?'selected':''}>${x.name}</option>`).join('');return `<div class="nf-builder-item"><div><b>${escapeHtml(f.name)}</b><small>${n.kcal} kcal · ${n.protein} P · ${n.carbs} C · ${n.fat} G</small></div><label><input class="builder-amount" data-item-index="${idx}" data-food-key="${it.key}" type="number" min="0" step="${f.unit==='un'?'1':'5'}" value="${it.amount}">${f.unit==='un'?'un':'g'}</label><label class="builder-move"><span>Refeição</span><select class="builder-move-meal" data-item-index="${idx}">${moveOptions}</select></label><button type="button" class="builder-remove-item" data-item-index="${idx}" aria-label="Remover alimento">×</button></div>`}).join(''):'<div class="nf-meal-empty">Adicione alimentos da lista e escolha a refeição.</div>'}</div></article>`}).join('');
+  list.innerHTML=draft.meals.map(m=>{const suggested=Math.round(meta.calories*m.share),mac=mealMacros(m);return `<article class="nf-builder-meal" data-meal-id="${m.id}"><div class="nf-builder-meal-head"><div><span>${m.time}</span><h4>${m.name}</h4></div><div class="nf-meal-kcal"><b>${Math.round(mac.kcal).toLocaleString('pt-BR')} kcal</b><small>meta ${suggested.toLocaleString('pt-BR')} kcal</small></div></div><div class="nf-builder-items">${m.items.length?m.items.map((it,idx)=>{const f=foodCatalog[it.key],n=foodNutrientsForAmount(f,it.amount);const moveOptions=BUILDER_MEALS.map(x=>`<option value="${x.id}" ${x.id===m.id?'selected':''}>${x.name}</option>`).join('');return `<div class="nf-builder-item"><div><b>${escapeHtml(f.name)}</b><small>${n.kcal} kcal · ${n.protein} P · ${n.carbs} C · ${n.fat} G</small></div><label><input class="builder-amount" data-item-index="${idx}" data-food-key="${it.key}" type="number" min="0" step="${f.unit==='un'?'1':'5'}" value="${it.amount}">${f.unit==='un'?'un':'g'}</label><label class="builder-move"><span>Refeição</span><select class="builder-move-meal" data-item-index="${idx}">${moveOptions}</select></label><button type="button" class="builder-remove-item" data-item-index="${idx}" aria-label="Remover alimento"><img src="assets/icons/x.svg" alt=""></button></div>`}).join(''):'<div class="nf-meal-empty">Adicione alimentos da lista e escolha a refeição.</div>'}</div></article>`}).join('');
   const consumed=draft.meals.reduce((a,m)=>a+mealKcal(m),0);const remaining=Math.round(meta.calories-consumed);const budget=byId('plano')?.querySelector('.nf-calorie-budget');
   if(budget){budget.classList.toggle('over',remaining<0);const bar=budget.querySelector('.nf-budget-bar i');if(bar)bar.style.width=`${meta.calories ? Math.min(100,Math.max(0,consumed/meta.calories*100)) : 0}%`;const foot=budget.querySelector('.nf-budget-foot strong');if(foot)foot.textContent=remaining>=0?`${remaining.toLocaleString('pt-BR')} kcal restantes`:`${Math.abs(remaining).toLocaleString('pt-BR')} kcal acima da meta`;const c=budget.querySelector('.nf-budget-foot b');if(c)c.textContent=`${Math.max(0,Math.round(consumed)).toLocaleString('pt-BR')} kcal`}
 }
 function bindBuilderEvents(p){
   byId('builderFoodSearch')?.addEventListener('input',()=>renderBuilderFoodList(p));
-  byId('builderFoodList')?.addEventListener('click',e=>{const b=e.target.closest('.nf-add-food');if(!b)return;const key=b.dataset.foodKey;const f=foodCatalog[key];const picker=byId('builderFoodList')?.querySelector(`.builder-food-meal[data-food-key="${key}"]`);const mealId=picker?.value||'breakfast';const draft=getBuilderDraft(p.id);const meal=draft.meals.find(m=>m.id===mealId)||draft.meals[0];const existing=meal.items.find(it=>it.key===key);if(existing){existing.amount=(Number(existing.amount)||0)+builderDefaultAmount(f)}else meal.items.push({key,amount:builderDefaultAmount(f)});saveBuilderDraft(p.id,draft);renderBuilderMeals(p);showToast(`${f.name} adicionado ao ${meal.name.toLowerCase()}.`)});
+  byId('builderFoodList')?.addEventListener('click',e=>{const b=e.target.closest('.nf-add-food');if(!b)return;const key=b.dataset.foodKey;const f=foodCatalog[key];const picker=byId('builderFoodList')?.querySelector(`.builder-food-meal[data-food-key="${key}"]`);const mealId=picker?.value;if(!mealId){showToast('Selecione a refeição.');return}const draft=getBuilderDraft(p.id);const meal=draft.meals.find(m=>m.id===mealId);if(!meal){showToast('Selecione a refeição.');return}const existing=meal.items.find(it=>it.key===key);if(existing){existing.amount=(Number(existing.amount)||0)+builderDefaultAmount(f)}else meal.items.push({key,amount:builderDefaultAmount(f)});saveBuilderDraft(p.id,draft);renderBuilderMeals(p);showToast(`${f.name} adicionado ao ${meal.name.toLowerCase()}.`)});
   byId('builderMenuList')?.addEventListener('input',e=>{if(!e.target.matches('.builder-amount'))return;const card=e.target.closest('[data-meal-id]');const draft=getBuilderDraft(p.id);const meal=draft.meals.find(m=>m.id===card.dataset.mealId);const item=meal?.items[Number(e.target.dataset.itemIndex)];if(!item)return;item.amount=Math.max(0,Number(e.target.value)||0);saveBuilderDraft(p.id,draft);renderBuilderMeals(p)});
   byId('builderMenuList')?.addEventListener('change',e=>{const select=e.target.closest('.builder-move-meal');if(!select)return;const card=select.closest('[data-meal-id]');const fromId=card?.dataset.mealId,toId=select.value,index=Number(select.dataset.itemIndex);if(!fromId||!toId||fromId===toId)return;const draft=getBuilderDraft(p.id);const from=draft.meals.find(m=>m.id===fromId),to=draft.meals.find(m=>m.id===toId);const item=from?.items[index];if(!from||!to||!item)return;from.items.splice(index,1);const existing=to.items.find(it=>it.key===item.key);if(existing)existing.amount=(Number(existing.amount)||0)+(Number(item.amount)||0);else to.items.push(item);saveBuilderDraft(p.id,draft);renderBuilderMeals(p);const dest=BUILDER_MEALS.find(m=>m.id===toId);showToast(`${foodCatalog[item.key].name} movido para ${dest?.name||'a refeição selecionada'}.`)});
   byId('builderMenuList')?.addEventListener('click',e=>{const b=e.target.closest('.builder-remove-item');if(!b)return;const card=b.closest('[data-meal-id]');const draft=getBuilderDraft(p.id);const meal=draft.meals.find(m=>m.id===card.dataset.mealId);if(meal)meal.items.splice(Number(b.dataset.itemIndex),1);saveBuilderDraft(p.id,draft);renderBuilderMeals(p)});
@@ -289,7 +530,7 @@ function closePatientModal(){
 }
 function renderPatients(){
   if(!patientList)return;
-  patientList.innerHTML=patients.map(p=>`<button type="button" class="patient-option ${pendingPatient?.id===p.id?'selected':''}" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'✓':''}</span></button>`).join('');
+  patientList.innerHTML=patients.length?patients.map(p=>`<div class="patient-option-row ${pendingPatient?.id===p.id?'selected':''}"><button type="button" class="patient-option" data-patient-id="${p.id}"><span class="avatar">${p.initials}</span><span><b>${p.name}</b><span>${p.email} · ${p.objective}</span></span><span class="check">${pendingPatient?.id===p.id?'<img src="assets/icons/check.svg" alt="">':''}</span></button><button type="button" class="patient-option-delete" data-delete-id="${p.id}" title="Excluir paciente" aria-label="Excluir paciente"><img src="assets/icons/x.svg" alt=""></button></div>`).join(''):'<p class="muted">Nenhum paciente cadastrado. Use "+ Novo paciente" para começar.</p>';
   if(selectedPatientBox) selectedPatientBox.innerHTML=pendingPatient ? `<b>Paciente selecionado:</b> ${pendingPatient.name} · ${pendingPatient.objective}` : 'Nenhum paciente selecionado.';
   if(loadPatientBtn){loadPatientBtn.disabled=!pendingPatient;loadPatientBtn.textContent=pendingPatient?'Carregar informações do paciente':'Selecione um paciente';}
 }
@@ -307,29 +548,31 @@ function loadCalculatorPatient(patient){
     if(summaryAvatar)summaryAvatar.textContent='—';
     const form=document.getElementById('calcForm');
     if(form)delete form.dataset.patientId;
+    paintCalculatorEstimate(null);
     return;
   }
   const weight=Number(String(patient.weight||'0').replace(' kg','').replace(',','.'))||0;
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=value??''};
   set('sex',patient.sex||'m');
   set('age',patient.age||'');
-  set('weight',weight);
+  set('weight',weight||'');
   set('height',patient.height||'');
   set('objective',patient.objective||'Manutenção de peso');
   const summaryName=document.getElementById('calculatorPatientName');
   const summaryAvatar=document.querySelector('#calculatorPatientSummary .avatar');
   if(summaryName)summaryName.textContent=patient.name;
   if(summaryAvatar)summaryAvatar.textContent=patient.initials||patient.name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
-  // Usa a meta calórica cadastrada como referência, mas mantém o cálculo metabólico independente.
   const form=document.getElementById('calcForm');
   if(form)form.dataset.patientId=patient.id;
   if(weight && patient.age && patient.height){
     const activity=document.getElementById('activity');
     const bmr=10*weight+6.25*Number(patient.height)-5*Number(patient.age)+(patient.sex==='m'?5:-161);
     const tdee=bmr*Number(activity?.value||1.55);
-    const fmt=n=>Math.round(n).toLocaleString('pt-BR')+' kcal';
-    const b=document.getElementById('bmr'),t=document.getElementById('tdee'),m=document.getElementById('maintenance'),d=document.getElementById('deficit');
-    if(b)b.textContent=fmt(bmr); if(t)t.textContent=fmt(tdee); if(m)m.textContent=fmt(tdee); if(d)d.textContent=fmt(Math.max(0,tdee-500));
+    paintCalculatorEstimate({bmr,tdee});
+  }else{
+    paintCalculatorEstimate(null);
+    const hint=document.getElementById('calculatorResultHint');
+    if(hint)hint.textContent='Complete idade, peso e altura do paciente para calcular.';
   }
 }
 window.loadSelectedPatientCalculator=()=>loadCalculatorPatient(selectedPatient);
@@ -389,28 +632,31 @@ function renderDashboard(){
   updateWater();
 }
 
-function applyPatientData(patient){
+function applyPatientData(patient, silent){
   if(!patient)return;
   selectedPatient=patient;
   localStorage.setItem('nutrifit-selected-patient',patient.id);
   const name=document.getElementById('selectedPatientName');
   const profile=document.getElementById('profilePatientName');
-  const pageTitle=document.getElementById('pageTitle');
   if(name)name.textContent=patient.name;
   if(profile)profile.textContent=patient.name;
-  if(pageTitle && (localStorage.getItem('nutrifit-page')||'dashboard')==='dashboard')pageTitle.textContent='Olá, Nutri';
+  refreshDashboardGreeting();
   // Atualiza os principais indicadores com os dados do paciente carregado.
   const kcalStrong=document.querySelector('.metric-card strong');
-  if(kcalStrong)kcalStrong.innerHTML=`1.850 <small>/ ${patient.calories.toLocaleString('pt-BR')} kcal</small>`;
+  if(kcalStrong)kcalStrong.innerHTML=`1.850 <small>/ ${Number(patient.calories||0).toLocaleString('pt-BR')} kcal</small>`;
   const proteinStrong=document.querySelectorAll('.metric-card strong')[1];
-  if(proteinStrong)proteinStrong.innerHTML=`142 <small>/ ${patient.protein} g</small>`;
+  if(proteinStrong)proteinStrong.innerHTML=`142 <small>/ ${Number(patient.protein||0)} g</small>`;
   const goal=document.querySelector('.goal-card strong');
-  if(goal)goal.innerHTML=`${patient.weight.replace(' kg','')} <small>kg</small>`;
+  if(goal)goal.innerHTML=`${String(patient.weight??'').replace(' kg','')} <small>kg</small>`;
   loadCalculatorPatient(patient);
   renderDashboard();
   renderPatientsCrud(byId('patientSearch')?.value||'');
+  if(typeof renderPatientPlan==='function') renderPatientPlan();
+  if(typeof renderAlimentacao==='function') renderAlimentacao();
+  if(typeof renderAgua==='function') renderAgua();
+  if(typeof renderEvolucao==='function') renderEvolucao();
   closePatientModal();
-  showToast(`Informações de ${patient.name} carregadas.`);
+  if(!silent) showToast(`Informações de ${patient.name} carregadas.`);
 }
 function showToast(message){
   let toast=document.getElementById('nutrifitToast');
@@ -422,13 +668,13 @@ document.getElementById('patientSelector')?.addEventListener('click',openPatient
 document.getElementById('profilePatientBtn')?.addEventListener('click',openPatientModal);
 document.getElementById('closePatientModal')?.addEventListener('click',closePatientModal);
 patientModal?.addEventListener('click',e=>{if(e.target===patientModal)closePatientModal()});
-patientList?.addEventListener('click',e=>{const btn=e.target.closest('[data-patient-id]');if(btn)selectPatient(btn.dataset.patientId)});
+patientList?.addEventListener('click',e=>{
+  const del=e.target.closest('[data-delete-id]');
+  if(del){deletePatientById(del.dataset.deleteId);return;}
+  const btn=e.target.closest('[data-patient-id]');
+  if(btn)selectPatient(btn.dataset.patientId);
+});
 loadPatientBtn?.addEventListener('click',()=>{if(pendingPatient){applyPatientData(pendingPatient);renderPatientPlan()}});
-
-// Nenhum paciente é carregado por padrão. A seleção deve ser feita explicitamente a cada sessão.
-localStorage.removeItem('nutrifit-selected-patient');
-selectedPatient=null;
-pendingPatient=null;
 const initialName=document.getElementById('selectedPatientName');
 const initialProfile=document.getElementById('profilePatientName');
 const initialSelectorAvatar=document.querySelector('#patientSelector .small-avatar');
@@ -436,6 +682,9 @@ if(initialName) initialName.textContent='Nenhum paciente';
 if(initialProfile) initialProfile.textContent='Nenhum paciente';
 if(initialSelectorAvatar) initialSelectorAvatar.textContent='—';
 loadCalculatorPatient(null);
+refreshDashboardGreeting();
+renderAgua();
+renderEvolucao();
 
 
 
@@ -445,7 +694,6 @@ loadCalculatorPatient(null);
 const editPatientModal=document.getElementById('editPatientModal');
 const settingsModal=document.getElementById('settingsModal');
 const suggestPlanModal=document.getElementById('suggestPlanModal');
-const byId=id=>document.getElementById(id);
 renderDashboard();
 function openModal(m){if(!m)return;m.classList.add('open');m.setAttribute('aria-hidden','false')}
 function closeModal(m){if(!m)return;m.classList.remove('open');m.setAttribute('aria-hidden','true')}
@@ -464,7 +712,27 @@ function fillEditForm(p,mode='edit'){
 }
 function persistPatients(){localStorage.setItem('nutrifit-patients',JSON.stringify(patients))}
 function refreshCurrentPatientViews(){ renderPatients(); renderPatientsCrud(byId('patientSearch')?.value||''); renderPatientPlan(); renderAlimentacao(); if(typeof loadCalculatorPatient==='function') loadCalculatorPatient(selectedPatient||null); const current=localStorage.getItem('nutrifit-page'); if(current) showPage(current); window.scrollTo({top:0,behavior:'smooth'}); }
-function loadPatients(){try{const saved=JSON.parse(localStorage.getItem('nutrifit-patients'));if(Array.isArray(saved)&&saved.length){patients.splice(0,patients.length,...saved)}}catch(e){}}
+// IDs dos pacientes de demonstração que existiam antes (Mardem, Ana, Carlos).
+// Navegadores que já tinham esses dados salvos no localStorage antes desta
+// atualização continuariam carregando-os; esta limpeza remove definitivamente
+// esses registros (e qualquer plano/meta vinculados a eles) na primeira vez
+// que o app roda com esta versão, sem afetar pacientes reais cadastrados.
+const LEGACY_SEED_PATIENT_IDS=['mardem','ana','carlos'];
+function purgeLegacySeedPatients(saved){
+  const cleaned=saved.filter(p=>!LEGACY_SEED_PATIENT_IDS.includes(p?.id));
+  if(cleaned.length===saved.length)return cleaned;
+  localStorage.setItem('nutrifit-patients',JSON.stringify(cleaned));
+  ['nutrifit-patient-plans','nutrifit-calculator-meta','nutrifit-plan-builder-drafts'].forEach(key=>{
+    try{
+      const store=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      let changed=false;
+      LEGACY_SEED_PATIENT_IDS.forEach(id=>{ if(store[id]!==undefined){ delete store[id]; changed=true; } });
+      if(changed) localStorage.setItem(key,JSON.stringify(store));
+    }catch(e){}
+  });
+  return cleaned;
+}
+function loadPatients(){try{const saved=JSON.parse(localStorage.getItem('nutrifit-patients'));if(Array.isArray(saved)&&saved.length){const cleaned=purgeLegacySeedPatients(saved);patients.splice(0,patients.length,...cleaned)}}catch(e){}}
 loadPatients();
 renderPatientsCrud();
 if(selectedPatient){const fresh=patients.find(p=>p.id===selectedPatient.id);if(fresh)selectedPatient=fresh}
@@ -484,11 +752,12 @@ function deletePatientById(id){
   if(!confirm(`Excluir o cliente ${p.name}? Esta ação também removerá o plano alimentar e os dados da calculadora salvos para ele.`))return false;
   const idx=patients.findIndex(x=>x.id===id); if(idx>=0)patients.splice(idx,1);
   try{const plans=JSON.parse(localStorage.getItem('nutrifit-patient-plans')||'{}')||{};delete plans[id];localStorage.setItem('nutrifit-patient-plans',JSON.stringify(plans));const metas=JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')||{};delete metas[id];localStorage.setItem('nutrifit-calculator-meta',JSON.stringify(metas));const drafts=JSON.parse(localStorage.getItem('nutrifit-plan-builder-drafts')||'{}')||{};delete drafts[id];localStorage.setItem('nutrifit-plan-builder-drafts',JSON.stringify(drafts));}catch(e){}
-  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();}
+  if(selectedPatient?.id===id){selectedPatient=null;pendingPatient=null;localStorage.removeItem('nutrifit-selected-patient');loadCalculatorPatient(null);renderPatientPlan();renderAlimentacao();renderAgua();renderEvolucao();refreshDashboardGreeting();}
+  else if(pendingPatient?.id===id){pendingPatient=null;}
   persistPatients();renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');renderPatientPlan();renderAlimentacao();closeModal(editPatientModal);showToast(`${p.name} foi excluído.`);window.scrollTo({top:0,behavior:'smooth'});return true;
 }
 byId('editPatientBtn')?.addEventListener('click',()=>{if(pendingPatient)openEditPatient(pendingPatient,'edit')});
-byId('addPatientBtn')?.addEventListener('click',()=>openEditPatient(null,'create'));
+byId('addPatientBtn')?.addEventListener('click',()=>{closePatientModal();openEditPatient(null,'create');});
 byId('patientSearch')?.addEventListener('input',e=>renderPatientsCrud(e.target.value));
 byId('patientsCrudList')?.addEventListener('click',e=>{
   const sel=e.target.closest('[data-client-select]'); if(sel){const p=patients.find(x=>x.id===sel.dataset.clientSelect);if(p){pendingPatient=p;applyPatientData(p);renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');}}
@@ -505,11 +774,63 @@ byId('editPatientForm')?.addEventListener('submit',e=>{
  if(isCreate){p={id:`patient_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,name,initials:name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(),email,age,sex:byId('editSex').value,height,objective:byId('editObjective').value,calories:Number(byId('editCalories').value||0),protein:Number(byId('editProtein').value||0),waterGoal:Number(byId('editWaterGoal').value||2500),weight:weight.toFixed(1).replace('.',',')+' kg',restrictions:byId('editRestrictions').value.trim(),preferences:byId('editPreferences').value.trim()};patients.push(p);}
  else{p.name=name;p.email=email;p.age=age;p.sex=byId('editSex').value;p.height=height;p.objective=byId('editObjective').value;p.calories=Number(byId('editCalories').value||0);p.protein=Number(byId('editProtein').value||0);p.waterGoal=Number(byId('editWaterGoal').value||2500);p.weight=weight.toFixed(1).replace('.',',')+' kg';p.restrictions=byId('editRestrictions').value.trim();p.preferences=byId('editPreferences').value.trim();p.initials=name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
  pendingPatient=p;persistPatients();if(selectedPatient?.id===p.id){selectedPatient=p;applyPatientData(p);renderPatientPlan();renderAlimentacao();}
- renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');closeModal(editPatientModal);showToast(isCreate?`${p.name} foi cadastrado.`:`Dados de ${p.name} salvos.`);
+ renderPatients();renderPatientsCrud(byId('patientSearch')?.value||'');closeModal(editPatientModal);if(isCreate)openPatientModal();showToast(isCreate?`${p.name} foi cadastrado.`:`Dados de ${p.name} salvos.`);
 });
 byId('settingsBtn')?.addEventListener('click',()=>{byId('settingDark').checked=document.body.classList.contains('dark');byId('settingsPatientName').textContent=selectedPatient?.name||'Nenhum';openModal(settingsModal)});
 byId('closeSettingsModal')?.addEventListener('click',()=>closeModal(settingsModal));
 byId('saveSettingsBtn')?.addEventListener('click',()=>{applyTheme(byId('settingDark').checked?'dark':'light');localStorage.setItem('nutrifit-autosave',byId('settingAutoSave').checked?'1':'0');localStorage.setItem('nutrifit-suggestions',byId('settingSuggestions').checked?'1':'0');closeModal(settingsModal);showToast('Configurações salvas.')});
+function nutrifitStorageEntries(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(key&&key.startsWith('nutrifit-')) data[key]=localStorage.getItem(key);
+  }
+  return data;
+}
+byId('exportBackupBtn')?.addEventListener('click',()=>{
+  const payload={app:'NutriFit',version:1,exportedAt:new Date().toISOString(),data:nutrifitStorageEntries()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`nutrifit-backup-${payload.exportedAt.slice(0,10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('Backup JSON baixado.');
+});
+byId('importBackupBtn')?.addEventListener('click',()=>byId('importBackupFile')?.click());
+byId('importBackupFile')?.addEventListener('change',event=>{
+  const file=event.target.files&&event.target.files[0];
+  event.target.value='';
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let parsed;
+    try{parsed=JSON.parse(String(reader.result||''));}catch(e){showToast('Não foi possível ler o arquivo JSON.');return;}
+    const data=parsed&&parsed.data&&typeof parsed.data==='object'&&!Array.isArray(parsed.data)?parsed.data:null;
+    if(!data||parsed.app!=='NutriFit'){showToast('Este JSON não é um backup do NutriFit.');return;}
+    const keys=Object.keys(data).filter(key=>key.startsWith('nutrifit-'));
+    if(!keys.length){showToast('O backup não contém dados do NutriFit.');return;}
+    if(!confirm('Importar este backup substitui os dados atuais deste navegador. Deseja continuar?'))return;
+    Object.keys(localStorage).filter(key=>key.startsWith('nutrifit-')).forEach(key=>localStorage.removeItem(key));
+    keys.forEach(key=>{
+      const value=data[key];
+      localStorage.setItem(key,typeof value==='string'?value:JSON.stringify(value));
+    });
+    showToast('Backup importado. Recarregando...');
+    setTimeout(()=>window.location.reload(),700);
+  };
+  reader.readAsText(file);
+});
+byId('clearAppDataBtn')?.addEventListener('click',()=>{
+  const confirmed=confirm('Tem certeza que deseja limpar todos os dados salvos (pacientes, planos, metas e preferências) neste navegador? Esta ação não pode ser desfeita.');
+  if(!confirmed)return;
+  Object.keys(localStorage).filter(key=>key.startsWith('nutrifit-')).forEach(key=>localStorage.removeItem(key));
+  showToast('Dados do aplicativo foram limpos. Recarregando...');
+  setTimeout(()=>window.location.reload(),700);
+});
 byId('settingsEditPatient')?.addEventListener('click',()=>{closeModal(settingsModal);pendingPatient=selectedPatient;if(pendingPatient){openEditPatient(pendingPatient,'edit')}});
 
 const mealPlanModal=byId('mealPlanModal');
@@ -525,7 +846,7 @@ function renderPlanTargets(p){
   const t=getPlanMeta(p), box=byId('planTargetPanel'); if(!box)return;
   box.innerHTML=`<div class="plan-target-title"><div><span class="eyebrow">METAS DA CALCULADORA</span><h3>Meta diária do paciente</h3></div><span class="target-source">${localStorage.getItem('nutrifit-calculator-meta')&&p&&JSON.parse(localStorage.getItem('nutrifit-calculator-meta')||'{}')[p.id]?'Calculada':'Estimativa atual'}</span></div><div class="plan-target-grid"><div><b>${Math.round(t.calories).toLocaleString('pt-BR')}</b><span>kcal</span></div><div><b>${Math.round(t.protein)}</b><span>g proteína</span></div><div><b>${Math.round(t.carbs)}</b><span>g carboidratos</span></div><div><b>${Math.round(t.fat)}</b><span>g gorduras</span></div></div>`;
 }
-function foodChoiceLabel(k){const f=foodCatalog[k];return `<label class="food-choice"><input type="checkbox" value="${k}" class="plan-food-check"><span><b>${f.name}</b><small>${f.kcal} kcal / ${f.ref}${f.unit==='un'?' un':' g'}</small></span><i>✓</i></label>`}
+function foodChoiceLabel(k){const f=foodCatalog[k];return `<label class="food-choice"><input type="checkbox" value="${k}" class="plan-food-check"><span><b>${f.name}</b><small>${f.kcal} kcal / ${f.ref}${f.unit==='un'?' un':' g'}</small></span><i><img src="assets/icons/check.svg" alt=""></i></label>`}
 function renderFoodChoices(selected=[]){
  const box=byId('foodChoiceGrid'); if(!box)return; const groups=[['Arroz, cereais e massas',['arroz','arroz_integral','macarrao','cuscuz','tapioca','aveia','granola']],['Feijões e tubérculos',['feijao','lentilha','grao_bico','batata','batata_inglesa','mandioca']],['Pães e frutas',['pao','pao_integral','banana','maca','laranja','mamao','morango']],['Proteínas',['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos']],['Lácteos',['iogurte','leite','leite_integral','queijo','cottage','ricota']],['Gorduras, sementes e vegetais',['azeite','castanhas','amendoim','pasta_amendoim','chia','abacate','salada','brocolis','cenoura','abobora','tomate']]];
  box.innerHTML=groups.map(([g,ks])=>`<div class="food-choice-group"><h4>${g}</h4>${ks.map(k=>foodChoiceLabel(k)).join('')}</div>`).join(''); box.querySelectorAll('.plan-food-check').forEach(c=>c.checked=selected.includes(c.value));
@@ -557,62 +878,90 @@ function optimizeFoods(keys,target){
  const total=foods.reduce((a,f)=>({kcal:a.kcal+f.kcal,protein:a.protein+f.protein,carbs:a.carbs+f.carbs,fat:a.fat+f.fat}),{kcal:0,protein:0,carbs:0,fat:0});
  return {foods,total};
 }
-function distributeCalculatedPlan(foods,target){
-  /* Distribuição determinística: cada alimento escolhido entra em apenas uma refeição.
-     Proteínas não são duplicadas entre almoço/jantar; ovos têm prioridade no café. */
+function foodCategory(k){
+  if(['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k))return 'protein';
+  if(['iogurte','leite','leite_integral','queijo','cottage','ricota'].includes(k))return 'dairy';
+  if(['banana','maca','laranja','mamao','morango','abacate'].includes(k))return 'fruit';
+  if(['arroz','arroz_integral','macarrao','cuscuz','tapioca','batata','batata_inglesa','mandioca','pao','pao_integral','aveia','granola'].includes(k))return 'carb';
+  if(['feijao','lentilha','grao_bico'].includes(k))return 'legume';
+  if(['azeite','castanhas','amendoim','pasta_amendoim','chia'].includes(k))return 'fat';
+  if(['salada','brocolis','cenoura','abobora','tomate'].includes(k))return 'vegetable';
+  return 'other';
+}
+const MEAL_FOOD_RULES=[
+  {allow:{protein:['ovos'],dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['aveia','granola','pao','pao_integral','cuscuz','tapioca'],fruit:['banana','maca','laranja','mamao','morango','abacate'],fat:['castanhas','amendoim','pasta_amendoim','chia']},max:{protein:1,dairy:1,carb:1,fruit:1,fat:1,total:4}},
+  {allow:{dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['pao','pao_integral','tapioca','aveia','cuscuz'],fruit:['banana','maca','laranja','mamao','morango'],fat:['castanhas','amendoim','pasta_amendoim']},max:{dairy:1,carb:1,fruit:1,fat:1,total:2}},
+  {allow:{protein:['frango','carne','carne_moida','peixe','tilapia','atum','sardinha'],carb:['arroz','arroz_integral','macarrao','batata','batata_inglesa','mandioca'],legume:['feijao','lentilha','grao_bico'],vegetable:['salada','brocolis','cenoura','abobora','tomate'],fat:['azeite']},max:{protein:1,carb:1,legume:1,vegetable:2,fat:1,total:5}},
+  {allow:{dairy:['iogurte','leite','leite_integral','queijo','cottage','ricota'],carb:['pao','pao_integral','tapioca','cuscuz'],fruit:['banana','maca','laranja','mamao','morango'],fat:['castanhas','amendoim','pasta_amendoim']},max:{dairy:1,carb:1,fruit:1,fat:1,total:2}},
+  {allow:{protein:['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'],carb:['arroz','arroz_integral','macarrao','batata','batata_inglesa','mandioca'],legume:['feijao','lentilha','grao_bico'],vegetable:['salada','brocolis','cenoura','abobora','tomate'],fat:['azeite']},max:{protein:1,carb:1,legume:1,vegetable:2,fat:1,total:5}}
+];
+function distributeCalculatedPlan(foods){
+  /* Pratos típicos: café (ovo/lácteo + pão/aveia + fruta), lanches (fruta/lácteo/castanha),
+     almoço e jantar (1 proteína + 1 carboidrato + feijão/legume + vegetais). Sem despejar o restante no almoço. */
   const defs=[['07:00','Café da manhã'],['10:00','Lanche da manhã'],['12:30','Almoço'],['16:30','Lanche da tarde'],['20:00','Jantar']];
   const groups=defs.map(([time,name])=>({time,name,foods:[]}));
   const used=new Set();
-  const keyOf=f=>Object.keys(foodCatalog).find(k=>foodCatalog[k].name===f.name);
-  const category=k=>{
-    if(['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k))return 'protein';
-    if(['iogurte','leite','leite_integral','queijo','cottage','ricota'].includes(k))return 'dairy';
-    if(['banana','maca','laranja','mamao','morango','abacate'].includes(k))return 'fruit';
-    if(['arroz','arroz_integral','macarrao','cuscuz','tapioca','batata','batata_inglesa','mandioca','pao','pao_integral','aveia','granola'].includes(k))return 'carb';
-    if(['feijao','lentilha','grao_bico'].includes(k))return 'legume';
-    if(['azeite','castanhas','amendoim','pasta_amendoim','chia'].includes(k))return 'fat';
-    if(['salada','brocolis','cenoura','abobora','tomate'].includes(k))return 'vegetable';
-    return 'other';
+  const tagged=(foods||[]).map(f=>{
+    const key=f.key||resolveFoodKeyFromFood(f)||Object.keys(foodCatalog).find(k=>foodCatalog[k].name===f.name);
+    return key?{...f,key}:null;
+  }).filter(Boolean);
+  const cat=f=>foodCategory(f.key);
+  const countCat=(i,c)=>groups[i].foods.filter(x=>cat(x)===c).length;
+  const canAdd=(f,i)=>{
+    if(!f||i==null||used.has(f.key))return false;
+    const rule=MEAL_FOOD_RULES[i], c=cat(f);
+    if(!rule.allow[c]||!rule.allow[c].includes(f.key))return false;
+    if(groups[i].foods.length>=rule.max.total)return false;
+    if(countCat(i,c)>=(rule.max[c]||0))return false;
+    return true;
   };
-  const add=(f,i)=>{if(!f||used.has(f.name))return false;groups[i].foods.push(f);used.add(f.name);return true};
-  const byCat=c=>foods.filter(f=>category(keyOf(f))===c&&!used.has(f.name));
+  const add=(f,i)=>{
+    if(!canAdd(f,i))return false;
+    groups[i].foods.push(f); used.add(f.key); return true;
+  };
+  const unused=c=>tagged.filter(f=>!used.has(f.key)&&(c?cat(f)===c:true));
+  const take=(i,c,pred)=>{
+    const list=unused(c).filter(f=>!pred||pred(f)).filter(f=>canAdd(f,i));
+    return list[0];
+  };
 
-  // Café da manhã: ovos/dairy + cereal/pão + fruta.
-  const eggs=byCat('protein').find(f=>keyOf(f)==='ovos');
-  if(eggs)add(eggs,0);
-  const breakfastDairy=byCat('dairy')[0]; if(breakfastDairy)add(breakfastDairy,0);
-  const breakfastCarb=byCat('carb').find(f=>['aveia','pao','pao_integral','cuscuz','tapioca'].includes(keyOf(f)))||byCat('carb')[0];
-  if(breakfastCarb)add(breakfastCarb,0);
-  const breakfastFruit=byCat('fruit')[0]; if(breakfastFruit)add(breakfastFruit,0);
+  add(take(0,'protein',f=>f.key==='ovos')||take(0,'dairy'),0);
+  add(take(0,'carb'),0);
+  add(take(0,'fruit'),0);
+  add(take(0,'fat'),0);
 
-  // Lanches: fruta + dairy ou oleaginosas, sem criar uma nova proteína principal.
-  const snack1Fruit=byCat('fruit')[0]; if(snack1Fruit)add(snack1Fruit,1);
-  const snack1Dairy=byCat('dairy')[0]; if(snack1Dairy)add(snack1Dairy,1);
-  const snack2Fruit=byCat('fruit')[0]; if(snack2Fruit)add(snack2Fruit,3);
-  const snackFat=byCat('fat')[0]; if(snackFat)add(snackFat,3);
+  add(take(1,'fruit'),1);
+  add(take(1,'dairy')||take(1,'fat')||take(1,'carb'),1);
 
-  // Proteínas principais: uma escolha diferente no almoço e outra no jantar.
-  const proteins=byCat('protein');
-  const mainProteins=proteins.filter(f=>f!==eggs);
-  if(mainProteins[0])add(mainProteins[0],2);
-  if(mainProteins[1])add(mainProteins[1],4);
+  add(take(2,'protein'),2);
+  add(take(2,'carb'),2);
+  add(take(2,'legume'),2);
+  add(take(2,'vegetable'),2);
+  add(take(2,'fat'),2);
 
-  // Carboidratos, leguminosas, vegetais e gordura acompanham as refeições principais.
-  const lunchCarb=byCat('carb')[0]; if(lunchCarb)add(lunchCarb,2);
-  const dinnerCarb=byCat('carb')[0]; if(dinnerCarb)add(dinnerCarb,4);
-  const legume=byCat('legume')[0]; if(legume)add(legume,2);
-  const legume2=byCat('legume')[0]; if(legume2)add(legume2,4);
-  const veg1=byCat('vegetable')[0]; if(veg1)add(veg1,2);
-  const veg2=byCat('vegetable')[0]; if(veg2)add(veg2,4);
-  const fat1=byCat('fat')[0]; if(fat1)add(fat1,2);
-  const fat2=byCat('fat')[0]; if(fat2)add(fat2,4);
+  add(take(3,'fruit'),3);
+  add(take(3,'dairy')||take(3,'fat')||take(3,'carb'),3);
 
-  // Qualquer alimento adicional escolhido é distribuído por compatibilidade, uma única vez.
-  foods.forEach(f=>{
-    if(used.has(f.name))return;
-    const c=category(keyOf(f));
-    const preferred=c==='fruit'||c==='dairy'||c==='fat'?[1,3,0,2,4]:c==='protein'?[2,4,0,3,1]:[2,4,0,1,3];
-    const slot=preferred.find(i=>groups[i].foods.length<4) ?? 2;
+  add(take(4,'protein'),4);
+  add(take(4,'carb'),4);
+  add(take(4,'legume'),4);
+  add(take(4,'vegetable'),4);
+  add(take(4,'fat'),4);
+
+  const typical={
+    ovos:[0,4], aveia:[0,1], granola:[0], pao:[0,1,3], pao_integral:[0,1,3], cuscuz:[0,1,3], tapioca:[0,1,3],
+    banana:[0,1,3], maca:[0,1,3], laranja:[1,3,0], mamao:[1,3,0], morango:[1,3,0], abacate:[0],
+    iogurte:[1,3,0], leite:[0,1,3], leite_integral:[0,1,3], queijo:[0,1,3], cottage:[0,1,3], ricota:[0,1,3],
+    frango:[2,4], carne:[2,4], carne_moida:[2,4], peixe:[4,2], tilapia:[4,2], atum:[4,2], sardinha:[4,2],
+    arroz:[2,4], arroz_integral:[2,4], macarrao:[2,4], batata:[4,2], batata_inglesa:[4,2], mandioca:[2,4],
+    feijao:[2,4], lentilha:[2,4], grao_bico:[2,4],
+    azeite:[2,4], castanhas:[1,3,0], amendoim:[1,3], pasta_amendoim:[1,3,0], chia:[0,1],
+    salada:[2,4], brocolis:[2,4], cenoura:[2,4], abobora:[2,4], tomate:[2,4]
+  };
+  tagged.forEach(f=>{
+    if(used.has(f.key))return;
+    const order=typical[f.key]||[0,1,2,3,4].filter(i=>canAdd(f,i));
+    const slot=order.find(i=>canAdd(f,i));
     add(f,slot);
   });
 
@@ -631,7 +980,7 @@ function planToBuilderDraft(plan){
   (plan?.meals||[]).forEach((m,mi)=>{
     const target=meals.find(x=>x.name===m.name)||meals[mi]||meals[0];
     (m.foods||[]).forEach(f=>{
-      const key=f.key||foodKey(f)||byName[String(f.name||'').toLowerCase()];
+      const key=resolveFoodKeyFromFood(f)||byName[String(f.name||'').toLowerCase()];
       if(!key||!foodCatalog[key])return;
       const amount=Number(f.amount)||builderDefaultAmount(foodCatalog[key]);
       const existing=target.items.find(it=>it.key===key);
@@ -653,10 +1002,28 @@ function openMealPlanModal(edit=false){
  if(edit && plan){ saveBuilderDraft(p.id,planToBuilderDraft(plan)); }
  const oldKeys=plan?.preferences||plan?.foods?.map(f=>foodKey(f))||[];renderFoodChoices(oldKeys);calculatedPlan=null;byId('calculatedPlanPanel').hidden=true;byId('saveCalculatedPlanBtn').disabled=true;byId('planCalcStatus').textContent=edit?'Plano carregado para edição. Use a aba Plano alimentar para ajustar alimentos e quantidades.':'Escolha os alimentos para começar.';mealPlanModal?.classList.add('open');mealPlanModal?.setAttribute('aria-hidden','false');
 }
+function buildCalculatedMeals(keys,meta){
+  const draftFoods=keys.map(k=>foodCalc(k,foodCatalog[k].unit==='un'?1:foodCatalog[k].ref)).filter(Boolean);
+  const draft=distributeCalculatedPlan(draftFoods);
+  const placed=[...new Set(draft.flatMap(m=>(m.foods||[]).map(f=>f.key)).filter(Boolean))];
+  const use=placed.length>=2?placed:keys;
+  const optimized=optimizeFoods(use,meta);
+  const meals=distributeCalculatedPlan(optimized.foods);
+  const total=meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{kcal:0,protein:0,carbs:0,fat:0});
+  return {optimized,meals,total,keys:use};
+}
 const openAddPlan=()=>openMealPlanModal(false);
 byId('addMealPlanBtn')?.addEventListener('click',openAddPlan);byId('foodAddPlanBtn')?.addEventListener('click',openAddPlan);document.addEventListener('click',e=>{if(e.target.closest('#bannerAddPlan,#foodEmptyAddPlan'))openAddPlan()});byId('closeMealPlanModal')?.addEventListener('click',()=>closeModal(mealPlanModal));byId('cancelMealPlan')?.addEventListener('click',()=>closeModal(mealPlanModal));mealPlanModal?.addEventListener('click',e=>{if(e.target===mealPlanModal)closeModal(mealPlanModal)});
-byId('calculateMealPlanBtn')?.addEventListener('click',()=>{const p=selectedPatient;if(!p)return;const keys=[...document.querySelectorAll('.plan-food-check:checked')].map(x=>x.value);if(keys.length<2){showToast('Escolha pelo menos 2 alimentos para calcular.');return}const meta=getPlanMeta(p);const optimized=optimizeFoods(keys,meta);const meals=distributeCalculatedPlan(optimized.foods,meta);const total=meals.reduce((a,m)=>({kcal:a.kcal+m.kcal,protein:a.protein+m.protein,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{kcal:0,protein:0,carbs:0,fat:0});calculatedPlan={meta,keys,meals,total,foods:optimized.foods};const diff={kcal:total.kcal-meta.calories,protein:total.protein-meta.protein,carbs:total.carbs-meta.carbs,fat:total.fat-meta.fat};byId('calculatedPlanPanel').hidden=false;byId('calculatedPlanPanel').innerHTML=`<div class="calculated-head"><div><span class="eyebrow">RESULTADO</span><h3>Quantidades calculadas</h3><p class="muted">As quantidades foram ajustadas para aproximar simultaneamente as quatro metas.</p></div><div class="calculated-total"><b>${Math.round(total.kcal).toLocaleString('pt-BR')} kcal</b><small>${Math.round(total.protein)} g P · ${Math.round(total.carbs)} g C · ${Math.round(total.fat)} g G</small></div></div><div class="calculated-foods">${optimized.foods.map(f=>`<div><b>${f.name}</b><strong>${f.amount}${f.unit==='un'?' un':' g'}</strong><span>${f.kcal} kcal · ${f.protein} P · ${f.carbs} C · ${f.fat} G</span></div>`).join('')}</div><div class="calculated-meals">${meals.map(m=>`<article><b>${m.time} · ${m.name}</b><strong>${m.kcal} kcal</strong><small>${m.items.join(' · ')}</small></article>`).join('')}</div><div class="target-difference">Diferença da meta: ${diff.kcal>=0?'+':''}${Math.round(diff.kcal)} kcal · ${diff.protein>=0?'+':''}${Math.round(diff.protein)} g P · ${diff.carbs>=0?'+':''}${Math.round(diff.carbs)} g C · ${diff.fat>=0?'+':''}${Math.round(diff.fat)} g G</div>`;byId('saveCalculatedPlanBtn').disabled=false;byId('planCalcStatus').textContent='Cálculo concluído. Revise e salve o plano.';showToast('Quantidades calculadas com base nas metas da calculadora.')});
-byId('mealPlanForm')?.addEventListener('submit',e=>{e.preventDefault();const p=selectedPatient;if(!p||!calculatedPlan){showToast('Calcule as quantidades antes de salvar.');return}patientPlans[p.id]={name:byId('mealPlanName').value.trim()||`Plano alimentar — ${p.name}`,calories:Math.round(calculatedPlan.meta.calories),protein:Math.round(calculatedPlan.meta.protein),carbs:Math.round(calculatedPlan.meta.carbs),fat:Math.round(calculatedPlan.meta.fat),meals:calculatedPlan.meals,foods:calculatedPlan.foods,preferences:calculatedPlan.keys,updatedAt:new Date().toISOString()};persistPlans();renderPatientPlan();renderAlimentacao();closeModal(mealPlanModal);showToast(`Plano de ${p.name} salvo com sucesso.`)});
+byId('calculateMealPlanBtn')?.addEventListener('click',()=>{const p=selectedPatient;if(!p)return;const keys=[...document.querySelectorAll('.plan-food-check:checked')].map(x=>x.value);if(keys.length<2){showToast('Escolha pelo menos 2 alimentos para calcular.');return}const meta=getPlanMeta(p);const built=buildCalculatedMeals(keys,meta);const {optimized,meals,total}=built;calculatedPlan={meta,keys:built.keys,meals,total,foods:optimized.foods};const diff={kcal:total.kcal-meta.calories,protein:total.protein-meta.protein,carbs:total.carbs-meta.carbs,fat:total.fat-meta.fat};byId('calculatedPlanPanel').hidden=false;byId('calculatedPlanPanel').innerHTML=`<div class="calculated-head"><div><span class="eyebrow">RESULTADO</span><h3>Quantidades calculadas</h3><p class="muted">As refeições usam combinações típicas de cada horário. As quantidades valem só para os alimentos que entram no cardápio.</p></div><div class="calculated-total"><b>${Math.round(total.kcal).toLocaleString('pt-BR')} kcal</b><small>${Math.round(total.protein)} g P · ${Math.round(total.carbs)} g C · ${Math.round(total.fat)} g G</small></div></div><div class="calculated-foods">${optimized.foods.map(f=>`<div><b>${f.name}</b><strong>${f.amount}${f.unit==='un'?' un':' g'}</strong><span>${f.kcal} kcal · ${f.protein} P · ${f.carbs} C · ${f.fat} G</span></div>`).join('')}</div><div class="calculated-meals">${meals.map(m=>`<article><b>${m.time} · ${m.name}</b><strong>${m.kcal} kcal</strong><small>${m.items.join(' · ')}</small></article>`).join('')}</div><div class="target-difference">Diferença da meta: ${diff.kcal>=0?'+':''}${Math.round(diff.kcal)} kcal · ${diff.protein>=0?'+':''}${Math.round(diff.protein)} g P · ${diff.carbs>=0?'+':''}${Math.round(diff.carbs)} g C · ${diff.fat>=0?'+':''}${Math.round(diff.fat)} g G</div>`;byId('saveCalculatedPlanBtn').disabled=false;byId('planCalcStatus').textContent='Cálculo concluído. Revise e salve o plano.';showToast('Quantidades calculadas com base nas metas da calculadora.')});
+function applyAssignedPlan(p,plan){
+  patientPlans[p.id]=plan;
+  persistPlans();
+  saveBuilderDraft(p.id,planToBuilderDraft(plan));
+  renderPatientPlan();
+  renderAlimentacao();
+  if(typeof renderDashboard==='function')renderDashboard();
+}
+byId('mealPlanForm')?.addEventListener('submit',e=>{e.preventDefault();const p=selectedPatient;if(!p||!calculatedPlan){showToast('Calcule as quantidades antes de salvar.');return}applyAssignedPlan(p,{name:byId('mealPlanName').value.trim()||`Plano alimentar — ${p.name}`,calories:Math.round(calculatedPlan.meta.calories),protein:Math.round(calculatedPlan.meta.protein),carbs:Math.round(calculatedPlan.meta.carbs),fat:Math.round(calculatedPlan.meta.fat),meals:calculatedPlan.meals,foods:calculatedPlan.foods,preferences:calculatedPlan.keys,updatedAt:new Date().toISOString()});closeModal(mealPlanModal);showToast(`Plano de ${p.name} salvo com sucesso.`)});
 
 function getMetabolicData(p){
   const weight=Number(String(p.weight||'0').replace(' kg','').replace(',','.'))||0;
@@ -725,17 +1092,19 @@ const foodCatalog={
 };
 const foodAliases={arroz:'arroz','arroz branco':'arroz','arroz integral':'arroz_integral','feijão':'feijao',feijao:'feijao',frango:'frango','peito de frango':'frango',carne:'carne',peixe:'peixe',ovo:'ovos',ovos:'ovos',aveia:'aveia',banana:'banana',iogurte:'iogurte',batata:'batata','batata doce':'batata','batata-doce':'batata',pão:'pao',pao:'pao',leite:'leite',queijo:'queijo',azeite:'azeite',castanha:'castanhas',castanhas:'castanhas',salada:'salada'};
 function foodKey(t){const s=String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');for(const [a,k] of Object.entries(foodAliases)){const aa=a.normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(s.includes(aa))return k}return null}
-function foodCalc(k,amount){const f=foodCatalog[k],x=Number(amount)||0;if(!f||!x)return null;const q=x/f.ref;return {name:f.name,amount:x,unit:f.unit,kcal:Math.round(f.kcal*q),protein:+(f.protein*q).toFixed(1),carbs:+(f.carbs*q).toFixed(1),fat:+(f.fat*q).toFixed(1)}}
+function foodCalc(k,amount){const f=foodCatalog[k],x=Number(amount)||0;if(!f||!x)return null;const q=x/f.ref;return {key:k,name:f.name,amount:x,unit:f.unit,kcal:Math.round(f.kcal*q),protein:+(f.protein*q).toFixed(1),carbs:+(f.carbs*q).toFixed(1),fat:+(f.fat*q).toFixed(1)}}
 function smartPlan(p,request){
  const meta=getMetabolicData(p), target=Math.max(800,Number(meta.target)||2000);
  const text=String(request||'').toLowerCase(); let keys=[...new Set(Object.entries(foodAliases).filter(([a])=>text.includes(a.normalize('NFD').replace(/[\u0300-\u036f]/g,''))).map(([,k])=>k))];
  if(text.includes('sem lactose'))keys=keys.filter(k=>!['leite','iogurte','queijo'].includes(k));
  if(text.includes('sem peixe'))keys=keys.filter(k=>k!=='peixe');
  if(!keys.length)keys=['arroz','feijao','frango','ovos','banana','aveia'];
- const prot=keys.filter(k=>['frango','carne','peixe','ovos','iogurte','queijo'].includes(k)), carb=keys.filter(k=>['arroz','arroz_integral','feijao','batata','pao','aveia','banana'].includes(k));
+ const prot=keys.filter(k=>['frango','carne','carne_moida','peixe','tilapia','atum','sardinha','ovos'].includes(k)), carb=keys.filter(k=>['arroz','arroz_integral','feijao','batata','pao','aveia','banana'].includes(k));
  const defs=[['07:00','Café da manhã',.25],['10:00','Lanche da manhã',.10],['12:30','Almoço',.30],['16:30','Lanche da tarde',.10],['20:00','Jantar',.25]];
+ const lunchP=prot.find(k=>k!=='ovos')||prot[0];
+ const dinnerP=prot.find(k=>k!=='ovos'&&k!==lunchP);
  const meals=defs.map(([time,name,share],i)=>{
-   let ks=i===0?keys.filter(k=>['ovos','aveia','banana','iogurte','pao','leite','queijo'].includes(k)).slice(0,3):((i===2||i===4)?[prot[i===2?0:Math.min(1,prot.length-1)]||'ovos',carb[0]||'arroz',keys.includes('feijao')&&i===2?'feijao':null,keys.includes('salada')?'salada':null,keys.includes('azeite')?'azeite':null].filter(Boolean):keys.filter(k=>['banana','aveia','iogurte','pao','castanhas','ovos'].includes(k)).slice(0,2));
+   let ks=i===0?keys.filter(k=>['ovos','aveia','banana','iogurte','pao','leite'].includes(k)).slice(0,3):((i===2||i===4)?[i===2?lunchP:dinnerP,carb[0]||'arroz',keys.includes('feijao')&&i===2?'feijao':null,keys.includes('salada')?'salada':null,keys.includes('azeite')&&i===2?'azeite':null].filter(Boolean):keys.filter(k=>['banana','aveia','iogurte','pao','castanhas'].includes(k)).slice(0,2));
    if(!ks.length)ks=['ovos','banana'];
    const per=target*share/ks.length; let foods=ks.map(k=>{const f=foodCatalog[k];let a=f.ref*per/f.kcal;if(f.unit==='un')a=Math.max(1,Math.round(a));else a=Math.max(5,Math.round(a/5)*5);return foodCalc(k,a)}).filter(Boolean);
    const total=foods.reduce((a,f)=>({kcal:a.kcal+f.kcal,protein:a.protein+f.protein,carbs:a.carbs+f.carbs,fat:a.fat+f.fat}),{kcal:0,protein:0,carbs:0,fat:0});
@@ -805,7 +1174,7 @@ byId('suggestPlanForm')?.addEventListener('submit',e=>{
   box.innerHTML=`<div class="generated-head"><div><span class="eyebrow">SUGESTÃO GERADA</span><h3>Plano de ${p.name}</h3><p class="muted">Meta calculada pela TMB/TDEE: ${meta.target.toLocaleString('pt-BR')} kcal/dia · ${meta.protein} g de proteína</p></div><b>${meta.target.toLocaleString('pt-BR')} kcal</b></div>${meals.map(m=>`<div class="generated-meal"><span>${m.time}</span><div><b>${m.name}</b><p>${m.foods.map(f=>`${f.name}: ${f.unit}`).join(' · ')}</p><small>${m.protein} g proteína · ${m.carbs} g carboidratos · ${m.fat} g gorduras</small></div><strong>${m.kcal} kcal</strong></div>`).join('')}<div class="disclaimer">Sugestão automática para apoio ao atendimento. Revise o plano antes de entregar ao paciente.</div><button class="primary full" type="button" id="assignGeneratedPlan">Atribuir este plano ao paciente</button>`;
   byId('assignGeneratedPlan')?.addEventListener('click',()=>{
     const plan={id:`plan_${Date.now()}`,type:'suggested',name:`Plano personalizado — ${p.name}`,calories:smart.target,protein:Math.round(smart.total.protein),carbs:Math.round(smart.total.carbs),fat:Math.round(smart.total.fat),meals:smart.meals.map(m=>({time:m.time,name:m.name,kcal:m.kcal,protein:m.protein,carbs:m.carbs,fat:m.fat,foods:m.foods,items:m.items})),preferences:smart.keys,updatedAt:new Date().toISOString()};
-    patientPlans[p.id]=plan; persistPlans(); saveBuilderDraft(p.id,planToBuilderDraft(plan)); renderPatientPlan(); renderAlimentacao(); closeModal(suggestPlanModal); showToast(`Plano de ${p.name} criado e disponível para edição.`);
+    applyAssignedPlan(p,plan); closeModal(suggestPlanModal); showToast(`Plano de ${p.name} criado e disponível para edição.`);
   });
 });
 
@@ -852,3 +1221,138 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('#addMealPlanBtn');
   if(b){e.preventDefault();showPage('plano');renderPatientPlan();}
 });
+
+const RECIPE_ICONS=[
+  {id:'salad',emoji:'🥗'},{id:'bowl',emoji:'🥣'},{id:'egg',emoji:'🍳'},{id:'soup',emoji:'🍲'},
+  {id:'pan',emoji:'🥘'},{id:'avocado',emoji:'🥑'},{id:'strawberry',emoji:'🍓'},{id:'bread',emoji:'🍞'},
+  {id:'chicken',emoji:'🍗'},{id:'fish',emoji:'🐟'},{id:'cheese',emoji:'🧀'},{id:'coffee',emoji:'☕'}
+];
+const recipeModal=byId('recipeModal');
+let editingRecipeId=null;
+let recipeEmoji='salad';
+function recipeIconId(value){
+  if(!value)return 'salad';
+  if(typeof value==='string'){
+    if(RECIPE_ICONS.some(x=>x.id===value))return value;
+    const byE=RECIPE_ICONS.find(x=>x.emoji===value);
+    return byE?byE.id:'salad';
+  }
+  if(value.icon && RECIPE_ICONS.some(x=>x.id===value.icon))return value.icon;
+  const byE=RECIPE_ICONS.find(x=>x.emoji===value.emoji);
+  return byE?byE.id:'salad';
+}
+function recipeIconImg(value){return `<img src="assets/icons/${recipeIconId(value)}.svg" alt="">`}
+function recipeEmojiFor(id){return (RECIPE_ICONS.find(x=>x.id===id)||RECIPE_ICONS[0]).emoji}
+function loadRecipes(){
+  try{const saved=JSON.parse(localStorage.getItem('nutrifit-recipes')||'[]');if(Array.isArray(saved))return saved;}catch(e){}
+  return [];
+}
+function persistRecipes(list){localStorage.setItem('nutrifit-recipes',JSON.stringify(list))}
+function recipeMacros(r){
+  const bits=[];
+  if(Number(r.kcal))bits.push(`${Number(r.kcal).toLocaleString('pt-BR')} kcal`);
+  if(Number(r.protein))bits.push(`${r.protein} g proteína`);
+  if(Number(r.carbs))bits.push(`${r.carbs} g carboidratos`);
+  if(Number(r.fat))bits.push(`${r.fat} g gordura`);
+  return bits.join(' · ');
+}
+function renderRecipeEmojiPicks(){
+  const box=byId('recipeEmojiPicks'); if(!box)return;
+  const current=recipeIconId(recipeEmoji);
+  box.innerHTML=RECIPE_ICONS.map(x=>`<button type="button" data-emoji="${x.id}" class="${x.id===current?'is-on':''}">${recipeIconImg(x.id)}</button>`).join('');
+  const preview=byId('recipeEmojiPreview'); if(preview)preview.innerHTML=recipeIconImg(current);
+}
+function openRecipeModal(recipe){
+  editingRecipeId=recipe?.id||null;
+  recipeEmoji=recipeIconId(recipe);
+  byId('recipeModalTitle').textContent=recipe?'Editar receita':'Nova receita';
+  byId('recipeModalSubtitle').textContent=recipe?'Ajuste os dados e salve. Você também pode excluir esta receita.':'Monte uma receita simples: nome, refeição, ingredientes e modo de preparo.';
+  byId('recipeName').value=recipe?.name||'';
+  byId('recipeMeal').value=recipe?.meal||'Almoço';
+  byId('recipeKcal').value=recipe?.kcal||'';
+  byId('recipeProtein').value=recipe?.protein||'';
+  byId('recipeCarbs').value=recipe?.carbs||'';
+  byId('recipeFat').value=recipe?.fat||'';
+  byId('recipeIngredients').value=(recipe?.ingredients||[]).join('\n');
+  byId('recipeSteps').value=recipe?.steps||'';
+  const del=byId('deleteRecipeBtn'); if(del)del.hidden=!recipe;
+  renderRecipeEmojiPicks();
+  openModal(recipeModal);
+}
+function renderRecipes(){
+  const grid=byId('recipeGrid'), sub=byId('recipesPageSubtitle');
+  if(!grid)return;
+  const recipes=loadRecipes();
+  if(sub)sub.textContent=recipes.length?`${recipes.length} receita${recipes.length===1?'':'s'} cadastrada${recipes.length===1?'':'s'}.`:'Cadastre receitas do consultório, edite e exclua quando quiser.';
+  if(!recipes.length){
+    grid.innerHTML='<div class="recipe-empty card"><div class="recipe-photo">'+recipeIconImg('utensils')+'</div><h3>Nenhuma receita ainda</h3><p>Crie a primeira receita com nome, refeição, ingredientes e preparo. Depois você edita ou exclui com um toque.</p><button class="primary" type="button" id="emptyAddRecipeBtn">+ Nova receita</button></div>';
+    byId('emptyAddRecipeBtn')?.addEventListener('click',()=>openRecipeModal(null));
+    return;
+  }
+  grid.innerHTML=recipes.map(r=>{
+    const macros=recipeMacros(r);
+    const preview=(r.ingredients||[]).slice(0,2).join(' · ');
+    return `<article class="recipe-card card" data-recipe-id="${escapeHtml(r.id)}"><div class="recipe-photo">${recipeIconImg(r)}</div><div><span>${escapeHtml(r.meal||'Receita')}${Number(r.kcal)?` · ${Number(r.kcal).toLocaleString('pt-BR')} kcal`:''}</span><h3>${escapeHtml(r.name)}</h3><p>${macros||preview||'Sem informações nutricionais'}</p><div class="recipe-card-actions"><button class="text-btn" type="button" data-recipe-view="${escapeHtml(r.id)}">Ver</button><button class="outline-btn" type="button" data-recipe-edit="${escapeHtml(r.id)}">Editar</button><button class="danger-btn" type="button" data-recipe-delete="${escapeHtml(r.id)}">Excluir</button></div></div></article>`;
+  }).join('');
+}
+window.renderRecipes=renderRecipes;
+function recipeById(id){return loadRecipes().find(r=>r.id===id)||null}
+function deleteRecipe(id){
+  const r=recipeById(id); if(!r)return;
+  if(!confirm(`Excluir a receita “${r.name}”?`))return;
+  persistRecipes(loadRecipes().filter(x=>x.id!==id));
+  closeModal(recipeModal);
+  renderRecipes();
+  showToast('Receita excluída.');
+}
+byId('addRecipeBtn')?.addEventListener('click',()=>openRecipeModal(null));
+byId('closeRecipeModal')?.addEventListener('click',()=>closeModal(recipeModal));
+byId('cancelRecipeBtn')?.addEventListener('click',()=>closeModal(recipeModal));
+recipeModal?.addEventListener('click',e=>{if(e.target===recipeModal)closeModal(recipeModal)});
+byId('recipeEmojiPicks')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-emoji]'); if(!b)return;
+  recipeEmoji=b.dataset.emoji; renderRecipeEmojiPicks();
+});
+byId('deleteRecipeBtn')?.addEventListener('click',()=>{if(editingRecipeId)deleteRecipe(editingRecipeId)});
+byId('recipeForm')?.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=byId('recipeName').value.trim();
+  if(!name){showToast('Informe o nome da receita.');return;}
+  const recipe={
+    id:editingRecipeId||`recipe_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+    name, meal:byId('recipeMeal').value, icon:recipeIconId(recipeEmoji), emoji:recipeEmojiFor(recipeIconId(recipeEmoji)),
+    kcal:byId('recipeKcal').value?Number(byId('recipeKcal').value):'',
+    protein:byId('recipeProtein').value?Number(byId('recipeProtein').value):'',
+    carbs:byId('recipeCarbs').value?Number(byId('recipeCarbs').value):'',
+    fat:byId('recipeFat').value?Number(byId('recipeFat').value):'',
+    ingredients:byId('recipeIngredients').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    steps:byId('recipeSteps').value.trim(),
+    updatedAt:new Date().toISOString()
+  };
+  const list=loadRecipes();
+  const idx=list.findIndex(r=>r.id===recipe.id);
+  if(idx>=0)list[idx]=recipe; else list.unshift(recipe);
+  persistRecipes(list);
+  closeModal(recipeModal);
+  renderRecipes();
+  showToast(editingRecipeId?'Receita atualizada.':'Receita salva.');
+});
+byId('recipeGrid')?.addEventListener('click',e=>{
+  const del=e.target.closest('[data-recipe-delete]');
+  if(del){deleteRecipe(del.dataset.recipeDelete);return;}
+  const edit=e.target.closest('[data-recipe-edit]');
+  if(edit){openRecipeModal(recipeById(edit.dataset.recipeEdit));return;}
+  const view=e.target.closest('[data-recipe-view]');
+  if(view){
+    const r=recipeById(view.dataset.recipeView); if(!r)return;
+    openRecipeModal(r);
+  }
+});
+viewsReady=true;
+renderRecipes();
+try{
+  const savedPatientId=localStorage.getItem('nutrifit-selected-patient');
+  const savedPatient=savedPatientId&&patients.find(p=>p.id===savedPatientId);
+  if(savedPatient) applyPatientData(savedPatient, true);
+  else if(savedPatientId) localStorage.removeItem('nutrifit-selected-patient');
+}catch(e){}
